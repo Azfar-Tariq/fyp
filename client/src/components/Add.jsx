@@ -1,6 +1,6 @@
 import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
-export default function Add({ toggleDialog }) {
+export default function Add({ toggleDialog, text }) {
 	return (
 		<div>
 			<button
@@ -8,7 +8,7 @@ export default function Add({ toggleDialog }) {
 				onClick={toggleDialog}
 			>
 				<MaterialSymbolsAddRounded />
-				Add Building
+				Add {text}
 			</button>
 		</div>
 	);

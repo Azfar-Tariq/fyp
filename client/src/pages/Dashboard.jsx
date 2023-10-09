@@ -9,31 +9,62 @@ import Labs from "../components/Labs";
 export default function Dashboard() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [buildingName, setBuildingName] = useState("");
+	const [labName, setLabName] = useState("");
 	const [buildingList, setBuildingList] = useState([]);
 	const [selectedBuilding, setSelectedBuilding] = useState(null);
+	const [addButtonText, setAddButtonText] = useState("Building");
+	const [isAddingLab, setIsAddingLab] = useState(false);
 
 	useEffect(() => {
-		Axios.get("http://localhost:3001/read").then((response) => {
+		Axios.get("http://localhost:3001/readBuilding").then((response) => {
 			setBuildingList(response.data);
-		}, []);
-	});
+		});
+	}, []);
 
 	const toggleDialog = () => {
 		setIsDialogOpen(!isDialogOpen);
 	};
 
 	const handleSubmitDialog = () => {
-		console.log("Building Name: ", buildingName);
-		Axios.post("http://localhost:3001/insert", { buildingName: buildingName });
+		if (isAddingLab) {
+			console.log("Lab Name: ", labName);
+			Axios.post(
+				`http://localhost:3001/readbuilding/${selectedBuilding}/addLab`,
+				{
+					labName: labName,
+				}
+			)
+				.then((response) => {
+					console.log(response.data);
+				})
+				.catch((error) => {
+					console.error("Failed to save lab:", error);
+				});
+		} else {
+			console.log("Building Name: ", buildingName);
+			Axios.post("http://localhost:3001/insertBuilding", {
+				buildingName: buildingName,
+			})
+				.then((response) => {
+					console.log(response.data);
+				})
+				.catch((error) => {
+					console.error("Failed to save building:", error);
+				});
+		}
 		setIsDialogOpen(false);
 	};
 
 	const handleSelectBuilding = (buildingName) => {
 		setSelectedBuilding(buildingName);
+		setAddButtonText("Lab");
+		setIsAddingLab(true);
 	};
 
 	const handleBackToBuildings = () => {
 		setSelectedBuilding(null);
+		setAddButtonText("Building");
+		setIsAddingLab(false);
 	};
 
 	return (
@@ -58,14 +89,15 @@ export default function Dashboard() {
 						/>
 					</div>
 				)}
-				<Add toggleDialog={toggleDialog} className='mt-6' />
+				<Add toggleDialog={toggleDialog} text={addButtonText} />
 				{isDialogOpen && (
 					<Dialog
-						text='Add'
-						buildingName={buildingName}
-						setBuildingName={setBuildingName}
+						text={`Add ${selectedBuilding ? "Lab" : "Building"}`}
+						buildingName={selectedBuilding ? labName : buildingName}
+						setBuildingName={selectedBuilding ? setLabName : setBuildingName}
 						onClose={toggleDialog}
 						onSubmit={handleSubmitDialog}
+						isAddingLab={selectedBuilding}
 					/>
 				)}
 			</div>

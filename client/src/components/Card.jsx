@@ -18,7 +18,7 @@ export default function Card({ val, onSelect }) {
 	};
 
 	const deleteBuilding = (id) => {
-		Axios.delete(`http://localhost:3001/delete/${id}`);
+		Axios.delete(`http://localhost:3001/deletebuilding/${id}`);
 	};
 
 	const openEditDialog = () => {
@@ -46,13 +46,16 @@ export default function Card({ val, onSelect }) {
 						<MiOptionsVertical
 							color='white'
 							className='hover:bg-gray-700 hover:rounded-md'
-							onClick={toggleMenu}
+							onClick={(e) => {
+								e.stopPropagation();
+								toggleMenu();
+							}}
 						/>
 					</div>
 				</a>
 			</div>
 			{isMenuOpen && (
-				<div className='bg-white border border-gray-300 rounded shadow-md z-10'>
+				<div className='absolute bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
 					<ul>
 						<li>
 							<button
@@ -83,7 +86,7 @@ export default function Card({ val, onSelect }) {
 					setBuildingName={setEditBuildingName}
 					onClose={() => setIsEditDialogOpen(false)}
 					onSubmit={() => {
-						Axios.put(`http://localhost:3001/update/${val._id}`, {
+						Axios.put(`http://localhost:3001/updateBuilding/${val._id}`, {
 							newBuildingName: editBuildingName,
 						})
 							.then((res) => {
