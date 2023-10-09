@@ -18,8 +18,8 @@ export default function Dashboard() {
 	useEffect(() => {
 		Axios.get("http://localhost:3001/readBuilding").then((response) => {
 			setBuildingList(response.data);
-		});
-	}, []);
+		}, []);
+	});
 
 	const toggleDialog = () => {
 		setIsDialogOpen(!isDialogOpen);
@@ -29,7 +29,7 @@ export default function Dashboard() {
 		if (isAddingLab) {
 			console.log("Lab Name: ", labName);
 			Axios.post(
-				`http://localhost:3001/readbuilding/${selectedBuilding}/addLab`,
+				`http://localhost:3001/readBuidling/${selectedBuilding}/addLab`,
 				{
 					labName: labName,
 				}

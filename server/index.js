@@ -109,7 +109,7 @@ app.put("/readBuilding/:buildingId/updateLab/:labId", async (req, res) => {
 	const labId = req.params.labId;
 	const updateLab = req.body;
 	try {
-		const building = await buildingData.findById(buildingId);
+		const building = await BuildingData.findById(buildingId);
 		if (!building) {
 			res.status(404).send("Building not found");
 		} else {
@@ -152,6 +152,124 @@ app.delete("/readBuilding/:buildingId/deleteLab/:labId", async (req, res) => {
 	}
 });
 
+// -------- PC's Data Endpioints --------
+// send data to database
+app.post("/readBuilding/:buildingId/readLab/:labId/addPC", async (req, res) => {
+	const buildingId = req.params.buildingId;
+	const labId = req.params.labId;
+	const newPC = req.body;
+
+	try {
+		const building = await BuildingData.findById(buildingId);
+		if (!building) {
+			res.status(404).send("Building not found");
+		} else {
+			const lab = building.labs.id(labId);
+			if (!lab) {
+				res.status(404).send("Lab not found in the building");
+			} else {
+				lab.pcs.push(newPC);
+				await building.save();
+				res.status(200).send("PC saved to database");
+			}
+		}
+	} catch (err) {
+		console.log(err);
+		res.status(500).send("Failed to save PC to the database");
+	}
+});
+
+// get data from database
+app.get("/readBuilding/:buildingId/readLab/:labId/readPC", async (req, res) => {
+	const buildingId = req.params.buildingId;
+	const labId = req.params.labId;
+	try {
+		const building = await BuildingData.findById(buildingId);
+		if (!building) {
+			res.status(404).send("Building not found");
+		} else {
+			const lab = building.labs.id(labId);
+			if (!lab) {
+				res.status(404).send("Lab not found in the building");
+			} else {
+				const pcs = lab.pcs;
+				res.status(200).json(pcs);
+			}
+		}
+	} catch (err) {
+		console.log(err);
+		res.status(500).send("Failed to get PCs from the database");
+	}
+});
+
+// edit data from database
+app.put(
+	"/readBuilding/:buildingId/readLab/:labId/updatePC/:pcId",
+	async (req, res) => {
+		const buildingId = req.params.buildingId;
+		const labId = req.params.labId;
+		const pcId = req.params.pcId;
+		const updatePC = req.body;
+		try {
+			const building = await BuildingData.findById(buildingId);
+			if (!building) {
+				res.status(404).send("Building not found");
+			} else {
+				const lab = building.labs.id(labId);
+				if (!lab) {
+					res.status(404).send("Lab not found in the building");
+				} else {
+					const pcToUpdate = lab.pcs.id(pcId);
+					if (!pcToUpdate) {
+						res.status(404).send("PC not found in the lab");
+					} else {
+						pcToUpdate.set(updatePC);
+						await building.save();
+						res.status(200).send("PC updated successfully");
+					}
+				}
+			}
+		} catch (err) {
+			console.log(err);
+			res.status(500).send("Failed to update PC in the database");
+		}
+	}
+);
+
+// delete data from database
+app.delete(
+	"/readBuilding/:buildingId/readLab/:labId/deletePC/:pcId",
+	async (req, res) => {
+		const buildingId = req.params.buildingId;
+		const labId = req.params.labId;
+		const pcId = req.params.pcId;
+		try {
+			const building = await BuildingData.findById(buildingId);
+			if (!building) {
+				res.status(404).send("Building not found");
+			} else {
+				const lab = building.labs.id(labId);
+				if (!lab) {
+					res.status(404).send("Lab not found in the building");
+				} else {
+					const pcToDelete = lab.pcs.id(pcId);
+					if (!pcToDelete) {
+						res.status(404).send("PC not found in the lab");
+					} else {
+						pcToDelete.deleteOne();
+						await building.save();
+						res.status(200).send("PC deleted successfully");
+					}
+				}
+			}
+		} catch (err) {
+			console.log(err);
+			res.status(500).send("Failed to delete PC from the database");
+		}
+	}
+);
+
+// listen to port 3001
 app.listen(3001, () => {
 	console.log("Server is running on port 3001");
 });

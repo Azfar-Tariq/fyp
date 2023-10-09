@@ -1,13 +1,21 @@
-import Image2 from "../assets/images/labs/lab1.jpg";
+import { useEffect, useState } from "react";
 import LabCard from "./LabCard";
+import Axios from "axios";
 
 export default function Labs({ parentBuildingName, toggleLabs }) {
-	const labData = [
-		{ labName: "Lab 1", imageSrc: Image2 },
-		{ labName: "Lab 2", imageSrc: Image2 },
-		{ labName: "Lab 3", imageSrc: Image2 },
-		{ labName: "Lab 4", imageSrc: Image2 },
-	];
+	const [labData, setLabData] = useState([]);
+
+	useEffect(() => {
+		Axios.get(
+			`http://localhost:3001/readBuilding/${parentBuildingName}/readLab`
+		)
+			.then((response) => {
+				setLabData(response.data);
+			})
+			.catch((error) => {
+				console.error("Failed to get labs:", error);
+			});
+	}, [parentBuildingName]);
 
 	return (
 		<div className='p-4'>
