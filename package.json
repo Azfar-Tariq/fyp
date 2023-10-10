@@ -1,5 +1,13 @@
 {
-  "dependencies": {
-    "prop-types": "^15.8.1"
-  }
+	"dependencies": {
+		"prop-types": "^15.8.1"
+	},
+	"devDependencies": {
+		"concurrently": "^8.2.1"
+	},
+	"scripts": {
+		"start": "concurrently \"npm run server\" \"npm run client\"",
+		"server": "cd server && npm run devStart",
+		"client": "cd client && npm run dev"
+	}
 }
