@@ -11,7 +11,8 @@ export default function Dashboard() {
 	const [buildingName, setBuildingName] = useState("");
 	const [labName, setLabName] = useState("");
 	const [buildingList, setBuildingList] = useState([]);
-	const [selectedBuilding, setSelectedBuilding] = useState(null);
+	const [selectedBuildingId, setSelectedBuildingId] = useState(null);
+	const [selectedBuildingName, setSelectedBuildingName] = useState("");
 	const [addButtonText, setAddButtonText] = useState("Building");
 	const [isAddingLab, setIsAddingLab] = useState(false);
 
@@ -29,7 +30,7 @@ export default function Dashboard() {
 		if (isAddingLab) {
 			console.log("Lab Name: ", labName);
 			Axios.post(
-				`http://localhost:3001/readBuidling/${selectedBuilding}/addLab`,
+				`http://localhost:3001/readBuidling/${selectedBuildingId}/addLab`,
 				{
 					labName: labName,
 				}
@@ -55,36 +56,39 @@ export default function Dashboard() {
 		setIsDialogOpen(false);
 	};
 
-	const handleSelectBuilding = (buildingName) => {
-		setSelectedBuilding(buildingName);
+	const handleSelectBuilding = (buildingId, buildingName) => {
+		setSelectedBuildingId(buildingId);
+		setSelectedBuildingName(buildingName);
 		setAddButtonText("Lab");
 		setIsAddingLab(true);
 	};
 
 	const handleBackToBuildings = () => {
-		setSelectedBuilding(null);
+		setSelectedBuildingId(null);
+		setSelectedBuildingName("");
 		setAddButtonText("Building");
 		setIsAddingLab(false);
 	};
 
 	return (
-		<div className='col-span-4 px-6 py-4 h-screen flex flex-col '>
+		<div className='col-span-4 px-6 py-4 h-screen flex flex-col'>
 			<Header title='Dashboard' />
 			<div className='overflow-y-auto'>
-				{selectedBuilding === null ? (
+				{selectedBuildingId === null ? (
 					<div className='grid grid-cols-3 gap-4'>
 						{buildingList.map((val, index) => (
 							<Card
 								key={index}
 								val={val}
-								onSelect={() => handleSelectBuilding(val.buildingName)}
+								onSelect={() => handleSelectBuilding(val._id, val.buildingName)}
 							/>
 						))}
 					</div>
 				) : (
 					<div>
 						<Labs
-							parentBuildingName={selectedBuilding}
+							parentBuildingId={selectedBuildingId}
+							parentBuildingName={selectedBuildingName}
 							toggleLabs={handleBackToBuildings}
 						/>
 					</div>
@@ -92,12 +96,12 @@ export default function Dashboard() {
 				<Add toggleDialog={toggleDialog} text={addButtonText} />
 				{isDialogOpen && (
 					<Dialog
-						text={`Add ${selectedBuilding ? "Lab" : "Building"}`}
-						buildingName={selectedBuilding ? labName : buildingName}
-						setBuildingName={selectedBuilding ? setLabName : setBuildingName}
+						text={`Add ${selectedBuildingId ? "Lab" : "Building"}`}
+						buildingName={selectedBuildingId ? labName : buildingName}
+						setBuildingName={selectedBuildingId ? setLabName : setBuildingName}
 						onClose={toggleDialog}
 						onSubmit={handleSubmitDialog}
-						isAddingLab={selectedBuilding}
+						isAddingLab={selectedBuildingId}
 					/>
 				)}
 			</div>

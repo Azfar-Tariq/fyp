@@ -2,20 +2,22 @@ import { useEffect, useState } from "react";
 import LabCard from "./LabCard";
 import Axios from "axios";
 
-export default function Labs({ parentBuildingName, toggleLabs }) {
+export default function Labs({
+	parentBuildingId,
+	parentBuildingName,
+	toggleLabs,
+}) {
 	const [labData, setLabData] = useState([]);
 
 	useEffect(() => {
-		Axios.get(
-			`http://localhost:3001/readBuilding/${parentBuildingName}/readLab`
-		)
+		Axios.get(`http://localhost:3001/readBuilding/${parentBuildingId}/readLab`)
 			.then((response) => {
 				setLabData(response.data);
 			})
 			.catch((error) => {
 				console.error("Failed to get labs:", error);
 			});
-	}, [parentBuildingName]);
+	}, [parentBuildingId]);
 
 	return (
 		<div className='p-4'>

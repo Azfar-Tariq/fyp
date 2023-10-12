@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MiOptionsVertical } from "../assets/icons/options";
+import Image1 from "../assets/images/labs/lab1.jpg";
 
 export default function LabCard({ lab }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +17,7 @@ export default function LabCard({ lab }) {
 		<div className='border rounded-lg shadow bg-gray-800 border-gray-700'>
 			<img
 				className='rounded-t-lg object-fit w-full h-40'
-				src={lab.imageSrc}
+				src={Image1}
 				alt=''
 			/>
 			<div className='flex justify-between items-center p-4'>
