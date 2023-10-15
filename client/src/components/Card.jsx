@@ -30,29 +30,27 @@ export default function Card({ val, onSelect }) {
 	return (
 		<div>
 			<div
-				className='border rounded-lg shadow bg-gray-800 border-gray-700'
+				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
 				onClick={() => onSelect(val.buildingName)}
 			>
-				<a href='#'>
-					<img
-						className='rounded-t-lg object-cover w-full h-full'
-						src={Image1}
-						alt=''
+				<img
+					className='rounded-t-lg object-cover w-full h-full'
+					src={Image1}
+					alt=''
+				/>
+				<div className='p-4 flex justify-between items-center'>
+					<p className=' text-xl font-bold tracking-tight text-white'>
+						{val.buildingName}
+					</p>
+					<MiOptionsVertical
+						color='white'
+						className='hover:bg-gray-700 hover:rounded-md'
+						onClick={(e) => {
+							e.stopPropagation();
+							toggleMenu();
+						}}
 					/>
-					<div className='p-4 flex justify-between items-center'>
-						<h5 className=' text-xl font-bold tracking-tight text-white'>
-							{val.buildingName}
-						</h5>
-						<MiOptionsVertical
-							color='white'
-							className='hover:bg-gray-700 hover:rounded-md'
-							onClick={(e) => {
-								e.stopPropagation();
-								toggleMenu();
-							}}
-						/>
-					</div>
-				</a>
+				</div>
 			</div>
 			{isMenuOpen && (
 				<div className='absolute bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
@@ -81,9 +79,10 @@ export default function Card({ val, onSelect }) {
 			)}
 			{isEditDialogOpen && (
 				<Dialog
-					text='Edit'
-					buildingName={editBuildingName}
-					setBuildingName={setEditBuildingName}
+					text='Edit Building'
+					text2='Building'
+					name={editBuildingName}
+					setName={setEditBuildingName}
 					onClose={() => setIsEditDialogOpen(false)}
 					onSubmit={() => {
 						Axios.put(`http://localhost:3001/updateBuilding/${val._id}`, {

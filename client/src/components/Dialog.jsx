@@ -1,14 +1,14 @@
 export default function Dialog({
 	text,
-	buildingName,
-	setBuildingName,
+	text2,
+	name,
+	setName,
 	onClose,
 	onSubmit,
-	isAddingLab,
 }) {
 	const handleSave = () => {
 		onSubmit();
-		setBuildingName("");
+		setName("");
 	};
 
 	return (
@@ -19,16 +19,14 @@ export default function Dialog({
 						<h3 className='text-3xl font-semibold'>{text}</h3>
 					</div>
 					<div className='relative p-6 flex-auto'>
-						<label htmlFor='buildingName'>
-							{isAddingLab ? "Lab Name: " : "Building Name: "}
-						</label>
+						<label htmlFor='buildingName'>{`Enter ${text2} Name:`}</label>
 						<input
 							type='text'
 							id='buildingName'
 							className='outline-1 border-2 border-black rounded-md p-2 w-full'
-							placeholder={`e.g. ${isAddingLab ? "Lab 1" : "Building 1"}`}
-							value={buildingName}
-							onChange={(e) => setBuildingName(e.target.value)}
+							placeholder={`e.g. ${text2} A`}
+							value={name}
+							onChange={(e) => setName(e.target.value)}
 						/>
 					</div>
 					<div className='flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b'>
