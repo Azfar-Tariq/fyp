@@ -19,7 +19,11 @@ export default function Pcs({
 			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readPc`
 		)
 			.then((response) => {
-				setPcData(response.data);
+				const updatedPcData = response.data.map((pc) => ({
+					...pc,
+					pcStatus: false,
+				}));
+				setPcData(updatedPcData);
 			})
 			.catch((error) => {
 				console.error("Failed to get labs:", error);
@@ -47,11 +51,11 @@ export default function Pcs({
 	};
 
 	return (
-		<div className='p-4'>
+		<div className='pt-4 pr-4 pb-4'>
 			<button className='text-blue-600 hover:underline' onClick={toggleLabs}>
 				Back to Labs
 			</button>
-			<h3 className='text-lg font-semibold mb-2'>{parentLabName}</h3>
+			<h3 className='text-lg font-semibold'>{parentLabName}</h3>
 			<div>
 				<div className='grid grid-cols-3 gap-4'>
 					{pcData.map((val, index) => (

@@ -157,7 +157,8 @@ app.delete("/readBuilding/:buildingId/deleteLab/:labId", async (req, res) => {
 app.post("/readBuilding/:buildingId/readLab/:labId/addPC", async (req, res) => {
 	const buildingId = req.params.buildingId;
 	const labId = req.params.labId;
-	const newPC = req.body;
+	// const newPC = req.body;
+	const { pcName, pcStatus } = req.body;
 
 	try {
 		const building = await BuildingData.findById(buildingId);
@@ -168,7 +169,7 @@ app.post("/readBuilding/:buildingId/readLab/:labId/addPC", async (req, res) => {
 			if (!lab) {
 				res.status(404).send("Lab not found in the building");
 			} else {
-				lab.pcs.push(newPC);
+				lab.pcs.push({ pcName, pcStatus });
 				await building.save();
 				res.status(200).send("PC saved to database");
 			}
@@ -209,7 +210,8 @@ app.put(
 		const buildingId = req.params.buildingId;
 		const labId = req.params.labId;
 		const pcId = req.params.pcId;
-		const updatePC = req.body;
+		// const updatePC = req.body;
+		const { pcName, pcStatus } = req.body;
 		try {
 			const building = await BuildingData.findById(buildingId);
 			if (!building) {
@@ -223,7 +225,7 @@ app.put(
 					if (!pcToUpdate) {
 						res.status(404).send("PC not found in the lab");
 					} else {
-						pcToUpdate.set(updatePC);
+						pcToUpdate.set({ pcName, pcStatus });
 						await building.save();
 						res.status(200).send("PC updated successfully");
 					}

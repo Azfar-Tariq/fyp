@@ -5,6 +5,11 @@ const PCSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	pcStatus: {
+		type: Boolean,
+		default: false,
+		required: true,
+	},
 });
 
 const LabSchema = new mongoose.Schema({

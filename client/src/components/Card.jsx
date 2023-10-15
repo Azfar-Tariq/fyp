@@ -27,6 +27,19 @@ export default function Card({ val, onSelect }) {
 		closeMenu();
 	};
 
+	const handleSubmitDialog = () => {
+		Axios.put(`http://localhost:3001/updateBuilding/${val._id}`, {
+			newBuildingName: editBuildingName,
+		})
+			.then((res) => {
+				console.log(res.data);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		setIsEditDialogOpen(false);
+	};
+
 	return (
 		<div>
 			<div
@@ -84,18 +97,7 @@ export default function Card({ val, onSelect }) {
 					name={editBuildingName}
 					setName={setEditBuildingName}
 					onClose={() => setIsEditDialogOpen(false)}
-					onSubmit={() => {
-						Axios.put(`http://localhost:3001/updateBuilding/${val._id}`, {
-							newBuildingName: editBuildingName,
-						})
-							.then((res) => {
-								console.log(res.data);
-							})
-							.catch((err) => {
-								console.log(err);
-							});
-						setIsEditDialogOpen(false);
-					}}
+					onSubmit={handleSubmitDialog}
 				/>
 			)}
 		</div>

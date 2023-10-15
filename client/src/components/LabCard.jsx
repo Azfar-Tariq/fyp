@@ -29,6 +29,22 @@ export default function LabCard({ val, parentBuildingId, onSelect }) {
 		closeMenu();
 	};
 
+	const handleSubmitDialog = () => {
+		Axios.put(
+			`http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val._id}`,
+			{
+				labName: editLabName,
+			}
+		)
+			.then((res) => {
+				console.log(res.data);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		setIsEditingDialogOpen(false);
+	};
+
 	return (
 		<div>
 			<div
@@ -86,21 +102,7 @@ export default function LabCard({ val, parentBuildingId, onSelect }) {
 					name={editLabName}
 					setName={setEditLabName}
 					onClose={() => setIsEditingDialogOpen(false)}
-					onSubmit={() => {
-						Axios.put(
-							`http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val._id}`,
-							{
-								labName: editLabName,
-							}
-						)
-							.then((res) => {
-								console.log(res.data);
-							})
-							.catch((err) => {
-								console.log(err);
-							});
-						setIsEditingDialogOpen(false);
-					}}
+					onSubmit={handleSubmitDialog}
 				/>
 			)}
 		</div>

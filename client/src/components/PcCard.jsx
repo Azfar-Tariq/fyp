@@ -3,15 +3,11 @@ import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
 
-export default function PcCard({
-	val,
-	parentBuildingId,
-	parentLabId,
-	onSelect,
-}) {
+export default function PcCard({ val, parentBuildingId, parentLabId }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 	const [editPcName, setEditPcName] = useState("");
+	const [pcStatus, setPcStatus] = useState(val.pcStatus);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -19,6 +15,10 @@ export default function PcCard({
 
 	const closeMenu = () => {
 		setIsMenuOpen(false);
+	};
+
+	const toggleStatus = () => {
+		setPcStatus(!pcStatus);
 	};
 
 	const deletePc = (id) => {
@@ -33,16 +33,56 @@ export default function PcCard({
 		closeMenu();
 	};
 
+	const handleSubmitDialog = () => {
+		Axios.put(
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePc/${val._id}`,
+			{
+				pcName: editPcName,
+				pcStatus: pcStatus,
+			}
+		)
+			.then((res) => {
+				console.log(res.data);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		setIsEditingDialogOpen(false);
+	};
+
 	return (
 		<div>
-			<div
-				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
-				onClick={() => onSelect(val.pcName)}
-			>
+			<div className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'>
 				<div className='flex justify-between items-center p-4'>
 					<p className='text-xl font-bold tracking-tight text-white'>
 						{val.pcName}
 					</p>
+					{/* <button
+						className='bg-white p-2 pr-3 pl-3 rounded-lg'
+						onClick={(e) => {
+							e.stopPropagation();
+							toggleStatus();
+						}}
+					>
+						{pcStatus ? "ON" : "OFF"}
+					</button> */}
+					<button
+						className={`relative inline-flex items-center h-6 rounded-full w-12 ${
+							pcStatus ? "bg-blue-500" : "bg-gray-300"
+						}`}
+						onClick={(e) => {
+							e.stopPropagation();
+							toggleStatus();
+							console.log(pcStatus);
+						}}
+					>
+						<span
+							className={`absolute inline-block w-6 h-6 bg-white rounded-full transform transition-transform translate-x-${
+								pcStatus ? "6" : "0"
+							}`}
+						></span>
+					</button>
+
 					<MiOptionsVertical
 						color='white'
 						className='hover:bg-slate-400 hover:rounded-md'
@@ -85,21 +125,7 @@ export default function PcCard({
 					name={editPcName}
 					setName={setEditPcName}
 					onClose={() => setIsEditingDialogOpen(false)}
-					onSubmit={() => {
-						Axios.put(
-							`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePc/${val._id}`,
-							{
-								pcName: editPcName,
-							}
-						)
-							.then((res) => {
-								console.log(res.data);
-							})
-							.catch((err) => {
-								console.log(err);
-							});
-						setIsEditingDialogOpen(false);
-					}}
+					onSubmit={handleSubmitDialog}
 				/>
 			)}
 		</div>
