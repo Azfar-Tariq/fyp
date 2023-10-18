@@ -7,8 +7,8 @@ const PCSchema = new mongoose.Schema({
 	},
 	pcStatus: {
 		type: Boolean,
-		default: false,
 		required: true,
+		default: false,
 	},
 });
 
