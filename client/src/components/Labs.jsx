@@ -5,6 +5,17 @@ import Add from "./Add";
 import Dialog from "./Dialog";
 import Pcs from "./Pcs";
 
+const fetchLabData = async (parentBuildingId, setLabData) => {
+	try {
+		const response = await Axios.get(
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab`
+		);
+		setLabData(response.data);
+	} catch (err) {
+		console.error("Failed to get lab data:", err);
+	}
+};
+
 export default function Labs({
 	parentBuildingId,
 	parentBuildingName,
@@ -15,6 +26,10 @@ export default function Labs({
 	const [selectedLabId, setSelectedLabId] = useState(null);
 	const [selectedLabName, setSelectedLabName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+	const updatedLabData = () => {
+		fetchLabData(parentBuildingId, setLabData);
+	};
 
 	useEffect(() => {
 		Axios.get(`http://localhost:3001/readBuilding/${parentBuildingId}/readLab`)
@@ -39,6 +54,7 @@ export default function Labs({
 		)
 			.then((response) => {
 				console.log(response.data);
+				updatedLabData();
 			})
 			.catch((err) => {
 				console.error("Failed to save lab:", err);
@@ -70,6 +86,7 @@ export default function Labs({
 								<LabCard
 									val={val}
 									parentBuildingId={parentBuildingId}
+									updatedLabData={updatedLabData}
 									onSelect={() => handleSelectLab(val._id, val.labName)}
 								/>
 							</div>

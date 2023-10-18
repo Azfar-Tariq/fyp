@@ -3,11 +3,15 @@ import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
 
-export default function PcCard({ val, parentBuildingId, parentLabId }) {
+export default function PcCard({
+	val,
+	parentBuildingId,
+	parentLabId,
+	updatePcData,
+}) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
-	const [editPcName, setEditPcName] = useState("");
-	const [pcStatus, setPcStatus] = useState(val.pcStatus);
+	const [editPcName, setEditPcName] = useState(val.pcName);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -18,13 +22,29 @@ export default function PcCard({ val, parentBuildingId, parentLabId }) {
 	};
 
 	const toggleStatus = () => {
-		setPcStatus(!pcStatus);
+		val.pcStatus = !val.pcStatus;
+		Axios.put(
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePC/${val._id}`,
+			{
+				pcName: editPcName,
+				pcStatus: val.pcStatus,
+			}
+		)
+			.then((res) => {
+				console.log(res.data);
+				updatePcData();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	};
 
 	const deletePc = (id) => {
 		Axios.delete(
 			`http://localhost:3001/readbuilding/${parentBuildingId}/readLab/${parentLabId}/deletePc/${id}`
-		);
+		).then(() => {
+			updatePcData();
+		});
 	};
 
 	const openEditDialog = () => {
@@ -38,11 +58,11 @@ export default function PcCard({ val, parentBuildingId, parentLabId }) {
 			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePc/${val._id}`,
 			{
 				pcName: editPcName,
-				pcStatus: pcStatus,
 			}
 		)
 			.then((res) => {
 				console.log(res.data);
+				updatePcData();
 			})
 			.catch((err) => {
 				console.log(err);
@@ -57,32 +77,15 @@ export default function PcCard({ val, parentBuildingId, parentLabId }) {
 					<p className='text-xl font-bold tracking-tight text-white'>
 						{val.pcName}
 					</p>
-					{/* <button
-						className='bg-white p-2 pr-3 pl-3 rounded-lg'
-						onClick={(e) => {
-							e.stopPropagation();
-							toggleStatus();
-						}}
-					>
-						{pcStatus ? "ON" : "OFF"}
-					</button> */}
-					<button
-						className={`relative inline-flex items-center h-6 rounded-full w-12 ${
-							pcStatus ? "bg-blue-500" : "bg-gray-300"
-						}`}
-						onClick={(e) => {
-							e.stopPropagation();
-							toggleStatus();
-							console.log(pcStatus);
-						}}
-					>
-						<span
-							className={`absolute inline-block w-6 h-6 bg-white rounded-full transform transition-transform translate-x-${
-								pcStatus ? "6" : "0"
-							}`}
-						></span>
-					</button>
-
+					<label className='relative inline-flex items-center cursor-pointer'>
+						<input
+							type='checkbox'
+							className='sr-only peer'
+							checked={val.pcStatus}
+							onChange={toggleStatus}
+						/>
+						<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+					</label>
 					<MiOptionsVertical
 						color='white'
 						className='hover:bg-slate-400 hover:rounded-md'

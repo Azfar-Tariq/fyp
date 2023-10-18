@@ -4,7 +4,12 @@ import Axios from "axios";
 import Image1 from "../assets/images/labs/lab1.jpg";
 import Dialog from "./Dialog";
 
-export default function LabCard({ val, parentBuildingId, onSelect }) {
+export default function LabCard({
+	val,
+	parentBuildingId,
+	updatedLabData,
+	onSelect,
+}) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 	const [editLabName, setEditLabName] = useState("");
@@ -20,7 +25,9 @@ export default function LabCard({ val, parentBuildingId, onSelect }) {
 	const deleteLab = (id) => {
 		Axios.delete(
 			`http://localhost:3001/readbuilding/${parentBuildingId}/deleteLab/${id}`
-		);
+		).then(() => {
+			updatedLabData();
+		});
 	};
 
 	const openEditDialog = () => {
@@ -38,6 +45,7 @@ export default function LabCard({ val, parentBuildingId, onSelect }) {
 		)
 			.then((res) => {
 				console.log(res.data);
+				updatedLabData();
 			})
 			.catch((err) => {
 				console.log(err);

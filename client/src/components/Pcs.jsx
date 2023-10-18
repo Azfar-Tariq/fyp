@@ -4,6 +4,17 @@ import Add from "./Add";
 import Dialog from "./Dialog";
 import PcCard from "./PcCard";
 
+const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
+	try {
+		const response = await Axios.get(
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readPc`
+		);
+		setPcData(response.data);
+	} catch (err) {
+		console.error("Failed to get PC Data:", err);
+	}
+};
+
 export default function Pcs({
 	parentBuildingId,
 	parentLabId,
@@ -14,20 +25,12 @@ export default function Pcs({
 	const [pcName, setPcName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+	const updatePcData = () => {
+		fetchPcData(parentBuildingId, parentLabId, setPcData);
+	};
+
 	useEffect(() => {
-		Axios.get(
-			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readPc`
-		)
-			.then((response) => {
-				const updatedPcData = response.data.map((pc) => ({
-					...pc,
-					pcStatus: false,
-				}));
-				setPcData(updatedPcData);
-			})
-			.catch((error) => {
-				console.error("Failed to get labs:", error);
-			});
+		fetchPcData(parentBuildingId, parentLabId, setPcData);
 	}, [parentBuildingId, parentLabId]);
 
 	const toggleDialog = () => {
@@ -43,10 +46,12 @@ export default function Pcs({
 		)
 			.then((response) => {
 				console.log(response.data);
+				fetchPcData(parentBuildingId, parentLabId, setPcData);
 			})
 			.catch((err) => {
 				console.error("Failed to save lab:", err);
 			});
+		setPcName("");
 		setIsDialogOpen(false);
 	};
 
@@ -64,6 +69,7 @@ export default function Pcs({
 								val={val}
 								parentBuildingId={parentBuildingId}
 								parentLabId={parentLabId}
+								updatePcData={updatePcData}
 							/>
 						</div>
 					))}
