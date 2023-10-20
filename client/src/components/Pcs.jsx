@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import Add from "./Add";
@@ -24,6 +25,7 @@ export default function Pcs({
 	const [pcData, setPcData] = useState([]);
 	const [pcName, setPcName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [showImageInput, setShowImageInput] = useState(false);
 
 	const updatePcData = () => {
 		fetchPcData(parentBuildingId, parentLabId, setPcData);
@@ -81,6 +83,7 @@ export default function Pcs({
 						text2='PC'
 						name={pcName}
 						setName={setPcName}
+						showImageInput={showImageInput}
 						onClose={toggleDialog}
 						onSubmit={handleSubmitDialog}
 					/>

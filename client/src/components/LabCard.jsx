@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
-import Image1 from "../assets/images/labs/lab1.jpg";
 import Dialog from "./Dialog";
 
 export default function LabCard({
 	val,
+	image,
 	parentBuildingId,
 	updatedLabData,
 	onSelect,
@@ -13,6 +14,7 @@ export default function LabCard({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 	const [editLabName, setEditLabName] = useState("");
+	const [showImageInput, setShowImageInput] = useState(true);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -25,9 +27,14 @@ export default function LabCard({
 	const deleteLab = (id) => {
 		Axios.delete(
 			`http://localhost:3001/readbuilding/${parentBuildingId}/deleteLab/${id}`
-		).then(() => {
-			updatedLabData();
-		});
+		)
+			.then((res) => {
+				console.log(res.data);
+				updatedLabData();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	};
 
 	const openEditDialog = () => {
@@ -61,7 +68,9 @@ export default function LabCard({
 			>
 				<img
 					className='rounded-t-lg object-fit w-full h-40'
-					src={Image1}
+					src={image}
+					// for default image
+					// src={image ? image : Image1}
 					alt=''
 				/>
 				<div className='flex justify-between items-center p-4'>
@@ -109,6 +118,7 @@ export default function LabCard({
 					text2='Lab'
 					name={editLabName}
 					setName={setEditLabName}
+					showImageInput={showImageInput}
 					onClose={() => setIsEditingDialogOpen(false)}
 					onSubmit={handleSubmitDialog}
 				/>

@@ -16,6 +16,9 @@ const LabSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	labImage: {
+		type: String,
+	},
 	pcs: [PCSchema],
 });
 
@@ -23,6 +26,9 @@ const BuildingDataSchema = new mongoose.Schema({
 	buildingName: {
 		type: String,
 		required: true,
+	},
+	buildingImage: {
+		type: String,
 	},
 	labs: [LabSchema],
 });

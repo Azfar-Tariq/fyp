@@ -1,13 +1,14 @@
+/* eslint-disable no-unused-vars */
 import { MiOptionsVertical } from "../assets/icons/options";
-import Image1 from "../assets/images/blockC.jpg";
 import Axios from "axios";
 import Dialog from "./Dialog";
 import { useState } from "react";
 
-export default function Card({ val, onSelect }) {
+export default function Card({ val, image, updatedBuildingData, onSelect }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [editBuildingName, setEditBuildingName] = useState("");
+	const [showImageInput, setShowImageInput] = useState(true);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -18,7 +19,14 @@ export default function Card({ val, onSelect }) {
 	};
 
 	const deleteBuilding = (id) => {
-		Axios.delete(`http://localhost:3001/deletebuilding/${id}`);
+		Axios.delete(`http://localhost:3001/deletebuilding/${id}`)
+			.then((res) => {
+				console.log(res.data);
+				updatedBuildingData();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	};
 
 	const openEditDialog = () => {
@@ -33,6 +41,7 @@ export default function Card({ val, onSelect }) {
 		})
 			.then((res) => {
 				console.log(res.data);
+				updatedBuildingData();
 			})
 			.catch((err) => {
 				console.log(err);
@@ -48,7 +57,7 @@ export default function Card({ val, onSelect }) {
 			>
 				<img
 					className='rounded-t-lg object-cover w-full h-full'
-					src={Image1}
+					src={image}
 					alt=''
 				/>
 				<div className='p-4 flex justify-between items-center'>
@@ -96,6 +105,7 @@ export default function Card({ val, onSelect }) {
 					text2='Building'
 					name={editBuildingName}
 					setName={setEditBuildingName}
+					showImageInput={showImageInput}
 					onClose={() => setIsEditDialogOpen(false)}
 					onSubmit={handleSubmitDialog}
 				/>

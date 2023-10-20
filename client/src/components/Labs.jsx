@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import LabCard from "./LabCard";
 import Axios from "axios";
@@ -23,9 +24,11 @@ export default function Labs({
 }) {
 	const [labData, setLabData] = useState([]);
 	const [labName, setLabName] = useState("");
+	const [labImage, setLabImage] = useState(null);
 	const [selectedLabId, setSelectedLabId] = useState(null);
 	const [selectedLabName, setSelectedLabName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [showImageInput, setShowImageInput] = useState(true);
 
 	const updatedLabData = () => {
 		fetchLabData(parentBuildingId, setLabData);
@@ -46,11 +49,12 @@ export default function Labs({
 	};
 
 	const handleSubmitDialog = () => {
+		const formData = new FormData();
+		formData.append("labName", labName);
+		formData.append("labImage", labImage);
 		Axios.post(
 			`http://localhost:3001/readbuilding/${parentBuildingId}/addLab`,
-			{
-				labName: labName,
-			}
+			formData
 		)
 			.then((response) => {
 				console.log(response.data);
@@ -60,6 +64,8 @@ export default function Labs({
 				console.error("Failed to save lab:", err);
 			});
 		setIsDialogOpen(false);
+		setLabName("");
+		setLabImage(null);
 	};
 
 	const handleSelectLab = (labId, labName) => {
@@ -85,6 +91,7 @@ export default function Labs({
 							<div key={index} className='relative'>
 								<LabCard
 									val={val}
+									image={`http://localhost:3001/${val.labImage}`}
 									parentBuildingId={parentBuildingId}
 									updatedLabData={updatedLabData}
 									onSelect={() => handleSelectLab(val._id, val.labName)}
@@ -99,6 +106,9 @@ export default function Labs({
 							text2='Lab'
 							name={labName}
 							setName={setLabName}
+							image={labImage}
+							setImage={setLabImage}
+							showImageInput={showImageInput}
 							onClose={toggleDialog}
 							onSubmit={handleSubmitDialog}
 						/>

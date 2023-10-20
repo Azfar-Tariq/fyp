@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
@@ -12,6 +13,7 @@ export default function PcCard({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 	const [editPcName, setEditPcName] = useState(val.pcName);
+	const [showImageInput, setShowImageInput] = useState(false);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -127,6 +129,7 @@ export default function PcCard({
 					text2='PC'
 					name={editPcName}
 					setName={setEditPcName}
+					showImageInput={showImageInput}
 					onClose={() => setIsEditingDialogOpen(false)}
 					onSubmit={handleSubmitDialog}
 				/>

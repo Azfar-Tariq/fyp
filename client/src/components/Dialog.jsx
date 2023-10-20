@@ -3,12 +3,16 @@ export default function Dialog({
 	text2,
 	name,
 	setName,
+	image,
+	setImage,
+	showImageInput,
 	onClose,
 	onSubmit,
 }) {
 	const handleSave = () => {
 		onSubmit();
 		setName("");
+		setImage(null);
 	};
 
 	return (
@@ -28,6 +32,20 @@ export default function Dialog({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 						/>
+						{showImageInput && (
+							<div>
+								<label htmlFor='buildingImage'>{`Select ${text2} Image:`}</label>
+								<input
+									type='file'
+									id='buildingImage'
+									accept='image/*'
+									onChange={(e) => setImage(e.target.files[0])}
+								/>
+								{image && (
+									<img src={URL.createObjectURL(image)} alt='Building' />
+								)}
+							</div>
+						)}
 					</div>
 					<div className='flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b'>
 						<button
