@@ -3,11 +3,13 @@ import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Card({ val, image, updatedBuildingData, onSelect }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [editBuildingName, setEditBuildingName] = useState("");
+	const [selectedBuildingImage, setSelectedBuildingImage] = useState(null);
 	const [showImageInput, setShowImageInput] = useState(true);
 
 	const toggleMenu = () => {
@@ -23,6 +25,7 @@ export default function Card({ val, image, updatedBuildingData, onSelect }) {
 			.then((res) => {
 				console.log(res.data);
 				updatedBuildingData();
+				toast.success("Building deleted successfully");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -31,17 +34,23 @@ export default function Card({ val, image, updatedBuildingData, onSelect }) {
 
 	const openEditDialog = () => {
 		setEditBuildingName(val.buildingName);
+		setSelectedBuildingImage(image);
 		setIsEditDialogOpen(true);
 		closeMenu();
 	};
 
 	const handleSubmitDialog = () => {
-		Axios.put(`http://localhost:3001/updateBuilding/${val._id}`, {
-			newBuildingName: editBuildingName,
-		})
+		const formData = new FormData();
+		formData.append("newBuildingName", editBuildingName);
+		if (selectedBuildingImage) {
+			formData.append("buildingImage", selectedBuildingImage);
+		}
+
+		Axios.put(`http://localhost:3001/updateBuilding/${val._id}`, formData)
 			.then((res) => {
 				console.log(res.data);
 				updatedBuildingData();
+				toast.success("Building updated successfully");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -51,12 +60,13 @@ export default function Card({ val, image, updatedBuildingData, onSelect }) {
 
 	return (
 		<div>
+			<ToastContainer />
 			<div
 				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
-				onClick={() => onSelect(val.buildingName)}
+				onClick={() => onSelect(val._id, val.buildingName, image)}
 			>
 				<img
-					className='rounded-t-lg object-cover w-full h-full'
+					className='rounded-t-lg object-fit aspect-video'
 					src={image}
 					alt=''
 				/>
@@ -75,7 +85,7 @@ export default function Card({ val, image, updatedBuildingData, onSelect }) {
 				</div>
 			</div>
 			{isMenuOpen && (
-				<div className='absolute bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
+				<div className='absolute bottom-12 right-0 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
 					<ul>
 						<li>
 							<button
@@ -105,6 +115,8 @@ export default function Card({ val, image, updatedBuildingData, onSelect }) {
 					text2='Building'
 					name={editBuildingName}
 					setName={setEditBuildingName}
+					image={selectedBuildingImage}
+					setImage={setSelectedBuildingImage}
 					showImageInput={showImageInput}
 					onClose={() => setIsEditDialogOpen(false)}
 					onSubmit={handleSubmitDialog}

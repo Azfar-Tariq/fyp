@@ -4,6 +4,7 @@ import Axios from "axios";
 import Add from "./Add";
 import Dialog from "./Dialog";
 import PcCard from "./PcCard";
+import { ToastContainer, toast } from "react-toastify";
 
 const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
 	try {
@@ -49,6 +50,7 @@ export default function Pcs({
 			.then((response) => {
 				console.log(response.data);
 				fetchPcData(parentBuildingId, parentLabId, setPcData);
+				toast.success("PC added successfully");
 			})
 			.catch((err) => {
 				console.error("Failed to save lab:", err);
@@ -62,6 +64,7 @@ export default function Pcs({
 			<button className='text-blue-600 hover:underline' onClick={toggleLabs}>
 				Back to Labs
 			</button>
+			<ToastContainer />
 			<h3 className='text-lg font-semibold'>{parentLabName}</h3>
 			<div>
 				<div className='grid grid-cols-3 gap-4'>

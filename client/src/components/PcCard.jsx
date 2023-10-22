@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function PcCard({
 	val,
@@ -44,9 +45,13 @@ export default function PcCard({
 	const deletePc = (id) => {
 		Axios.delete(
 			`http://localhost:3001/readbuilding/${parentBuildingId}/readLab/${parentLabId}/deletePc/${id}`
-		).then(() => {
-			updatePcData();
-		});
+		)
+			.then(() => {
+				updatePcData();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	};
 
 	const openEditDialog = () => {
@@ -65,6 +70,7 @@ export default function PcCard({
 			.then((res) => {
 				console.log(res.data);
 				updatePcData();
+				toast.success("PC updated successfully");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -74,6 +80,7 @@ export default function PcCard({
 
 	return (
 		<div>
+			<ToastContainer />
 			<div className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'>
 				<div className='flex justify-between items-center p-4'>
 					<p className='text-xl font-bold tracking-tight text-white'>
@@ -99,7 +106,7 @@ export default function PcCard({
 				</div>
 			</div>
 			{isMenuOpen && (
-				<div className='absolute right-0 mt-2 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
+				<div className='absolute bottom-12 right-0 mt-2 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
 					<ul>
 						<li>
 							<button

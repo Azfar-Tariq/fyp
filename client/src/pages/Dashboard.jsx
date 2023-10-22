@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import Dialog from "../components/Dialog";
 import Axios from "axios";
 import Labs from "../components/Labs";
+import { ToastContainer, toast } from "react-toastify";
 
 const fetchData = async (setBuildingList) => {
 	try {
@@ -52,6 +53,7 @@ export default function Dashboard() {
 			.then((response) => {
 				console.log(response.data);
 				updatedBuildingData();
+				toast.success("Building added successfully");
 			})
 			.catch((error) => {
 				console.error("Failed to save building:", error);
@@ -74,18 +76,23 @@ export default function Dashboard() {
 	return (
 		<div className='col-span-4 px-6 py-4 h-screen flex flex-col'>
 			<Header title='Dashboard' />
+			<ToastContainer />
 			<div className='overflow-y-auto'>
 				{selectedBuildingId === null ? (
 					<div>
 						<div className='grid grid-cols-3 gap-4'>
 							{buildingList.map((val, index) => (
-								<div key={index}>
+								<div key={index} className='relative'>
 									<Card
 										val={val}
 										image={`http://localhost:3001/${val.buildingImage}`}
 										updatedBuildingData={updatedBuildingData}
 										onSelect={() =>
-											handleSelectBuilding(val._id, val.buildingName)
+											handleSelectBuilding(
+												val._id,
+												val.buildingName,
+												val.buildingImage
+											)
 										}
 									/>
 								</div>

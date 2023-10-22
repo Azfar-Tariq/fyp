@@ -1,3 +1,6 @@
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function Dialog({
 	text,
 	text2,
@@ -10,9 +13,15 @@ export default function Dialog({
 	onSubmit,
 }) {
 	const handleSave = () => {
-		onSubmit();
-		setName("");
-		setImage(null);
+		if (!name) {
+			toast.error("Please enter a name");
+		} else if (showImageInput && !image) {
+			toast.error("Please select an image");
+		} else {
+			onSubmit();
+			setName("");
+			setImage(null);
+		}
 	};
 
 	return (
@@ -29,21 +38,19 @@ export default function Dialog({
 							id='buildingName'
 							className='outline-1 border-2 border-black rounded-md p-2 w-full'
 							placeholder={`e.g. ${text2} A`}
+							maxLength={15}
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 						/>
 						{showImageInput && (
 							<div>
-								<label htmlFor='buildingImage'>{`Select ${text2} Image:`}</label>
+								<label htmlFor='image'>{`Select ${text2} Image:`}</label>
 								<input
 									type='file'
-									id='buildingImage'
+									id='image'
 									accept='image/*'
 									onChange={(e) => setImage(e.target.files[0])}
 								/>
-								{image && (
-									<img src={URL.createObjectURL(image)} alt='Building' />
-								)}
 							</div>
 						)}
 					</div>
@@ -65,6 +72,7 @@ export default function Dialog({
 					</div>
 				</div>
 			</div>
+			<ToastContainer />
 		</div>
 	);
 }

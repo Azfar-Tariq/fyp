@@ -5,6 +5,7 @@ import Axios from "axios";
 import Add from "./Add";
 import Dialog from "./Dialog";
 import Pcs from "./Pcs";
+import { ToastContainer, toast } from "react-toastify";
 
 const fetchLabData = async (parentBuildingId, setLabData) => {
 	try {
@@ -59,6 +60,7 @@ export default function Labs({
 			.then((response) => {
 				console.log(response.data);
 				updatedLabData();
+				toast.success("Lab added successfully");
 			})
 			.catch((err) => {
 				console.error("Failed to save lab:", err);
@@ -79,10 +81,11 @@ export default function Labs({
 	};
 
 	return (
-		<div className='p-4'>
+		<div>
 			<button className='text-blue-600 hover:underline' onClick={toggleLabs}>
 				Back to Buildings
 			</button>
+			<ToastContainer />
 			<h3 className='text-lg font-semibold mb-2'>{parentBuildingName}</h3>
 			{selectedLabId === null ? (
 				<div>
@@ -94,7 +97,9 @@ export default function Labs({
 									image={`http://localhost:3001/${val.labImage}`}
 									parentBuildingId={parentBuildingId}
 									updatedLabData={updatedLabData}
-									onSelect={() => handleSelectLab(val._id, val.labName)}
+									onSelect={() =>
+										handleSelectLab(val._id, val.labName, val.buidlingImage)
+									}
 								/>
 							</div>
 						))}

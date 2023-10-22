@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function LabCard({
 	val,
@@ -14,6 +15,7 @@ export default function LabCard({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 	const [editLabName, setEditLabName] = useState("");
+	const [selectedLabImage, setSelectedLabImage] = useState(null);
 	const [showImageInput, setShowImageInput] = useState(true);
 
 	const toggleMenu = () => {
@@ -31,6 +33,7 @@ export default function LabCard({
 			.then((res) => {
 				console.log(res.data);
 				updatedLabData();
+				toast.success("Lab deleted successfully");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -39,20 +42,26 @@ export default function LabCard({
 
 	const openEditDialog = () => {
 		setEditLabName(val.labName);
+		setSelectedLabImage(image);
 		setIsEditingDialogOpen(true);
 		closeMenu();
 	};
 
 	const handleSubmitDialog = () => {
+		const formData = new FormData();
+		formData.append("labName", editLabName);
+		if (selectedLabImage) {
+			formData.append("labImage", selectedLabImage);
+		}
+
 		Axios.put(
 			`http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val._id}`,
-			{
-				labName: editLabName,
-			}
+			formData
 		)
 			.then((res) => {
 				console.log(res.data);
 				updatedLabData();
+				toast.success("Lab updated successfully");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -62,12 +71,13 @@ export default function LabCard({
 
 	return (
 		<div>
+			<ToastContainer />
 			<div
 				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
-				onClick={() => onSelect(val.labName)}
+				onClick={() => onSelect(val._id, val.labName, image)}
 			>
 				<img
-					className='rounded-t-lg object-fit w-full h-40'
+					className='rounded-t-lg object-fit aspect-video'
 					src={image}
 					// for default image
 					// src={image ? image : Image1}
@@ -88,7 +98,7 @@ export default function LabCard({
 				</div>
 			</div>
 			{isMenuOpen && (
-				<div className='absolute right-0 mt-2 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
+				<div className='absolute bottom-12 right-0 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
 					<ul>
 						<li>
 							<button
@@ -118,6 +128,8 @@ export default function LabCard({
 					text2='Lab'
 					name={editLabName}
 					setName={setEditLabName}
+					image={selectedLabImage}
+					setImage={setSelectedLabImage}
 					showImageInput={showImageInput}
 					onClose={() => setIsEditingDialogOpen(false)}
 					onSubmit={handleSubmitDialog}
