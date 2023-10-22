@@ -4,6 +4,7 @@ import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
 import { toast, ToastContainer } from "react-toastify";
+import ModalOverlay from "./ModalOverlay";
 
 export default function PcCard({
 	val,
@@ -131,15 +132,17 @@ export default function PcCard({
 				</div>
 			)}
 			{isEditingDialogOpen && (
-				<Dialog
-					text='Edit PC'
-					text2='PC'
-					name={editPcName}
-					setName={setEditPcName}
-					showImageInput={showImageInput}
-					onClose={() => setIsEditingDialogOpen(false)}
-					onSubmit={handleSubmitDialog}
-				/>
+				<ModalOverlay isOpen={isEditingDialogOpen}>
+					<Dialog
+						text='Edit PC'
+						text2='PC'
+						name={editPcName}
+						setName={setEditPcName}
+						showImageInput={showImageInput}
+						onClose={() => setIsEditingDialogOpen(false)}
+						onSubmit={handleSubmitDialog}
+					/>
+				</ModalOverlay>
 			)}
 		</div>
 	);

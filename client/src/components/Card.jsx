@@ -4,6 +4,7 @@ import Axios from "axios";
 import Dialog from "./Dialog";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import ModalOverlay from "./ModalOverlay";
 
 export default function Card({ val, image, updatedBuildingData, onSelect }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -110,17 +111,19 @@ export default function Card({ val, image, updatedBuildingData, onSelect }) {
 				</div>
 			)}
 			{isEditDialogOpen && (
-				<Dialog
-					text='Edit Building'
-					text2='Building'
-					name={editBuildingName}
-					setName={setEditBuildingName}
-					image={selectedBuildingImage}
-					setImage={setSelectedBuildingImage}
-					showImageInput={showImageInput}
-					onClose={() => setIsEditDialogOpen(false)}
-					onSubmit={handleSubmitDialog}
-				/>
+				<ModalOverlay isOpen={isEditDialogOpen}>
+					<Dialog
+						text='Edit Building'
+						text2='Building'
+						name={editBuildingName}
+						setName={setEditBuildingName}
+						image={selectedBuildingImage}
+						setImage={setSelectedBuildingImage}
+						showImageInput={showImageInput}
+						onClose={() => setIsEditDialogOpen(false)}
+						onSubmit={handleSubmitDialog}
+					/>
+				</ModalOverlay>
 			)}
 		</div>
 	);

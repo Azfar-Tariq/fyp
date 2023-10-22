@@ -5,6 +5,8 @@ import Add from "./Add";
 import Dialog from "./Dialog";
 import PcCard from "./PcCard";
 import { ToastContainer, toast } from "react-toastify";
+import ModalOverlay from "./ModalOverlay";
+import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 
 const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
 	try {
@@ -19,9 +21,11 @@ const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
 
 export default function Pcs({
 	parentBuildingId,
+	parentBuildingName,
 	parentLabId,
 	parentLabName,
-	toggleLabs,
+	backToLabs,
+	backToBuildings,
 }) {
 	const [pcData, setPcData] = useState([]);
 	const [pcName, setPcName] = useState("");
@@ -60,12 +64,40 @@ export default function Pcs({
 	};
 
 	return (
-		<div className='pt-4 pr-4 pb-4'>
-			<button className='text-blue-600 hover:underline' onClick={toggleLabs}>
-				Back to Labs
-			</button>
+		<div>
+			<div className='flex items-center gap-2'>
+				<a
+					onClick={backToBuildings}
+					className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
+				>
+					Buildings
+				</a>
+				<MaterialSymbolsArrowForwardIosRounded />
+				<a
+					onClick={backToLabs}
+					className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
+				>
+					Labs
+				</a>
+				<MaterialSymbolsArrowForwardIosRounded />
+				<span>PCs</span>
+			</div>
 			<ToastContainer />
-			<h3 className='text-lg font-semibold'>{parentLabName}</h3>
+			<div className='flex items-center gap-2 mb-2'>
+				<p
+					className='text-gray-700 hover:text-blue-600 cursor-pointer text-lg font-semibold'
+					onClick={backToBuildings}
+				>
+					{parentBuildingName}
+				</p>
+				<MaterialSymbolsArrowForwardIosRounded />
+				<p
+					className='text-gray-700 hover:text-blue-600 cursor-pointer text-lg font-semibold'
+					onClick={backToLabs}
+				>
+					{parentLabName}
+				</p>
+			</div>
 			<div>
 				<div className='grid grid-cols-3 gap-4'>
 					{pcData.map((val, index) => (
@@ -81,15 +113,17 @@ export default function Pcs({
 				</div>
 
 				{isDialogOpen && (
-					<Dialog
-						text='Add PC'
-						text2='PC'
-						name={pcName}
-						setName={setPcName}
-						showImageInput={showImageInput}
-						onClose={toggleDialog}
-						onSubmit={handleSubmitDialog}
-					/>
+					<ModalOverlay isOpen={isDialogOpen}>
+						<Dialog
+							text='Add PC'
+							text2='PC'
+							name={pcName}
+							setName={setPcName}
+							showImageInput={showImageInput}
+							onClose={toggleDialog}
+							onSubmit={handleSubmitDialog}
+						/>
+					</ModalOverlay>
 				)}
 			</div>
 

@@ -6,6 +6,8 @@ import Add from "./Add";
 import Dialog from "./Dialog";
 import Pcs from "./Pcs";
 import { ToastContainer, toast } from "react-toastify";
+import ModalOverlay from "./ModalOverlay";
+import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 
 const fetchLabData = async (parentBuildingId, setLabData) => {
 	try {
@@ -21,7 +23,7 @@ const fetchLabData = async (parentBuildingId, setLabData) => {
 export default function Labs({
 	parentBuildingId,
 	parentBuildingName,
-	toggleLabs,
+	backToBuildings,
 }) {
 	const [labData, setLabData] = useState([]);
 	const [labName, setLabName] = useState("");
@@ -82,13 +84,27 @@ export default function Labs({
 
 	return (
 		<div>
-			<button className='text-blue-600 hover:underline' onClick={toggleLabs}>
-				Back to Buildings
-			</button>
 			<ToastContainer />
-			<h3 className='text-lg font-semibold mb-2'>{parentBuildingName}</h3>
 			{selectedLabId === null ? (
 				<div>
+					<div className='flex items-center gap-2'>
+						<a
+							onClick={backToBuildings}
+							className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
+						>
+							Buildings
+						</a>
+						<MaterialSymbolsArrowForwardIosRounded />
+						<span>Labs</span>
+					</div>
+					<div className='flex'>
+						<p
+							className='text-gray-700 hover:text-blue-600 font-semibold mb-2 cursor-pointer'
+							onClick={backToBuildings}
+						>
+							{parentBuildingName}
+						</p>
+					</div>
 					<div className='grid grid-cols-3 gap-4'>
 						{labData.map((val, index) => (
 							<div key={index} className='relative'>
@@ -106,17 +122,19 @@ export default function Labs({
 					</div>
 					<Add toggleDialog={toggleDialog} text='Lab' />
 					{isDialogOpen && (
-						<Dialog
-							text='Add Lab'
-							text2='Lab'
-							name={labName}
-							setName={setLabName}
-							image={labImage}
-							setImage={setLabImage}
-							showImageInput={showImageInput}
-							onClose={toggleDialog}
-							onSubmit={handleSubmitDialog}
-						/>
+						<ModalOverlay isOpen={isDialogOpen}>
+							<Dialog
+								text='Add Lab'
+								text2='Lab'
+								name={labName}
+								setName={setLabName}
+								image={labImage}
+								setImage={setLabImage}
+								showImageInput={showImageInput}
+								onClose={toggleDialog}
+								onSubmit={handleSubmitDialog}
+							/>
+						</ModalOverlay>
 					)}
 				</div>
 			) : (
@@ -126,7 +144,8 @@ export default function Labs({
 						parentBuildingName={parentBuildingName}
 						parentLabId={selectedLabId}
 						parentLabName={selectedLabName}
-						toggleLabs={handleBackToLabs}
+						backToLabs={handleBackToLabs}
+						backToBuildings={backToBuildings}
 					/>
 				</div>
 			)}

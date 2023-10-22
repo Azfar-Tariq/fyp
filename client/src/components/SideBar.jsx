@@ -7,26 +7,26 @@ export default function SideBar() {
 	return (
 		<div>
 			<aside className='top-0 left-0 z-40 w-full h-screen'>
-				<div className='h-full px-4 py-4 overflow-y-auto bg-gray-800'>
-					<div className='flex items-center pl-2.5 mb-5'>
+				<div className='h-full px-4 py-4 flex flex-col bg-gray-800'>
+					<div className='flex items-center gap-6 p-4'>
 						<img
 							src='https://flowbite.com/docs/images/logo.svg'
-							className='h-6 mr-3 sm:h-7'
+							className='h-6 sm:h-7'
 							alt='Logo'
 						/>
 						<span className='self-center text-xl font-semibold text-white'>
 							LOGO
 						</span>
 					</div>
-					<ul className='space-y-2 font-medium'>
+					<ul className='space-y-4 font-medium'>
 						{sidebarItems.map((item, index) => (
 							<li key={index}>
 								<a
 									href={item.dest}
-									className='flex items-center p-2 rounded-lg text-white hover:bg-gray-700'
+									className='flex items-center text-xl p-2 rounded-lg gap-4 text-white hover:bg-gray-700'
 								>
 									{item.img}
-									<span className='ml-3'>{item.name}</span>
+									<span>{item.name}</span>
 								</a>
 							</li>
 						))}

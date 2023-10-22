@@ -4,6 +4,7 @@ import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
 import { toast, ToastContainer } from "react-toastify";
+import ModalOverlay from "./ModalOverlay";
 
 export default function LabCard({
 	val,
@@ -123,17 +124,19 @@ export default function LabCard({
 				</div>
 			)}
 			{isEditingDialogOpen && (
-				<Dialog
-					text='Edit Lab'
-					text2='Lab'
-					name={editLabName}
-					setName={setEditLabName}
-					image={selectedLabImage}
-					setImage={setSelectedLabImage}
-					showImageInput={showImageInput}
-					onClose={() => setIsEditingDialogOpen(false)}
-					onSubmit={handleSubmitDialog}
-				/>
+				<ModalOverlay isOpen={isEditingDialogOpen}>
+					<Dialog
+						text='Edit Lab'
+						text2='Lab'
+						name={editLabName}
+						setName={setEditLabName}
+						image={selectedLabImage}
+						setImage={setSelectedLabImage}
+						showImageInput={showImageInput}
+						onClose={() => setIsEditingDialogOpen(false)}
+						onSubmit={handleSubmitDialog}
+					/>
+				</ModalOverlay>
 			)}
 		</div>
 	);

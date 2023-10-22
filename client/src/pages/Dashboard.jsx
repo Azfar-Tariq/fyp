@@ -7,6 +7,7 @@ import Dialog from "../components/Dialog";
 import Axios from "axios";
 import Labs from "../components/Labs";
 import { ToastContainer, toast } from "react-toastify";
+import ModalOverlay from "../components/ModalOverlay";
 
 const fetchData = async (setBuildingList) => {
 	try {
@@ -80,6 +81,9 @@ export default function Dashboard() {
 			<div className='overflow-y-auto'>
 				{selectedBuildingId === null ? (
 					<div>
+						<div className='mb-2'>
+							<a className='text-lg font-semibold'>Buildings</a>
+						</div>
 						<div className='grid grid-cols-3 gap-4'>
 							{buildingList.map((val, index) => (
 								<div key={index} className='relative'>
@@ -100,17 +104,19 @@ export default function Dashboard() {
 						</div>
 						<Add toggleDialog={toggleDialog} text='Building' />
 						{isDialogOpen && (
-							<Dialog
-								text='Add Building'
-								text2='Building'
-								name={buildingName}
-								setName={setBuildingName}
-								image={buildingImage}
-								setImage={setBuildingImage}
-								showImageInput={showImageInput}
-								onClose={toggleDialog}
-								onSubmit={handleSubmitDialog}
-							/>
+							<ModalOverlay isOpen={isDialogOpen}>
+								<Dialog
+									text='Add Building'
+									text2='Building'
+									name={buildingName}
+									setName={setBuildingName}
+									image={buildingImage}
+									setImage={setBuildingImage}
+									showImageInput={showImageInput}
+									onClose={toggleDialog}
+									onSubmit={handleSubmitDialog}
+								/>
+							</ModalOverlay>
 						)}
 					</div>
 				) : (
@@ -118,7 +124,7 @@ export default function Dashboard() {
 						<Labs
 							parentBuildingId={selectedBuildingId}
 							parentBuildingName={selectedBuildingName}
-							toggleLabs={handleBackToBuildings}
+							backToBuildings={handleBackToBuildings}
 						/>
 					</div>
 				)}
