@@ -8,6 +8,7 @@ import Pcs from "./Pcs";
 import { ToastContainer, toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
+import { PulseLoader } from "react-spinners";
 
 const fetchLabData = async (parentBuildingId, setLabData) => {
 	try {
@@ -32,18 +33,22 @@ export default function Labs({
 	const [selectedLabName, setSelectedLabName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [showImageInput, setShowImageInput] = useState(true);
+	const [loading, setLoading] = useState(false);
 
 	const updatedLabData = () => {
 		fetchLabData(parentBuildingId, setLabData);
 	};
 
 	useEffect(() => {
+		setLoading(true);
 		Axios.get(`http://localhost:3001/readBuilding/${parentBuildingId}/readLab`)
 			.then((response) => {
 				setLabData(response.data);
+				setLoading(false);
 			})
 			.catch((error) => {
 				console.error("Failed to get labs:", error);
+				setLoading(false);
 			});
 	}, [parentBuildingId]);
 
@@ -105,21 +110,32 @@ export default function Labs({
 							{parentBuildingName}
 						</p>
 					</div>
-					<div className='grid grid-cols-3 gap-4'>
-						{labData.map((val, index) => (
-							<div key={index} className='relative'>
-								<LabCard
-									val={val}
-									image={`http://localhost:3001/${val.labImage}`}
-									parentBuildingId={parentBuildingId}
-									updatedLabData={updatedLabData}
-									onSelect={() =>
-										handleSelectLab(val._id, val.labName, val.buidlingImage)
-									}
-								/>
-							</div>
-						))}
-					</div>
+					{loading && (
+						<div>
+							<PulseLoader />
+						</div>
+					)}
+					{labData.length === 0 ? (
+						<div>
+							<p>No Labs currently</p>
+						</div>
+					) : (
+						<div className='grid grid-cols-3 gap-4'>
+							{labData.map((val, index) => (
+								<div key={index} className='relative'>
+									<LabCard
+										val={val}
+										image={`http://localhost:3001/${val.labImage}`}
+										parentBuildingId={parentBuildingId}
+										updatedLabData={updatedLabData}
+										onSelect={() =>
+											handleSelectLab(val._id, val.labName, val.buidlingImage)
+										}
+									/>
+								</div>
+							))}
+						</div>
+					)}
 					<Add toggleDialog={toggleDialog} text='Lab' />
 					{isDialogOpen && (
 						<ModalOverlay isOpen={isDialogOpen}>

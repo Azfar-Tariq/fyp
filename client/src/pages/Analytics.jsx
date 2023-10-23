@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Axios from "axios";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
+import { PulseLoader } from "react-spinners";
 
 export default function Analytics() {
 	const [buildingList, setBuildingList] = useState([]);
@@ -13,14 +14,18 @@ export default function Analytics() {
 	const [selectedBuildingName, setSelectedBuildingName] = useState("");
 	const [selectedLabName, setSelectedLabName] = useState("");
 	const [selectedPcName, setSelectedPcName] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
+		setLoading(true);
 		Axios.get("http://localhost:3001/readBuilding")
 			.then((res) => {
 				setBuildingList(res.data);
+				setLoading(false);
 			})
 			.catch((err) => {
 				console.error("Failed to get buildings:", err);
+				setLoading(false);
 			});
 	}, []);
 
@@ -84,9 +89,14 @@ export default function Analytics() {
 
 			<div className='flex'>
 				<div className='flex flex-col w-72'>
+					{loading && (
+						<div>
+							<PulseLoader />
+						</div>
+					)}
 					<ul>
 						{buildingList.map((building, buildingIndex) => (
-							<li key={buildingIndex} className='bg-gray-800'>
+							<li key={buildingIndex} className='bg-gray-800 p-2'>
 								<a
 									className='flex items-center text-xl p-2 gap-4 text-white border border-white cursor-pointer'
 									onClick={() =>
@@ -103,7 +113,7 @@ export default function Analytics() {
 								{building._id === selectedBuildingId && (
 									<ul className='ml-4'>
 										{labList.map((lab, labIndex) => (
-											<li key={labIndex}>
+											<li key={labIndex} className='p-2'>
 												<a
 													className='flex items-center text-xl p-2 gap-4 text-white border border-white cursor-pointer'
 													onClick={() => handleLabClick(lab._id, lab.labName)}
@@ -118,7 +128,7 @@ export default function Analytics() {
 												{lab._id === selectedLabId && (
 													<ul className='ml-4'>
 														{pcList.map((pc, pcIndex) => (
-															<li key={pcIndex}>
+															<li key={pcIndex} className='p-2'>
 																<a
 																	className='flex items-center text-xl p-2 gap-4 text-white border border-white cursor-pointer'
 																	onClick={() => handlePcClick(pc.pcName)}

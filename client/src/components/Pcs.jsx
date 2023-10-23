@@ -7,6 +7,7 @@ import PcCard from "./PcCard";
 import { ToastContainer, toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
+import { PulseLoader } from "react-spinners";
 
 const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
 	try {
@@ -31,13 +32,25 @@ export default function Pcs({
 	const [pcName, setPcName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [showImageInput, setShowImageInput] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const updatePcData = () => {
 		fetchPcData(parentBuildingId, parentLabId, setPcData);
 	};
 
 	useEffect(() => {
-		fetchPcData(parentBuildingId, parentLabId, setPcData);
+		setLoading(true);
+		Axios.get(
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readPc`
+		)
+			.then((response) => {
+				setPcData(response.data);
+				setLoading(false);
+			})
+			.catch((error) => {
+				console.error("Failed to get labs:", error);
+				setLoading(false);
+			});
 	}, [parentBuildingId, parentLabId]);
 
 	const toggleDialog = () => {
@@ -99,19 +112,27 @@ export default function Pcs({
 				</p>
 			</div>
 			<div>
-				<div className='grid grid-cols-3 gap-4'>
-					{pcData.map((val, index) => (
-						<div key={index} className='relative'>
-							<PcCard
-								val={val}
-								parentBuildingId={parentBuildingId}
-								parentLabId={parentLabId}
-								updatePcData={updatePcData}
-							/>
-						</div>
-					))}
-				</div>
-
+				{loading && (
+					<div>
+						<PulseLoader />
+					</div>
+				)}
+				{pcData.length === 0 ? (
+					<p>No PCs currently</p>
+				) : (
+					<div className='grid grid-cols-3 gap-4'>
+						{pcData.map((val, index) => (
+							<div key={index} className='relative'>
+								<PcCard
+									val={val}
+									parentBuildingId={parentBuildingId}
+									parentLabId={parentLabId}
+									updatePcData={updatePcData}
+								/>
+							</div>
+						))}
+					</div>
+				)}
 				{isDialogOpen && (
 					<ModalOverlay isOpen={isDialogOpen}>
 						<Dialog

@@ -8,6 +8,7 @@ import Axios from "axios";
 import Labs from "../components/Labs";
 import { ToastContainer, toast } from "react-toastify";
 import ModalOverlay from "../components/ModalOverlay";
+import { PulseLoader } from "react-spinners";
 
 const fetchData = async (setBuildingList) => {
 	try {
@@ -26,18 +27,22 @@ export default function Dashboard() {
 	const [selectedBuildingId, setSelectedBuildingId] = useState(null);
 	const [selectedBuildingName, setSelectedBuildingName] = useState("");
 	const [showImageInput, setShowImageInput] = useState(true);
+	const [loading, setLoading] = useState(false);
 
 	const updatedBuildingData = () => {
 		fetchData(setBuildingList);
 	};
 
 	useEffect(() => {
+		setLoading(true);
 		Axios.get("http://localhost:3001/readBuilding")
 			.then((response) => {
 				setBuildingList(response.data);
+				setLoading(false);
 			}, [])
 			.catch((err) => {
 				console.error("Failed to get buildings:", err);
+				setLoading(false);
 			});
 	}, []);
 
@@ -84,24 +89,33 @@ export default function Dashboard() {
 						<div className='mb-2'>
 							<a className='text-lg font-semibold'>Buildings</a>
 						</div>
-						<div className='grid grid-cols-3 gap-4'>
-							{buildingList.map((val, index) => (
-								<div key={index} className='relative'>
-									<Card
-										val={val}
-										image={`http://localhost:3001/${val.buildingImage}`}
-										updatedBuildingData={updatedBuildingData}
-										onSelect={() =>
-											handleSelectBuilding(
-												val._id,
-												val.buildingName,
-												val.buildingImage
-											)
-										}
-									/>
-								</div>
-							))}
-						</div>
+						{loading && (
+							<div>
+								<PulseLoader />
+							</div>
+						)}
+						{buildingList.length === 0 ? (
+							<p>No Buildings currently</p>
+						) : (
+							<div className='grid grid-cols-3 gap-4'>
+								{buildingList.map((val, index) => (
+									<div key={index} className='relative'>
+										<Card
+											val={val}
+											image={`http://localhost:3001/${val.buildingImage}`}
+											updatedBuildingData={updatedBuildingData}
+											onSelect={() =>
+												handleSelectBuilding(
+													val._id,
+													val.buildingName,
+													val.buildingImage
+												)
+											}
+										/>
+									</div>
+								))}
+							</div>
+						)}
 						<Add toggleDialog={toggleDialog} text='Building' />
 						{isDialogOpen && (
 							<ModalOverlay isOpen={isDialogOpen}>
