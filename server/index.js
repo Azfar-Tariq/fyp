@@ -1,361 +1,495 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
+const sql = require("mssql");
 const app = express();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-const BuildingData = require("./models/BuildingData");
-
 app.use(express.json());
 app.use(cors());
 
-mongoose
-	.connect(
-		"mongodb+srv://azfar:658k6QBGojpNkcWn@labnet.lulqqiu.mongodb.net/fyp?retryWrites=true&w=majority",
-		{
-			useNewUrlParser: true,
-		}
-	)
-	.catch((err) => console.error("MongoDB connection error: ", err));
-
-// -------- Configure for Image Upload --------
-const storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, "./images");
+// SQL Server configuration
+const config = {
+	host: "localhost",
+	server: "DESKTOP-RE32RAN\\SQLEXPRESS", // Replace with your SQL Server instance name
+	database: "fyp", // Replace with your database name
+	options: {
+		trustedConnection: true, // Use Windows Authentication
 	},
-	filename: function (req, file, cb) {
-		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-		cb(null, uniqueSuffix + "-" + file.originalname);
-	},
-});
+};
 
-const upload = multer({ storage: storage });
+// SQL Server connection pool
+const pool = new sql.ConnectionPool(config);
+const poolConnect = pool.connect();
 
-// -------- Building Data Endpioints --------
-// send data to database
-app.post(
-	"/insertBuilding",
-	upload.single("buildingImage"),
-	async (req, res) => {
-		const buildingName = req.body.buildingName;
-		const buildingImage = req.file ? req.file.path.replace("public", "") : "";
-		const building = new BuildingData({
-			buildingName: buildingName,
-			buildingImage: buildingImage,
+poolConnect
+	.then(() => {
+		console.log("Connected to SQL Server");
+
+		const storage = multer.diskStorage({
+			destination: function (req, file, cb) {
+				cb(null, path.join(__dirname, "public/images")); // Adjust the destination directory as needed
+			},
+			filename: function (req, file, cb) {
+				const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+				cb(
+					null,
+					file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+				);
+			},
 		});
 
-		try {
-			await building.save();
-			res.status(200).send("Building saved to database");
-		} catch (err) {
-			console.log(err);
-			res.status(500).send("Failed to save building to database");
-		}
-	}
-);
+		const upload = multer({ storage: storage });
 
-// get data from database
-app.get("/readBuilding", async (req, res) => {
-	try {
-		const result = await BuildingData.find({}).exec();
-		res.send(result);
-	} catch (error) {
-		res.status(500).send(error);
-	}
-});
+		// -------- Building Data Endpoints --------
+		// send data to database
+		app.post(
+			"/insertBuilding",
+			upload.single("buildingImage"),
+			async (req, res) => {
+				const buildingName = req.body.buildingName;
+				const buildingImage = req.file
+					? req.file.path.replace("public", "")
+					: "";
 
-// edit data from database
-app.put(
-	"/updateBuilding/:id",
-	upload.single("buildingImage"),
-	async (req, res) => {
-		const newBuildingName = req.body.newBuildingName;
-		const newBuildingImage = req.file
-			? req.file.path.replace("public", "")
-			: "";
-		const id = req.params.id;
-
-		try {
-			const building = await BuildingData.findById(id);
-			if (!building) {
-				res.status(404).send("Building not found");
-				return;
-			}
-			if (newBuildingName) {
-				building.buildingName = newBuildingName;
-			}
-			if (newBuildingImage) {
-				if (building.buildingImage) {
-					fs.unlinkSync(building.buildingImage);
+				try {
+					const request = pool.request();
+					await request.query(
+						`INSERT INTO BuildingData (buildingName, buildingImage) VALUES ('${buildingName}', '${buildingImage}')`
+					);
+					res.status(200).send("Building saved to database");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to save building to database");
 				}
-				building.buildingImage = newBuildingImage;
 			}
-			await building.save();
-			res.status(200).send("Building updated successfully");
-		} catch (err) {
-			console.log(err);
-			res.status(500).send("Failed to update building in the database");
-		}
-	}
-);
+		);
 
-// delete data from database
-app.delete("/deleteBuilding/:id", async (req, res) => {
-	const id = req.params.id;
-
-	try {
-		const deleteBuilding = await BuildingData.findByIdAndRemove(id).exec();
-		if (deleteBuilding) {
-			if (deleteBuilding.buildingImage) {
-				const imagePath = path.join(__dirname, deleteBuilding.buildingImage);
-				fs.unlinkSync(imagePath);
+		// get data from database
+		app.get("/readBuilding", async (req, res) => {
+			try {
+				const request = pool.request();
+				const result = await request.query("SELECT * FROM BuildingData");
+				res.send(result.recordset);
+			} catch (error) {
+				console.error("Failed to get buildings from SQL Server:", error);
+				res.status(500).send(error);
 			}
-			res.status(200).send("Building Deleted Successfully");
-		} else {
-			res.status(404).send("Building Not Found");
-		}
-	} catch (err) {
-		console.log(err);
-		res.status(500).send("Failed to delete building from database");
-	}
-});
+		});
 
-// -------- Lab Data Endpioints --------
-// send data to database
-app.post(
-	"/readBuilding/:buildingId/addLab",
-	upload.single("labImage"),
-	async (req, res) => {
-		const buildingId = req.params.buildingId;
-		const newLab = req.body;
-		const newLabImage = req.file ? req.file.path.replace("public", "") : "";
+		// edit data from database
+		app.put(
+			"/updateBuilding/:id",
+			upload.single("buildingImage"),
+			async (req, res) => {
+				const newBuildingName = req.body.newBuildingName;
+				const newBuildingImage = req.file
+					? req.file.path.replace("public", "")
+					: "";
+				const id = req.params.id;
 
-		try {
-			const building = await BuildingData.findById(buildingId);
-			if (!building) {
-				res.status(404).send("Building not found");
-				return;
-			}
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${id}`
+					);
+					const building = result.recordset[0];
 
-			newLab.labImage = newLabImage;
-
-			building.labs.push(newLab);
-			await building.save();
-
-			res.status(200).send("Lab saved to database");
-		} catch (err) {
-			console.log(err);
-			res.status(500).send("Failed to save lab to the database");
-		}
-	}
-);
-
-// get data from database
-app.get("/readBuilding/:buildingId/readLab", async (req, res) => {
-	const buildingId = req.params.buildingId;
-	try {
-		const building = await BuildingData.findById(buildingId);
-		if (!building) {
-			res.status(404).send("Building not found");
-		} else {
-			const labs = building.labs;
-			res.status(200).json(labs);
-		}
-	} catch (err) {
-		console.log(err);
-		res.status(500).send("Failed to get labs from the database");
-	}
-});
-
-// edit data from database
-app.put(
-	"/readBuilding/:buildingId/updateLab/:labId",
-	upload.single("labImage"),
-	async (req, res) => {
-		const buildingId = req.params.buildingId;
-		const labId = req.params.labId;
-		const updateLab = req.body;
-		const newLabImage = req.file ? req.file.path.replace("public", "") : "";
-
-		try {
-			const building = await BuildingData.findById(buildingId);
-			if (!building) {
-				res.status(404).send("Building not found");
-				return;
-			} else {
-				const labToUpdate = building.labs.id(labId);
-				if (!labToUpdate) {
-					res.status(404).send("Lab not found in the building");
-				} else {
-					if (newLabImage) {
-						if (labToUpdate.labImage) {
-							fs.unlinkSync(labToUpdate.labImage);
-						}
-						labToUpdate.labImage = newLabImage;
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
 					}
-					labToUpdate.set(updateLab);
-					await building.save();
-					res.status(200).send("Lab updated successfully");
+
+					if (newBuildingName) {
+						await request.query(
+							`UPDATE BuildingData SET buildingName = '${newBuildingName}' WHERE id = ${id}`
+						);
+					}
+
+					if (newBuildingImage) {
+						if (building.buildingImage) {
+							fs.unlinkSync(building.buildingImage);
+						}
+						await request.query(
+							`UPDATE BuildingData SET buildingImage = '${newBuildingImage}' WHERE id = ${id}`
+						);
+					}
+
+					res.status(200).send("Building updated successfully");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to update building in the database");
 				}
 			}
-		} catch (err) {
-			console.log(err);
-			res.status(500).send("Failed to update lab in the database");
-		}
-	}
-);
+		);
 
-// delete data from database
-app.delete("/readBuilding/:buildingId/deleteLab/:labId", async (req, res) => {
-	const buildingId = req.params.buildingId;
-	const labId = req.params.labId;
-	try {
-		const building = await BuildingData.findById(buildingId);
-		if (!building) {
-			res.status(404).send("Building not found");
-			return;
-		} else {
-			const labToDelete = building.labs.id(labId);
-			if (!labToDelete) {
-				res.status(404).send("Lab not found in the building");
-			} else {
-				if (labToDelete.labImage) {
-					fs.unlinkSync(labToDelete.labImage);
-				}
-				labToDelete.deleteOne();
-				await building.save();
-				res.status(200).send("Lab deleted successfully");
-			}
-		}
-	} catch (err) {
-		console.log(err);
-		res.status(500).send("Failed to delete lab from the database");
-	}
-});
+		// delete data from database
+		app.delete("/deleteBuilding/:id", async (req, res) => {
+			const id = req.params.id;
 
-// -------- PC's Data Endpioints --------
-// send data to database
-app.post("/readBuilding/:buildingId/readLab/:labId/addPC", async (req, res) => {
-	const buildingId = req.params.buildingId;
-	const labId = req.params.labId;
-	const { pcName, pcStatus } = req.body;
+			try {
+				const request = pool.request();
+				const result = await request.query(
+					`SELECT * FROM BuildingData WHERE id = ${id}`
+				);
+				const deleteBuilding = result.recordset[0];
 
-	try {
-		const building = await BuildingData.findById(buildingId);
-		if (!building) {
-			res.status(404).send("Building not found");
-		} else {
-			const lab = building.labs.id(labId);
-			if (!lab) {
-				res.status(404).send("Lab not found in the building");
-			} else {
-				lab.pcs.push({ pcName, pcStatus });
-				await building.save();
-				res.status(200).send("PC saved to database");
-			}
-		}
-	} catch (err) {
-		console.log(err);
-		res.status(500).send("Failed to save PC to the database");
-	}
-});
-
-// get data from database
-app.get("/readBuilding/:buildingId/readLab/:labId/readPC", async (req, res) => {
-	const buildingId = req.params.buildingId;
-	const labId = req.params.labId;
-	try {
-		const building = await BuildingData.findById(buildingId);
-		if (!building) {
-			res.status(404).send("Building not found");
-		} else {
-			const lab = building.labs.id(labId);
-			if (!lab) {
-				res.status(404).send("Lab not found in the building");
-			} else {
-				const pcs = lab.pcs;
-				res.status(200).json(pcs);
-			}
-		}
-	} catch (err) {
-		console.log(err);
-		res.status(500).send("Failed to get PCs from the database");
-	}
-});
-
-// edit data from database
-app.put(
-	"/readBuilding/:buildingId/readLab/:labId/updatePC/:pcId",
-	async (req, res) => {
-		const buildingId = req.params.buildingId;
-		const labId = req.params.labId;
-		const pcId = req.params.pcId;
-		const { pcName, pcStatus } = req.body;
-		try {
-			const building = await BuildingData.findById(buildingId);
-			if (!building) {
-				res.status(404).send("Building not found");
-			} else {
-				const lab = building.labs.id(labId);
-				if (!lab) {
-					res.status(404).send("Lab not found in the building");
+				if (deleteBuilding) {
+					if (deleteBuilding.buildingImage) {
+						fs.unlinkSync(deleteBuilding.buildingImage);
+					}
+					await request.query(`DELETE FROM BuildingData WHERE id = ${id}`);
+					res.status(200).send("Building Deleted Successfully");
 				} else {
-					const pcToUpdate = lab.pcs.id(pcId);
+					res.status(404).send("Building Not Found");
+				}
+			} catch (err) {
+				console.log(err);
+				res.status(500).send("Failed to delete building from database");
+			}
+		});
+
+		// -------- Lab Data Endpoints --------
+		// send data to database
+		app.post(
+			"/readBuilding/:buildingId/addLab",
+			upload.single("labImage"),
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const newLab = req.body;
+				const newLabImage = req.file ? req.file.path.replace("public", "") : "";
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					newLab.labImage = newLabImage;
+					await request.query(
+						`INSERT INTO LabData (labName, labImage, buildingId) VALUES ('${newLab.labName}', '${newLabImage}', ${buildingId})`
+					);
+
+					building.labs.push(newLab);
+					await request.query(
+						`UPDATE BuildingData SET labs = '${JSON.stringify(
+							building.labs
+						)}' WHERE id = ${buildingId}`
+					);
+
+					res.status(200).send("Lab saved to database");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to save lab to the database");
+				}
+			}
+		);
+
+		// get data from database
+		app.get("/readBuilding/:buildingId/readLab", async (req, res) => {
+			const buildingId = req.params.buildingId;
+			try {
+				const request = pool.request();
+				const result = await request.query(
+					`SELECT labs FROM BuildingData WHERE id = ${buildingId}`
+				);
+				const labs = result.recordset[0].labs;
+				res.status(200).json(labs);
+			} catch (err) {
+				console.log(err);
+				res.status(500).send("Failed to get labs from the database");
+			}
+		});
+
+		// edit data from database
+		app.post(
+			"/readBuilding/:buildingId/addLab",
+			upload.single("labImage"),
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const newLab = req.body;
+				const newLabImage = req.file ? req.file.path.replace("public", "") : "";
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					newLab.labImage = newLabImage;
+					await request.query(
+						`INSERT INTO LabData (labName, labImage, buildingId) VALUES ('${newLab.labName}', '${newLabImage}', ${buildingId})`
+					);
+
+					building.labs.push(newLab);
+					await request.query(
+						`UPDATE BuildingData SET labs = '${JSON.stringify(
+							building.labs
+						)}' WHERE id = ${buildingId}`
+					);
+
+					res.status(200).send("Lab saved to database");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to save lab to the database");
+				}
+			}
+		);
+
+		// delete data from database
+		app.delete(
+			"/readBuilding/:buildingId/deleteLab/:labId",
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const labId = req.params.labId;
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					const labToDeleteIndex = building.labs.findIndex(
+						(lab) => lab.id === labId
+					);
+
+					if (labToDeleteIndex === -1) {
+						res.status(404).send("Lab not found in the building");
+						return;
+					}
+
+					if (building.labs[labToDeleteIndex].labImage) {
+						fs.unlinkSync(building.labs[labToDeleteIndex].labImage);
+					}
+
+					await request.query(`DELETE FROM LabData WHERE id = '${labId}'`);
+					building.labs.splice(labToDeleteIndex, 1);
+					await request.query(
+						`UPDATE BuildingData SET labs = '${JSON.stringify(
+							building.labs
+						)}' WHERE id = ${buildingId}`
+					);
+
+					res.status(200).send("Lab deleted successfully");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to delete lab from the database");
+				}
+			}
+		);
+
+		// -------- PC's Data Endpoints --------
+		// send data to database
+		app.post(
+			"/readBuilding/:buildingId/readLab/:labId/addPC",
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const labId = req.params.labId;
+				const { pcName, pcStatus } = req.body;
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					const lab = building.labs.find((lab) => lab.id === labId);
+
+					if (!lab) {
+						res.status(404).send("Lab not found in the building");
+						return;
+					}
+
+					await request.query(
+						`INSERT INTO PCData (pcName, pcStatus) VALUES ('${pcName}', '${pcStatus}')`
+					);
+
+					lab.pcs.push({ pcName, pcStatus });
+					await request.query(
+						`UPDATE BuildingData SET labs = '${JSON.stringify(
+							building.labs
+						)}' WHERE id = ${buildingId}`
+					);
+
+					res.status(200).send("PC saved to database");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to save PC to the database");
+				}
+			}
+		);
+
+		// get data from database
+		app.get(
+			"/readBuilding/:buildingId/readLab/:labId/readPC",
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const labId = req.params.labId;
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT labs FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					const lab = building.labs.find((lab) => lab.id === labId);
+
+					if (!lab) {
+						res.status(404).send("Lab not found in the building");
+						return;
+					}
+
+					const pcs = lab.pcs;
+					res.status(200).json(pcs);
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to get PCs from the database");
+				}
+			}
+		);
+
+		// edit data from database
+		app.put(
+			"/readBuilding/:buildingId/readLab/:labId/updatePC/:pcId",
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const labId = req.params.labId;
+				const pcId = req.params.pcId;
+				const { pcName, pcStatus } = req.body;
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					const lab = building.labs.find((lab) => lab.id === labId);
+
+					if (!lab) {
+						res.status(404).send("Lab not found in the building");
+						return;
+					}
+
+					const pcToUpdate = lab.pcs.find((pc) => pc.id === pcId);
+
 					if (!pcToUpdate) {
 						res.status(404).send("PC not found in the lab");
-					} else {
-						pcToUpdate.pcName = pcName;
-						pcToUpdate.pcStatus = pcStatus;
-						await building.save();
-						res.status(200).send("PC updated successfully");
+						return;
 					}
+
+					pcToUpdate.pcName = pcName;
+					pcToUpdate.pcStatus = pcStatus;
+					await request.query(
+						`UPDATE PCData SET pcName = '${pcName}', pcStatus = '${pcStatus}' WHERE id = '${pcId}'`
+					);
+					await request.query(
+						`UPDATE BuildingData SET labs = '${JSON.stringify(
+							building.labs
+						)}' WHERE id = ${buildingId}`
+					);
+
+					res.status(200).send("PC updated successfully");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to update PC in the database");
 				}
 			}
-		} catch (err) {
-			console.log(err);
-			res.status(500).send("Failed to update PC in the database");
-		}
-	}
-);
+		);
 
-// delete data from database
-app.delete(
-	"/readBuilding/:buildingId/readLab/:labId/deletePC/:pcId",
-	async (req, res) => {
-		const buildingId = req.params.buildingId;
-		const labId = req.params.labId;
-		const pcId = req.params.pcId;
-		try {
-			const building = await BuildingData.findById(buildingId);
-			if (!building) {
-				res.status(404).send("Building not found");
-			} else {
-				const lab = building.labs.id(labId);
-				if (!lab) {
-					res.status(404).send("Lab not found in the building");
-				} else {
-					const pcToDelete = lab.pcs.id(pcId);
-					if (!pcToDelete) {
+		// delete data from database
+		app.delete(
+			"/readBuilding/:buildingId/readLab/:labId/deletePC/:pcId",
+			async (req, res) => {
+				const buildingId = req.params.buildingId;
+				const labId = req.params.labId;
+				const pcId = req.params.pcId;
+
+				try {
+					const request = pool.request();
+					const result = await request.query(
+						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					);
+					const building = result.recordset[0];
+
+					if (!building) {
+						res.status(404).send("Building not found");
+						return;
+					}
+
+					const lab = building.labs.find((lab) => lab.id === labId);
+
+					if (!lab) {
+						res.status(404).send("Lab not found in the building");
+						return;
+					}
+
+					const pcToDeleteIndex = lab.pcs.findIndex((pc) => pc.id === pcId);
+
+					if (pcToDeleteIndex === -1) {
 						res.status(404).send("PC not found in the lab");
-					} else {
-						pcToDelete.deleteOne();
-						await building.save();
-						res.status(200).send("PC deleted successfully");
+						return;
 					}
+
+					await request.query(`DELETE FROM PCData WHERE id = '${pcId}'`);
+					lab.pcs.splice(pcToDeleteIndex, 1);
+					await request.query(
+						`UPDATE BuildingData SET labs = '${JSON.stringify(
+							building.labs
+						)}' WHERE id = ${buildingId}`
+					);
+
+					res.status(200).send("PC deleted successfully");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to delete PC from the database");
 				}
 			}
-		} catch (err) {
-			console.log(err);
-			res.status(500).send("Failed to delete PC from the database");
-		}
-	}
-);
+		);
+		// Your API routes go here
 
-app.use("/images", express.static(path.join(__dirname, "images")));
+		app.use("/images", express.static(path.join(__dirname, "images")));
 
-// listen to port 3001
-app.listen(3001, () => {
-	console.log("Server is running on port 3001");
-});
+		app.listen(3001, () => {
+			console.log("Server is running on port 3001");
+		});
+	})
+	.catch((err) => {
+		console.error("Failed to connect to SQL Server:", err);
+	});
