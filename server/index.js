@@ -12,9 +12,13 @@ app.use(cors());
 // SQL Server configuration
 const config = {
 	host: "localhost",
-	server: "DESKTOP-RE32RAN\\SQLEXPRESS", // Replace with your SQL Server instance name
+	user: "admin",
+	password: "admin123",
+	server: "DESKTOP-L1BR7L9\\SQLEXPRESS", // Replace with your SQL Server instance name
 	database: "fyp", // Replace with your database name
 	options: {
+		encrypt: true,
+		trustServerCertificate: true, // Change to true for local dev / self-signed certs
 		trustedConnection: true, // Use Windows Authentication
 	},
 };
@@ -485,11 +489,11 @@ poolConnect
 		// Your API routes go here
 
 		app.use("/images", express.static(path.join(__dirname, "images")));
-
-		app.listen(3001, () => {
-			console.log("Server is running on port 3001");
-		});
 	})
 	.catch((err) => {
 		console.error("Failed to connect to SQL Server:", err);
 	});
+
+app.listen(3001, () => {
+	console.log("Server is running on port 3001");
+});
