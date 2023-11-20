@@ -31,18 +31,20 @@ poolConnect
 	.then(() => {
 		console.log("Connected to SQL Server");
 
-		const storage = multer.diskStorage({
-			destination: function (req, file, cb) {
-				cb(null, path.join(__dirname, "public/images")); // Adjust the destination directory as needed
-			},
-			filename: function (req, file, cb) {
-				const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-				cb(
-					null,
-					file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-				);
-			},
-		});
+		// const storage = multer.diskStorage({
+		// 	destination: function (req, file, cb) {
+		// 		cb(null, path.join(__dirname, "./images")); // Adjust the destination directory as needed
+		// 	},
+		// 	filename: function (req, file, cb) {
+		// 		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+		// 		cb(
+		// 			null,
+		// 			file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+		// 		);
+		// 	},
+		// });
+
+		const storage = multer.memoryStorage();
 
 		const upload = multer({ storage: storage });
 
@@ -53,15 +55,16 @@ poolConnect
 			upload.single("buildingImage"),
 			async (req, res) => {
 				const buildingName = req.body.buildingName;
-				const buildingImage = req.file
-					? req.file.path.replace("public", "")
-					: "";
+				const buildingImage = req.file ? req.file.buffer : null;
 
 				try {
 					const request = pool.request();
-					await request.query(
-						`INSERT INTO BuildingData (buildingName, buildingImage) VALUES ('${buildingName}', '${buildingImage}')`
-					);
+					await request
+						.input("buildingName", sql.NVarChar, buildingName)
+						.input("buildingImage", sql.VarBinary(sql.MAX), buildingImage)
+						.query(
+							"INSERT INTO BuildingData (buildingName, buildingImage) VALUES (@buildingName, @buildingImage)"
+						);
 					res.status(200).send("Building saved to database");
 				} catch (err) {
 					console.log(err);
@@ -74,7 +77,9 @@ poolConnect
 		app.get("/readBuilding", async (req, res) => {
 			try {
 				const request = pool.request();
-				const result = await request.query("SELECT * FROM BuildingData");
+				const result = await request.query(
+					"SELECT id, buildingName, CONVERT(VARCHAR(MAX), buildingImage, 1) AS buildingImage FROM BuildingData"
+				);
 				res.send(result.recordset);
 			} catch (error) {
 				console.error("Failed to get buildings from SQL Server:", error);
