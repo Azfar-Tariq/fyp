@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
+import ImageAnnotator from "./ImageAnnotator";
 
 const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
 	try {
@@ -110,6 +111,7 @@ export default function Pcs({
 					{parentLabName}
 				</p>
 			</div>
+			<ImageAnnotator />
 			<div>
 				{loading && (
 					<div>
