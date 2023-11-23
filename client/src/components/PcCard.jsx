@@ -15,7 +15,6 @@ export default function PcCard({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 	const [editPcName, setEditPcName] = useState(val.pcName);
-	const [showImageInput, setShowImageInput] = useState(false);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -28,7 +27,7 @@ export default function PcCard({
 	const toggleStatus = () => {
 		val.pcStatus = !val.pcStatus;
 		Axios.put(
-			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePC/${val._id}`,
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePC/${val.id}`,
 			{
 				pcName: editPcName,
 				pcStatus: val.pcStatus,
@@ -49,6 +48,7 @@ export default function PcCard({
 		)
 			.then(() => {
 				updatePcData();
+				toast.success("PC deleted successfully");
 			})
 			.catch((err) => {
 				console.log(err);
@@ -63,7 +63,7 @@ export default function PcCard({
 
 	const handleSubmitDialog = () => {
 		Axios.put(
-			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePc/${val._id}`,
+			`http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/updatePc/${val.id}`,
 			{
 				pcName: editPcName,
 			}
@@ -122,7 +122,7 @@ export default function PcCard({
 								className='block px-4 py-2 text-red-600 hover:bg-red-200 w-full text-left'
 								onClick={() => {
 									closeMenu();
-									deletePc(val._id);
+									deletePc(val.id);
 								}}
 							>
 								Delete
@@ -138,7 +138,6 @@ export default function PcCard({
 						text2='PC'
 						name={editPcName}
 						setName={setEditPcName}
-						showImageInput={showImageInput}
 						onClose={() => setIsEditingDialogOpen(false)}
 						onSubmit={handleSubmitDialog}
 					/>

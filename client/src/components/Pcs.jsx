@@ -31,7 +31,6 @@ export default function Pcs({
 	const [pcData, setPcData] = useState([]);
 	const [pcName, setPcName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const [showImageInput, setShowImageInput] = useState(false);
 	const [loading, setLoading] = useState(false);
 
 	const updatePcData = () => {
@@ -140,7 +139,6 @@ export default function Pcs({
 							text2='PC'
 							name={pcName}
 							setName={setPcName}
-							showImageInput={showImageInput}
 							onClose={toggleDialog}
 							onSubmit={handleSubmitDialog}
 						/>

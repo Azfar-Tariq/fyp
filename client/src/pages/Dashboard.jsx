@@ -22,11 +22,9 @@ const fetchData = async (setBuildingList) => {
 export default function Dashboard() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [buildingName, setBuildingName] = useState("");
-	const [buildingImage, setBuildingImage] = useState(null);
 	const [buildingList, setBuildingList] = useState([]);
 	const [selectedBuildingId, setSelectedBuildingId] = useState(null);
 	const [selectedBuildingName, setSelectedBuildingName] = useState("");
-	const [showImageInput, setShowImageInput] = useState(true);
 	const [loading, setLoading] = useState(false);
 
 	const updatedBuildingData = () => {
@@ -51,11 +49,9 @@ export default function Dashboard() {
 	};
 
 	const handleSubmitDialog = () => {
-		const formData = new FormData();
-		formData.append("buildingName", buildingName);
-		formData.append("buildingImage", buildingImage);
-
-		Axios.post("http://localhost:3001/insertBuilding", formData)
+		Axios.post("http://localhost:3001/insertBuilding", {
+			buildingName: buildingName,
+		})
 			.then((response) => {
 				console.log(response.data);
 				updatedBuildingData();
@@ -66,7 +62,6 @@ export default function Dashboard() {
 			});
 		setIsDialogOpen(false);
 		setBuildingName("");
-		setBuildingImage(null);
 	};
 
 	const handleSelectBuilding = (buildingId, buildingName) => {
@@ -102,14 +97,9 @@ export default function Dashboard() {
 									<div key={index} className='relative'>
 										<Card
 											val={val}
-											image={`http://localhost:3001/${val.buildingImage}`}
 											updatedBuildingData={updatedBuildingData}
 											onSelect={() =>
-												handleSelectBuilding(
-													val._id,
-													val.buildingName,
-													val.buildingImage
-												)
+												handleSelectBuilding(val.id, val.buildingName)
 											}
 										/>
 									</div>
@@ -124,9 +114,6 @@ export default function Dashboard() {
 									text2='Building'
 									name={buildingName}
 									setName={setBuildingName}
-									image={buildingImage}
-									setImage={setBuildingImage}
-									showImageInput={showImageInput}
 									onClose={toggleDialog}
 									onSubmit={handleSubmitDialog}
 								/>

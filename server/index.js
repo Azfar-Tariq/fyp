@@ -31,56 +31,34 @@ poolConnect
 	.then(() => {
 		console.log("Connected to SQL Server");
 
-		// const storage = multer.diskStorage({
-		// 	destination: function (req, file, cb) {
-		// 		cb(null, path.join(__dirname, "./images")); // Adjust the destination directory as needed
-		// 	},
-		// 	filename: function (req, file, cb) {
-		// 		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-		// 		cb(
-		// 			null,
-		// 			file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-		// 		);
-		// 	},
-		// });
-
-		const storage = multer.memoryStorage();
-
-		const upload = multer({ storage: storage });
-
 		// -------- Building Data Endpoints --------
 		// send data to database
-		app.post(
-			"/insertBuilding",
-			upload.single("buildingImage"),
-			async (req, res) => {
-				const buildingName = req.body.buildingName;
-				const buildingImage = req.file ? req.file.buffer : null;
+		app.post("/insertBuilding", async (req, res) => {
+			const buildingName = req.body.buildingName;
 
-				try {
-					const request = pool.request();
-					await request
-						.input("buildingName", sql.NVarChar, buildingName)
-						.input("buildingImage", sql.VarBinary(sql.MAX), buildingImage)
-						.query(
-							"INSERT INTO BuildingData (buildingName, buildingImage) VALUES (@buildingName, @buildingImage)"
-						);
-					res.status(200).send("Building saved to database");
-				} catch (err) {
-					console.log(err);
-					res.status(500).send("Failed to save building to database");
-				}
+			try {
+				const request = pool.request();
+				await request
+					.input("buildingName", sql.NVarChar, buildingName)
+					.query(
+						"INSERT INTO BuildingData (buildingName) VALUES (@buildingName)"
+					);
+				res.status(200).send("Building saved to database");
+			} catch (err) {
+				console.log(err);
+				res.status(500).send("Failed to save building to database");
 			}
-		);
+		});
 
 		// get data from database
 		app.get("/readBuilding", async (req, res) => {
 			try {
 				const request = pool.request();
 				const result = await request.query(
-					"SELECT id, buildingName, CONVERT(VARCHAR(MAX), buildingImage, 1) AS buildingImage FROM BuildingData"
+					"SELECT id, buildingName FROM BuildingData"
 				);
-				res.send(result.recordset);
+				console.log(result.recordset);
+				res.status(200).json(result.recordset);
 			} catch (error) {
 				console.error("Failed to get buildings from SQL Server:", error);
 				res.status(500).send(error);
@@ -88,50 +66,33 @@ poolConnect
 		});
 
 		// edit data from database
-		app.put(
-			"/updateBuilding/:id",
-			upload.single("buildingImage"),
-			async (req, res) => {
-				const newBuildingName = req.body.newBuildingName;
-				const newBuildingImage = req.file
-					? req.file.path.replace("public", "")
-					: "";
-				const id = req.params.id;
+		app.put("/updateBuilding/:id", async (req, res) => {
+			const newBuildingName = req.body.newBuildingName;
+			const id = req.params.id;
 
-				try {
-					const request = pool.request();
-					const result = await request.query(
-						`SELECT * FROM BuildingData WHERE id = ${id}`
-					);
-					const building = result.recordset[0];
+			try {
+				const request = pool.request();
+				const result = await request.query(
+					`SELECT * FROM BuildingData WHERE id = ${id}`
+				);
+				const building = result.recordset[0];
 
-					if (!building) {
-						res.status(404).send("Building not found");
-						return;
-					}
-
-					if (newBuildingName) {
-						await request.query(
-							`UPDATE BuildingData SET buildingName = '${newBuildingName}' WHERE id = ${id}`
-						);
-					}
-
-					if (newBuildingImage) {
-						if (building.buildingImage) {
-							fs.unlinkSync(building.buildingImage);
-						}
-						await request.query(
-							`UPDATE BuildingData SET buildingImage = '${newBuildingImage}' WHERE id = ${id}`
-						);
-					}
-
-					res.status(200).send("Building updated successfully");
-				} catch (err) {
-					console.log(err);
-					res.status(500).send("Failed to update building in the database");
+				if (!building) {
+					res.status(404).send("Building not found");
+					return;
 				}
+
+				if (newBuildingName) {
+					await request.query(
+						`UPDATE BuildingData SET buildingName = '${newBuildingName}' WHERE id = ${id}`
+					);
+				}
+				res.status(200).send("Building updated successfully");
+			} catch (err) {
+				console.log(err);
+				res.status(500).send("Failed to update building in the database");
 			}
-		);
+		});
 
 		// delete data from database
 		app.delete("/deleteBuilding/:id", async (req, res) => {
@@ -143,11 +104,7 @@ poolConnect
 					`SELECT * FROM BuildingData WHERE id = ${id}`
 				);
 				const deleteBuilding = result.recordset[0];
-
 				if (deleteBuilding) {
-					if (deleteBuilding.buildingImage) {
-						fs.unlinkSync(deleteBuilding.buildingImage);
-					}
 					await request.query(`DELETE FROM BuildingData WHERE id = ${id}`);
 					res.status(200).send("Building Deleted Successfully");
 				} else {
@@ -161,45 +118,34 @@ poolConnect
 
 		// -------- Lab Data Endpoints --------
 		// send data to database
-		app.post(
-			"/readBuilding/:buildingId/addLab",
-			upload.single("labImage"),
-			async (req, res) => {
-				const buildingId = req.params.buildingId;
-				const newLab = req.body;
-				const newLabImage = req.file ? req.file.path.replace("public", "") : "";
+		app.post("/readBuilding/:buildingId/addLab", async (req, res) => {
+			const buildingId = req.params.buildingId;
+			const newLab = req.body;
 
-				try {
-					const request = pool.request();
-					const result = await request.query(
-						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
-					);
-					const building = result.recordset[0];
+			try {
+				const request = pool.request();
+				const buildingResult = await request.query(
+					`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+				);
+				const building = buildingResult.recordset[0];
 
-					if (!building) {
-						res.status(404).send("Building not found");
-						return;
-					}
-
-					newLab.labImage = newLabImage;
-					await request.query(
-						`INSERT INTO LabData (labName, labImage, buildingId) VALUES ('${newLab.labName}', '${newLabImage}', ${buildingId})`
-					);
-
-					building.labs.push(newLab);
-					await request.query(
-						`UPDATE BuildingData SET labs = '${JSON.stringify(
-							building.labs
-						)}' WHERE id = ${buildingId}`
-					);
-
-					res.status(200).send("Lab saved to database");
-				} catch (err) {
-					console.log(err);
-					res.status(500).send("Failed to save lab to the database");
+				if (!building) {
+					res.status(404).send("Building not found");
+					return;
 				}
+
+				await request
+					.input("buildingId", sql.Int, buildingId)
+					.input("labName", sql.NVarChar, newLab.labName)
+					.query(
+						"INSERT INTO Lab (buildingId, labName) VALUES (@buildingId, @labName)"
+					);
+				res.status(200).send("Lab saved to database");
+			} catch (err) {
+				console.log(err);
+				res.status(500).send("Failed to save lab to the database");
 			}
-		);
+		});
 
 		// get data from database
 		app.get("/readBuilding/:buildingId/readLab", async (req, res) => {
@@ -207,10 +153,9 @@ poolConnect
 			try {
 				const request = pool.request();
 				const result = await request.query(
-					`SELECT labs FROM BuildingData WHERE id = ${buildingId}`
+					`SELECT id, labName FROM Lab WHERE buildingId = ${buildingId}`
 				);
-				const labs = result.recordset[0].labs;
-				res.status(200).json(labs);
+				res.status(200).json(result.recordset);
 			} catch (err) {
 				console.log(err);
 				res.status(500).send("Failed to get labs from the database");
@@ -218,45 +163,42 @@ poolConnect
 		});
 
 		// edit data from database
-		app.post(
-			"/readBuilding/:buildingId/addLab",
-			upload.single("labImage"),
-			async (req, res) => {
-				const buildingId = req.params.buildingId;
-				const newLab = req.body;
-				const newLabImage = req.file ? req.file.path.replace("public", "") : "";
+		app.put("/readBuilding/:buildingId/updateLab/:labId", async (req, res) => {
+			const buildingId = req.params.buildingId;
+			const labId = req.params.labId;
+			const newLabName = req.body.newLabName;
 
-				try {
-					const request = pool.request();
-					const result = await request.query(
-						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
-					);
-					const building = result.recordset[0];
-
-					if (!building) {
-						res.status(404).send("Building not found");
-						return;
-					}
-
-					newLab.labImage = newLabImage;
-					await request.query(
-						`INSERT INTO LabData (labName, labImage, buildingId) VALUES ('${newLab.labName}', '${newLabImage}', ${buildingId})`
-					);
-
-					building.labs.push(newLab);
-					await request.query(
-						`UPDATE BuildingData SET labs = '${JSON.stringify(
-							building.labs
-						)}' WHERE id = ${buildingId}`
-					);
-
-					res.status(200).send("Lab saved to database");
-				} catch (err) {
-					console.log(err);
-					res.status(500).send("Failed to save lab to the database");
+			try {
+				const request = pool.request();
+				const buildingResult = await request.query(
+					`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+				);
+				const building = buildingResult.recordset[0];
+				if (!building) {
+					res.status(404).send("Building not found");
+					return;
 				}
+				const labResult = await request.query(
+					`SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
+				);
+				const labToUpdate = labResult.recordset[0];
+				if (!labToUpdate) {
+					res.status(404).send("Lab not found in the building");
+					return;
+				}
+				if (newLabName) {
+					await request
+						.input("newLabName", sql.NVarChar, newLabName)
+						.query(
+							`UPDATE Lab SET labName = @newLabName WHERE id = ${labId} AND buildingId = ${buildingId}`
+						);
+				}
+				res.status(200).send("Lab updated successfully");
+			} catch (err) {
+				console.log(err);
+				res.status(500).send("Failed to update lab to the database");
 			}
-		);
+		});
 
 		// delete data from database
 		app.delete(
@@ -267,36 +209,17 @@ poolConnect
 
 				try {
 					const request = pool.request();
-					const result = await request.query(
-						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
+					const labResult = await request.query(
+						`SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
 					);
-					const building = result.recordset[0];
+					const labToDelete = labResult.recordset[0];
 
-					if (!building) {
-						res.status(404).send("Building not found");
+					if (!labToDelete) {
+						res.status(404).send("Lab not found");
 						return;
 					}
 
-					const labToDeleteIndex = building.labs.findIndex(
-						(lab) => lab.id === labId
-					);
-
-					if (labToDeleteIndex === -1) {
-						res.status(404).send("Lab not found in the building");
-						return;
-					}
-
-					if (building.labs[labToDeleteIndex].labImage) {
-						fs.unlinkSync(building.labs[labToDeleteIndex].labImage);
-					}
-
-					await request.query(`DELETE FROM LabData WHERE id = '${labId}'`);
-					building.labs.splice(labToDeleteIndex, 1);
-					await request.query(
-						`UPDATE BuildingData SET labs = '${JSON.stringify(
-							building.labs
-						)}' WHERE id = ${buildingId}`
-					);
+					await request.query(`DELETE FROM Lab WHERE id = '${labId}'`);
 
 					res.status(200).send("Lab deleted successfully");
 				} catch (err) {
@@ -317,33 +240,30 @@ poolConnect
 
 				try {
 					const request = pool.request();
-					const result = await request.query(
+					const buildingResult = await request.query(
 						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
 					);
-					const building = result.recordset[0];
+					const building = buildingResult.recordset[0];
 
 					if (!building) {
 						res.status(404).send("Building not found");
 						return;
 					}
-
-					const lab = building.labs.find((lab) => lab.id === labId);
-
+					const labResult = await request.query(
+						`SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
+					);
+					const lab = labResult.recordset[0];
 					if (!lab) {
 						res.status(404).send("Lab not found in the building");
 						return;
 					}
-
-					await request.query(
-						`INSERT INTO PCData (pcName, pcStatus) VALUES ('${pcName}', '${pcStatus}')`
-					);
-
-					lab.pcs.push({ pcName, pcStatus });
-					await request.query(
-						`UPDATE BuildingData SET labs = '${JSON.stringify(
-							building.labs
-						)}' WHERE id = ${buildingId}`
-					);
+					await request
+						.input("labId", sql.Int, labId)
+						.input("pcName", sql.NVarChar, pcName)
+						.input("pcStatus", sql.Bit, pcStatus)
+						.query(
+							`INSERT INTO PC (labId, pcName, pcStatus) VALUES (@labId, @pcName, @pcStatus)`
+						);
 
 					res.status(200).send("PC saved to database");
 				} catch (err) {
@@ -363,24 +283,9 @@ poolConnect
 				try {
 					const request = pool.request();
 					const result = await request.query(
-						`SELECT labs FROM BuildingData WHERE id = ${buildingId}`
+						`SELECT id, pcName, pcStatus FROM PC WHERE labId = ${labId}`
 					);
-					const building = result.recordset[0];
-
-					if (!building) {
-						res.status(404).send("Building not found");
-						return;
-					}
-
-					const lab = building.labs.find((lab) => lab.id === labId);
-
-					if (!lab) {
-						res.status(404).send("Lab not found in the building");
-						return;
-					}
-
-					const pcs = lab.pcs;
-					res.status(200).json(pcs);
+					res.status(200).json(result.recordset);
 				} catch (err) {
 					console.log(err);
 					res.status(500).send("Failed to get PCs from the database");
@@ -399,40 +304,13 @@ poolConnect
 
 				try {
 					const request = pool.request();
-					const result = await request.query(
-						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
-					);
-					const building = result.recordset[0];
-
-					if (!building) {
-						res.status(404).send("Building not found");
-						return;
-					}
-
-					const lab = building.labs.find((lab) => lab.id === labId);
-
-					if (!lab) {
-						res.status(404).send("Lab not found in the building");
-						return;
-					}
-
-					const pcToUpdate = lab.pcs.find((pc) => pc.id === pcId);
-
-					if (!pcToUpdate) {
-						res.status(404).send("PC not found in the lab");
-						return;
-					}
-
-					pcToUpdate.pcName = pcName;
-					pcToUpdate.pcStatus = pcStatus;
-					await request.query(
-						`UPDATE PCData SET pcName = '${pcName}', pcStatus = '${pcStatus}' WHERE id = '${pcId}'`
-					);
-					await request.query(
-						`UPDATE BuildingData SET labs = '${JSON.stringify(
-							building.labs
-						)}' WHERE id = ${buildingId}`
-					);
+					await request
+						.input("pcId", sql.Int, pcId)
+						.input("pcName", sql.NVarChar, pcName)
+						.input("pcStatus", sql.Bit, pcStatus)
+						.query(
+							`UPDATE PC SET pcName = @pcName, pcStatus = @pcStatus WHERE id = @pcId`
+						);
 
 					res.status(200).send("PC updated successfully");
 				} catch (err) {
@@ -446,43 +324,11 @@ poolConnect
 		app.delete(
 			"/readBuilding/:buildingId/readLab/:labId/deletePC/:pcId",
 			async (req, res) => {
-				const buildingId = req.params.buildingId;
-				const labId = req.params.labId;
 				const pcId = req.params.pcId;
 
 				try {
 					const request = pool.request();
-					const result = await request.query(
-						`SELECT * FROM BuildingData WHERE id = ${buildingId}`
-					);
-					const building = result.recordset[0];
-
-					if (!building) {
-						res.status(404).send("Building not found");
-						return;
-					}
-
-					const lab = building.labs.find((lab) => lab.id === labId);
-
-					if (!lab) {
-						res.status(404).send("Lab not found in the building");
-						return;
-					}
-
-					const pcToDeleteIndex = lab.pcs.findIndex((pc) => pc.id === pcId);
-
-					if (pcToDeleteIndex === -1) {
-						res.status(404).send("PC not found in the lab");
-						return;
-					}
-
-					await request.query(`DELETE FROM PCData WHERE id = '${pcId}'`);
-					lab.pcs.splice(pcToDeleteIndex, 1);
-					await request.query(
-						`UPDATE BuildingData SET labs = '${JSON.stringify(
-							building.labs
-						)}' WHERE id = ${buildingId}`
-					);
+					await request.query(`DELETE FROM PC WHERE id = '${pcId}'`);
 
 					res.status(200).send("PC deleted successfully");
 				} catch (err) {
@@ -491,7 +337,6 @@ poolConnect
 				}
 			}
 		);
-		// Your API routes go here
 
 		app.use("/images", express.static(path.join(__dirname, "images")));
 	})

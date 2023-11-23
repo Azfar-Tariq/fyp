@@ -8,16 +8,13 @@ import ModalOverlay from "./ModalOverlay";
 
 export default function LabCard({
 	val,
-	image,
 	parentBuildingId,
 	updatedLabData,
 	onSelect,
 }) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
-	const [editLabName, setEditLabName] = useState("");
-	const [selectedLabImage, setSelectedLabImage] = useState(null);
-	const [showImageInput, setShowImageInput] = useState(true);
+	const [editLabName, setEditLabName] = useState(val.labName);
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -43,21 +40,16 @@ export default function LabCard({
 
 	const openEditDialog = () => {
 		setEditLabName(val.labName);
-		setSelectedLabImage(image);
 		setIsEditingDialogOpen(true);
 		closeMenu();
 	};
 
 	const handleSubmitDialog = () => {
-		const formData = new FormData();
-		formData.append("labName", editLabName);
-		if (selectedLabImage) {
-			formData.append("labImage", selectedLabImage);
-		}
-
 		Axios.put(
-			`http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val._id}`,
-			formData
+			`http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val.id}`,
+			{
+				labName: editLabName,
+			}
 		)
 			.then((res) => {
 				console.log(res.data);
@@ -75,15 +67,8 @@ export default function LabCard({
 			<ToastContainer />
 			<div
 				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
-				onClick={() => onSelect(val._id, val.labName, image)}
+				onClick={() => onSelect(val.id, val.labName)}
 			>
-				<img
-					className='rounded-t-lg object-fit aspect-video'
-					src={image}
-					// for default image
-					// src={image ? image : Image1}
-					alt=''
-				/>
 				<div className='flex justify-between items-center p-4'>
 					<p className='text-xl font-bold tracking-tight text-white'>
 						{val.labName}
@@ -114,7 +99,7 @@ export default function LabCard({
 								className='block px-4 py-2 text-red-600 hover:bg-red-200 w-full text-left'
 								onClick={() => {
 									closeMenu();
-									deleteLab(val._id);
+									deleteLab(val.id);
 								}}
 							>
 								Delete
@@ -130,9 +115,6 @@ export default function LabCard({
 						text2='Lab'
 						name={editLabName}
 						setName={setEditLabName}
-						image={selectedLabImage}
-						setImage={setSelectedLabImage}
-						showImageInput={showImageInput}
 						onClose={() => setIsEditingDialogOpen(false)}
 						onSubmit={handleSubmitDialog}
 					/>

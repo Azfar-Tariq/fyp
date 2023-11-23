@@ -6,21 +6,15 @@ export default function Dialog({
 	text2,
 	name,
 	setName,
-	image,
-	setImage,
-	showImageInput,
 	onClose,
 	onSubmit,
 }) {
 	const handleSave = () => {
 		if (!name) {
 			toast.error("Please enter a name");
-		} else if (showImageInput && !image) {
-			toast.error("Please select an image");
 		} else {
 			onSubmit();
 			setName("");
-			setImage(null);
 		}
 	};
 
@@ -42,17 +36,6 @@ export default function Dialog({
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 						/>
-						{showImageInput && (
-							<div>
-								<label htmlFor='image'>{`Select ${text2} Image:`}</label>
-								<input
-									type='file'
-									id='image'
-									accept='image/*'
-									onChange={(e) => setImage(e.target.files[0])}
-								/>
-							</div>
-						)}
 					</div>
 					<div className='flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b'>
 						<button

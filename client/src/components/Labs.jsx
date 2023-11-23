@@ -28,11 +28,9 @@ export default function Labs({
 }) {
 	const [labData, setLabData] = useState([]);
 	const [labName, setLabName] = useState("");
-	const [labImage, setLabImage] = useState(null);
 	const [selectedLabId, setSelectedLabId] = useState(null);
 	const [selectedLabName, setSelectedLabName] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const [showImageInput, setShowImageInput] = useState(true);
 	const [loading, setLoading] = useState(false);
 
 	const updatedLabData = () => {
@@ -57,12 +55,11 @@ export default function Labs({
 	};
 
 	const handleSubmitDialog = () => {
-		const formData = new FormData();
-		formData.append("labName", labName);
-		formData.append("labImage", labImage);
 		Axios.post(
 			`http://localhost:3001/readbuilding/${parentBuildingId}/addLab`,
-			formData
+			{
+				labName: labName,
+			}
 		)
 			.then((response) => {
 				console.log(response.data);
@@ -74,7 +71,6 @@ export default function Labs({
 			});
 		setIsDialogOpen(false);
 		setLabName("");
-		setLabImage(null);
 	};
 
 	const handleSelectLab = (labId, labName) => {
@@ -125,12 +121,9 @@ export default function Labs({
 								<div key={index} className='relative'>
 									<LabCard
 										val={val}
-										image={`http://localhost:3001/${val.labImage}`}
 										parentBuildingId={parentBuildingId}
 										updatedLabData={updatedLabData}
-										onSelect={() =>
-											handleSelectLab(val._id, val.labName, val.buidlingImage)
-										}
+										onSelect={() => handleSelectLab(val.id, val.labName)}
 									/>
 								</div>
 							))}
@@ -144,9 +137,6 @@ export default function Labs({
 								text2='Lab'
 								name={labName}
 								setName={setLabName}
-								image={labImage}
-								setImage={setLabImage}
-								showImageInput={showImageInput}
 								onClose={toggleDialog}
 								onSubmit={handleSubmitDialog}
 							/>
