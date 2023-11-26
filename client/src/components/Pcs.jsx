@@ -1,11 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Axios from "axios";
-import Add from "./Add";
-import Dialog from "./Dialog";
-import PcCard from "./PcCard";
 import { ToastContainer, toast } from "react-toastify";
-import ModalOverlay from "./ModalOverlay";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
 import ImageAnnotator from "./ImageAnnotator";
@@ -30,14 +26,6 @@ export default function Pcs({
 	backToBuildings,
 }) {
 	const [pcData, setPcData] = useState([]);
-	// const [pcName, setPcName] = useState("");
-	// const [x1, setX1] = useState(0);
-	// const [y1, setY1] = useState(0);
-	// const [x2, setX2] = useState(0);
-	// const [y2, setY2] = useState(0);
-	// const [status, setStatus] = useState(0);
-	// const [isDialogOpen, setIsDialogOpen] = useState(false);
-	// const [loading, setLoading] = useState(false);
 
 	const updatePcData = () => {
 		fetchPcData(parentBuildingId, parentLabId, setPcData);
@@ -58,29 +46,6 @@ export default function Pcs({
 				// setLoading(false);
 			});
 	}, [parentBuildingId, parentLabId]);
-
-	// const toggleDialog = () => {
-	// 	setIsDialogOpen(!isDialogOpen);
-	// };
-
-	// const handleSubmitDialog = () => {
-	// 	Axios.post(
-	// 		`http://localhost:3001/readbuilding/${parentBuildingId}/readLab/${parentLabId}/addPc`,
-	// 		{
-	// 			pcName: pcName,
-	// 		}
-	// 	)
-	// 		.then((response) => {
-	// 			console.log(response.data);
-	// 			fetchPcData(parentBuildingId, parentLabId, setPcData);
-	// 			toast.success("PC added successfully");
-	// 		})
-	// 		.catch((err) => {
-	// 			console.error("Failed to save lab:", err);
-	// 		});
-	// 	setPcName("");
-	// 	setIsDialogOpen(false);
-	// };
 
 	const handleBoxCreated = async (boxCoordinates) => {
 		console.log("Box Coordinates:", boxCoordinates);
@@ -148,7 +113,7 @@ export default function Pcs({
 				parentBuildingId={parentBuildingId}
 				parentLabId={parentLabId}
 			/>
-			<div>
+			{/*<div>
 				{pcData.map((val, index) => (
 					<div key={index}>
 						<p>{val.x1}</p>
@@ -158,44 +123,7 @@ export default function Pcs({
 						<p>{String(val.pcStatus)}</p>
 					</div>
 				))}
-			</div>
-			{/*<div>
-				{loading && (
-					<div>
-						<PulseLoader />
-					</div>
-				)}
-				{pcData.length === 0 ? (
-					<p>No PCs currently</p>
-				) : (
-					<div className='grid grid-cols-3 gap-4'>
-						{pcData.map((val, index) => (
-							<div key={index} className='relative'>
-								<PcCard
-									val={val}
-									parentBuildingId={parentBuildingId}
-									parentLabId={parentLabId}
-									updatePcData={updatePcData}
-								/>
-							</div>
-						))}
-					</div>
-				)}
-				{isDialogOpen && (
-					<ModalOverlay isOpen={isDialogOpen}>
-						<Dialog
-							text='Add PC'
-							text2='PC'
-							name={pcName}
-							setName={setPcName}
-							onClose={toggleDialog}
-							onSubmit={handleSubmitDialog}
-						/>
-					</ModalOverlay>
-				)}
 				</div>*/}
-
-			{/*<Add toggleDialog={toggleDialog} text='PC' />*/}
 		</div>
 	);
 }

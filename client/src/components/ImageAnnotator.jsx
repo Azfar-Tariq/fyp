@@ -14,7 +14,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 		height: 0,
 		editing: false,
 	});
-	// const [annotationNames, setAnnotationNames] = useState({});
 	const wrapperRef = useRef(null);
 	const canvasRef = useRef(null);
 
@@ -42,7 +41,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
 
-			// Check if the click is on an existing annotation for editing
 			const clickedAnnotation = annotations.find((annotation) =>
 				isPointInsideRectangle({ x, y }, annotation)
 			);
@@ -75,7 +73,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 				const width = x - startPoint.x;
 				const height = y - startPoint.y;
 
-				// Check if the rectangle is larger than the minimum size
 				if (width >= MINIMUM_SHAPE_SIZE && height >= MINIMUM_SHAPE_SIZE) {
 					setCurrentAnnotation({
 						...currentAnnotation,
@@ -92,7 +89,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 		if (drawing) {
 			setDrawing(false);
 
-			// Check if the rectangle is larger than the minimum size before adding
 			if (
 				currentAnnotation.width >= MINIMUM_SHAPE_SIZE &&
 				currentAnnotation.height >= MINIMUM_SHAPE_SIZE
@@ -117,28 +113,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 		}
 	}, [drawing, currentAnnotation, annotations, onBoxCreated]);
 
-	// const handleAnnotationClick = useCallback(
-	// 	(id) => {
-	// 		const clickedAnnotation = annotations.find(
-	// 			(annotation) => annotation.id === id
-	// 		);
-	// 		if (clickedAnnotation) {
-	// 			const { x, y, width, height } = clickedAnnotation;
-	// 			const topLeft = { x, y };
-	// 			// const topRight = { x: x + width, y };
-	// 			// const bottomLeft = { x, y: y + height };
-	// 			const bottomRight = { x: x + width, y: y + height };
-
-	// 			console.log("Coordinates:");
-	// 			console.log(`Top Left: x=${topLeft.x}, y=${topLeft.y}`);
-	// 			// console.log(`Top Right: x=${topRight.x}, y=${topRight.y}`);
-	// 			// console.log(`Bottom Left: x=${bottomLeft.x}, y=${bottomLeft.y}`);
-	// 			console.log(`Bottom Right: x=${bottomRight.x}, y=${bottomRight.y}`);
-	// 		}
-	// 	},
-	// 	[annotations]
-	// );
-
 	useEffect(() => {
 		const wrapper = wrapperRef.current;
 		const canvas = canvasRef.current;
@@ -147,12 +121,10 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 		const img = new Image();
 		img.src = image;
 		img.onload = () => {
-			// Set canvas dimensions to match the size of the image dimensions
 			canvas.width = img.width * 2;
 			canvas.height = img.height * 2;
 
 			const drawLoop = () => {
-				// Clear the canvas and redraw annotations whenever annotations change
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 				pcData.forEach((coordinates) => {
@@ -164,7 +136,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 					};
 					drawRectangle(ctx, annotation);
 				});
-				// annotations.forEach((annotation) => drawRectangle(ctx, annotation));
 				if (drawing) {
 					drawRectangle(ctx, currentAnnotation);
 				}
@@ -172,7 +143,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 			requestAnimationFrame(drawLoop);
 		};
 
-		// Cleanup: remove event listeners when the component unmounts
 		return () => {
 			wrapper.removeEventListener("mousedown", handleMouseDown);
 			wrapper.removeEventListener("mousemove", handleMouseMove);
@@ -202,7 +172,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 				onMouseDown={handleMouseDown}
 				onMouseMove={handleMouseMove}
 				onMouseUp={handleMouseUp}
-				// onClick={() => handleAnnotationClick(currentAnnotation.id)}
 			/>
 		</div>
 	);
