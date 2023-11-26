@@ -232,11 +232,11 @@ poolConnect
 		// -------- PC's Data Endpoints --------
 		// send data to database
 		app.post(
-			"/readBuilding/:buildingId/readLab/:labId/addPC",
+			"/readBuilding/:buildingId/readLab/:labId/addCoordinates",
 			async (req, res) => {
 				const buildingId = req.params.buildingId;
 				const labId = req.params.labId;
-				const { pcName, pcStatus } = req.body;
+				const { x1, y1, x2, y2, pcStatus } = req.body;
 
 				try {
 					const request = pool.request();
@@ -258,24 +258,28 @@ poolConnect
 						return;
 					}
 					await request
+						.input("buildingId", sql.Int, buildingId)
 						.input("labId", sql.Int, labId)
-						.input("pcName", sql.NVarChar, pcName)
+						.input("x1", sql.Int, x1)
+						.input("y1", sql.Int, y1)
+						.input("x2", sql.Int, x2)
+						.input("y2", sql.Int, y2)
 						.input("pcStatus", sql.Bit, pcStatus)
 						.query(
-							`INSERT INTO PC (labId, pcName, pcStatus) VALUES (@labId, @pcName, @pcStatus)`
+							`INSERT INTO cameraData (buildingId, labId, x1, y1, x2, y2, pcStatus) VALUES (@buildingID, @labId, @x1, @y1, @x2, @y2, @pcStatus)`
 						);
 
-					res.status(200).send("PC saved to database");
+					res.status(200).send("Coordinates saved to database");
 				} catch (err) {
 					console.log(err);
-					res.status(500).send("Failed to save PC to the database");
+					res.status(500).send("Failed to save Coordinates to the database");
 				}
 			}
 		);
 
 		// get data from database
 		app.get(
-			"/readBuilding/:buildingId/readLab/:labId/readPC",
+			"/readBuilding/:buildingId/readLab/:labId/readCoordinates",
 			async (req, res) => {
 				const buildingId = req.params.buildingId;
 				const labId = req.params.labId;
@@ -283,12 +287,12 @@ poolConnect
 				try {
 					const request = pool.request();
 					const result = await request.query(
-						`SELECT id, pcName, pcStatus FROM PC WHERE labId = ${labId}`
+						`SELECT id, x1, y1, x2, y2, pcStatus FROM cameraData WHERE labId = ${labId}`
 					);
 					res.status(200).json(result.recordset);
 				} catch (err) {
 					console.log(err);
-					res.status(500).send("Failed to get PCs from the database");
+					res.status(500).send("Failed to get Coordinates from the database");
 				}
 			}
 		);
@@ -322,18 +326,20 @@ poolConnect
 
 		// delete data from database
 		app.delete(
-			"/readBuilding/:buildingId/readLab/:labId/deletePC/:pcId",
+			"/readBuilding/:buildingId/readLab/:labId/deleteCoordinates/:cellId",
 			async (req, res) => {
-				const pcId = req.params.pcId;
+				const cellId = req.params.cellId;
 
 				try {
 					const request = pool.request();
-					await request.query(`DELETE FROM PC WHERE id = '${pcId}'`);
+					await request.query(`DELETE FROM cameraData WHERE id = '${cellId}'`);
 
-					res.status(200).send("PC deleted successfully");
+					res.status(200).send("Coordinates deleted successfully");
 				} catch (err) {
 					console.log(err);
-					res.status(500).send("Failed to delete PC from the database");
+					res
+						.status(500)
+						.send("Failed to delete Coordinates from the database");
 				}
 			}
 		);
