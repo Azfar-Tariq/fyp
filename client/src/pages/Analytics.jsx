@@ -4,6 +4,7 @@ import Axios from "axios";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
+import graph from "../assets/images/graph.png";
 
 export default function Analytics() {
 	const [buildingList, setBuildingList] = useState([]);
@@ -13,7 +14,7 @@ export default function Analytics() {
 	const [selectedLabId, setSelectedLabId] = useState(null);
 	const [selectedBuildingName, setSelectedBuildingName] = useState("");
 	const [selectedLabName, setSelectedLabName] = useState("");
-	const [selectedPcName, setSelectedPcName] = useState("");
+	// const [selectedPcStatus, setSelectedPcStatus] = useState("");
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -21,6 +22,7 @@ export default function Analytics() {
 		Axios.get("http://localhost:3001/readBuilding")
 			.then((res) => {
 				setBuildingList(res.data);
+				console.log(res.data);
 				setLoading(false);
 			})
 			.catch((err) => {
@@ -37,7 +39,7 @@ export default function Analytics() {
 				setSelectedLabId(null);
 				setSelectedBuildingName(buildingName);
 				setSelectedLabName("");
-				setSelectedPcName("");
+				// setSelectedPcStatus("");
 			})
 			.catch((err) => {
 				console.error("Failed to get labs:", err);
@@ -46,13 +48,13 @@ export default function Analytics() {
 
 	const fetchPcData = (labId, labName) => {
 		Axios.get(
-			`http://localhost:3001/readBuilding/${selectedBuildingId}/readLab/${labId}/readPc`
+			`http://localhost:3001/readBuilding/${selectedBuildingId}/readLab/${labId}/readCoordinates`
 		)
 			.then((res) => {
 				setPcList(res.data);
 				setSelectedLabId(labId);
 				setSelectedLabName(labName);
-				setSelectedPcName("");
+				// setSelectedPcStatus("");
 			})
 			.catch((err) => {
 				console.error("Failed to get PCs:", err);
@@ -64,7 +66,7 @@ export default function Analytics() {
 			setSelectedBuildingId(null);
 			setSelectedLabId(null);
 			setSelectedLabName("");
-			setSelectedPcName("");
+			// setSelectedPcStatus("");
 		} else {
 			fetchLabData(buildingId, buildingName);
 		}
@@ -73,14 +75,10 @@ export default function Analytics() {
 	const handleLabClick = (labId, labName) => {
 		if (labId === selectedLabId) {
 			setSelectedLabId(null);
-			setSelectedPcName("");
+			// setSelectedPcStatus("");
 		} else {
 			fetchPcData(labId, labName);
 		}
-	};
-
-	const handlePcClick = (pcName) => {
-		setSelectedPcName(pcName);
 	};
 
 	return (
@@ -98,47 +96,28 @@ export default function Analytics() {
 						{buildingList.map((building, buildingIndex) => (
 							<li key={buildingIndex} className='bg-gray-800 p-2'>
 								<a
-									className='flex items-center text-xl p-2 gap-4 text-white border border-white cursor-pointer'
+									className='flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg'
 									onClick={() =>
-										handleBuildingClick(building._id, building.buildingName)
+										handleBuildingClick(building.id, building.buildingName)
 									}
 								>
-									{building._id === selectedBuildingId ? (
+									{building.id === selectedBuildingId ? (
 										<IcOutlineKeyboardArrowDown />
 									) : (
 										<MaterialSymbolsArrowForwardIosRounded />
 									)}
 									<span>{building.buildingName}</span>
 								</a>
-								{building._id === selectedBuildingId && (
+								{building.id === selectedBuildingId && (
 									<ul className='ml-4'>
 										{labList.map((lab, labIndex) => (
-											<li key={labIndex} className='p-2'>
+											<li key={labIndex} className='p-2 ml-3'>
 												<a
-													className='flex items-center text-xl p-2 gap-4 text-white border border-white cursor-pointer'
-													onClick={() => handleLabClick(lab._id, lab.labName)}
+													className='flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg'
+													onClick={() => handleLabClick(lab.id, lab.labName)}
 												>
-													{lab._id === selectedLabId ? (
-														<IcOutlineKeyboardArrowDown />
-													) : (
-														<MaterialSymbolsArrowForwardIosRounded />
-													)}
 													<span>{lab.labName}</span>
 												</a>
-												{lab._id === selectedLabId && (
-													<ul className='ml-4'>
-														{pcList.map((pc, pcIndex) => (
-															<li key={pcIndex} className='p-2'>
-																<a
-																	className='flex items-center text-xl p-2 gap-4 text-white border border-white cursor-pointer'
-																	onClick={() => handlePcClick(pc.pcName)}
-																>
-																	<span>{pc.pcName}</span>
-																</a>
-															</li>
-														))}
-													</ul>
-												)}
 											</li>
 										))}
 									</ul>
@@ -155,12 +134,13 @@ export default function Analytics() {
 					)}
 					{selectedLabName && (
 						<div>
-							<strong>Selected Lab: </strong> {selectedLabName}
-						</div>
-					)}
-					{selectedPcName && (
-						<div>
-							<strong>Selected PC: </strong> {selectedPcName}
+							<div>
+								<strong>Selected Lab: </strong> {selectedLabName}
+							</div>
+							<div>
+								<img src={graph} />
+							</div>
+							<p>No Data Available for {selectedLabName}</p>
 						</div>
 					)}
 				</div>

@@ -81,9 +81,6 @@ export default function Dashboard() {
 			<div className='overflow-y-auto'>
 				{selectedBuildingId === null ? (
 					<div>
-						<div className='mb-2'>
-							<a className='text-lg font-semibold'>Buildings</a>
-						</div>
 						{loading && (
 							<div>
 								<PulseLoader />

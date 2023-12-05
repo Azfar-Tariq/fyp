@@ -105,6 +105,9 @@ poolConnect
 				);
 				const deleteBuilding = result.recordset[0];
 				if (deleteBuilding) {
+					await request.query(
+						`DELETE FROM cameraData where buildingId = ${id}`
+					);
 					await request.query(`DELETE FROM BuildingData WHERE id = ${id}`);
 					res.status(200).send("Building Deleted Successfully");
 				} else {
@@ -343,8 +346,6 @@ poolConnect
 				}
 			}
 		);
-
-		app.use("/images", express.static(path.join(__dirname, "images")));
 	})
 	.catch((err) => {
 		console.error("Failed to connect to SQL Server:", err);

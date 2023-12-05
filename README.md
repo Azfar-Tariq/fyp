@@ -14,14 +14,17 @@ buildingName nvarchar(255),
 
 create table Lab (
 id int primary key identity,
-buildingId int foreign key references BuildingData(id),
+buildingId int,
+foreign key(buildingId) references BuildingData(id) on delete cascade,
 labName nvarchar(255),
 )
 
-create cameraData (
+create table cameraData (
 id int primary key identity,
 buildingId int foreign key references BuildingData(id),
+foreign key(buildingId) references BuildingData(id) on delete no action,
 labId int foreign key references Lab(id),
+foreign key(labId) references Lab(id) on delete cascade,
 x1 int,
 y1 int,
 x2 int,

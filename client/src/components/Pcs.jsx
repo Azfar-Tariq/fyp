@@ -74,34 +74,17 @@ export default function Pcs({
 
 	return (
 		<div>
-			<div className='flex items-center gap-2'>
-				<a
-					onClick={backToBuildings}
-					className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
-				>
-					Buildings
-				</a>
-				<MaterialSymbolsArrowForwardIosRounded />
-				<a
-					onClick={backToLabs}
-					className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
-				>
-					Labs
-				</a>
-				<MaterialSymbolsArrowForwardIosRounded />
-				<span>PCs</span>
-			</div>
 			<ToastContainer />
 			<div className='flex items-center gap-2 mb-2'>
 				<p
-					className='text-gray-700 hover:text-blue-600 cursor-pointer text-lg font-semibold'
+					className='text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold'
 					onClick={backToBuildings}
 				>
 					{parentBuildingName}
 				</p>
 				<MaterialSymbolsArrowForwardIosRounded />
 				<p
-					className='text-gray-700 hover:text-blue-600 cursor-pointer text-lg font-semibold'
+					className='text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold'
 					onClick={backToLabs}
 				>
 					{parentLabName}

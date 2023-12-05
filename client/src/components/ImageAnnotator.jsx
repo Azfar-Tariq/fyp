@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import image from "../assets/images/labs/lab12.jpg";
+import image from "../assets/images/labs/lab8.jpg";
 
 const MINIMUM_SHAPE_SIZE = 10;
 
