@@ -26,6 +26,7 @@ export default function Pcs({
 	backToBuildings,
 }) {
 	const [pcData, setPcData] = useState([]);
+	const [drawnRectangles, setDrawnRectangles] = useState([]);
 
 	const updatePcData = () => {
 		fetchPcData(parentBuildingId, parentLabId, setPcData);
@@ -48,25 +49,36 @@ export default function Pcs({
 	}, [parentBuildingId, parentLabId]);
 
 	const handleBoxCreated = async (boxCoordinates) => {
-		console.log("Box Coordinates:", boxCoordinates);
-		try {
-			const { topLeft, bottomRight } = boxCoordinates;
-			const { x: x1, y: y1 } = topLeft;
-			const { x: x2, y: y2 } = bottomRight;
-			const pcStatus = 0;
+		setDrawnRectangles((prevCoordinates) => [
+			...prevCoordinates,
+			boxCoordinates,
+		]);
+	};
 
-			await Axios.post(
-				`http://localhost:3001/readbuilding/${parentBuildingId}/readLab/${parentLabId}/addCoordinates`,
-				{
-					x1,
-					y1,
-					x2,
-					y2,
-					pcStatus,
-				}
-			);
+	const handleSaveButtonClick = async () => {
+		try {
+			// Iterate over drawnRectangles and send each rectangle's coordinates to the API
+			for (const boxCoordinates of drawnRectangles) {
+				const { topLeft, bottomRight } = boxCoordinates;
+				const { x: x1, y: y1 } = topLeft;
+				const { x: x2, y: y2 } = bottomRight;
+				const pcStatus = 0;
+				await Axios.post(
+					`http://localhost:3001/readbuilding/${parentBuildingId}/readLab/${parentLabId}/addCoordinates`,
+					{
+						x1,
+						y1,
+						x2,
+						y2,
+						pcStatus,
+					}
+				);
+			}
+			// After successfully saving all rectangles, update the displayed data
 			updatePcData();
 			toast.success("Coordinates added successfully");
+			// Clear the drawn rectangles after saving
+			setDrawnRectangles([]);
 		} catch (err) {
 			console.error("Failed to save coordinates:", err);
 		}
@@ -90,23 +102,13 @@ export default function Pcs({
 					{parentLabName}
 				</p>
 			</div>
-			<ImageAnnotator
-				onBoxCreated={handleBoxCreated}
-				pcData={pcData}
-				parentBuildingId={parentBuildingId}
-				parentLabId={parentLabId}
-			/>
-			{/*<div>
-				{pcData.map((val, index) => (
-					<div key={index}>
-						<p>{val.x1}</p>
-						<p>{val.y1}</p>
-						<p>{val.x2}</p>
-						<p>{val.y2}</p>
-						<p>{String(val.pcStatus)}</p>
-					</div>
-				))}
-				</div>*/}
+			<ImageAnnotator onBoxCreated={handleBoxCreated} pcData={pcData} />
+			<button
+				className='bg-blue-500 text-white p-2 rounded'
+				onClick={handleSaveButtonClick}
+			>
+				Save Changes
+			</button>
 		</div>
 	);
 }

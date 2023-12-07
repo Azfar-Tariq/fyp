@@ -113,6 +113,11 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 		}
 	}, [drawing, currentAnnotation, annotations, onBoxCreated]);
 
+	const handleClearChanges = () => {
+		// Clear both drawn rectangles and rectangles from pcData
+		setAnnotations([]);
+	};
+
 	useEffect(() => {
 		const wrapper = wrapperRef.current;
 		const canvas = canvasRef.current;
@@ -134,6 +139,9 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 						width: coordinates.x2 - coordinates.x1,
 						height: coordinates.y2 - coordinates.y1,
 					};
+					drawRectangle(ctx, annotation);
+				});
+				annotations.forEach((annotation) => {
 					drawRectangle(ctx, annotation);
 				});
 				if (drawing) {
@@ -173,6 +181,17 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 				onMouseMove={handleMouseMove}
 				onMouseUp={handleMouseUp}
 			/>
+			<div className='flex gap-2 m-2'>
+				<button
+					className='bg-red-500 text-white p-2 rounded'
+					onClick={handleClearChanges}
+				>
+					Clear Changes
+				</button>
+				<button className='bg-green-500 text-white p-2 rounded'>
+					Update Changes
+				</button>
+			</div>
 		</div>
 	);
 }
