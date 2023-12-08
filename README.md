@@ -2,8 +2,8 @@
 
 npm start to run the code <br>
 
-Database Structure <br>
--- Create table BuildingData
+Database Structure <br> <br>
+-- Create table BuildingData <br>
 CREATE TABLE BuildingData (
     id INT PRIMARY KEY IDENTITY,
     buildingName NVARCHAR(255)
@@ -38,7 +38,7 @@ CREATE TABLE users (
 
 --Run the following queries to add users <br>
 INSERT INTO users (email, password, name, role)
-VALUES ('admin@gmail.com', '12345678', 'Ahmad Imran', 'Admin');
+VALUES ('admin@gmail.com', '12345678', 'Ahmad Imran', 'Admin'); <br>
 
 INSERT INTO users (email, password, name, role)
 VALUES ('user1@gmail.com', '123', 'Testing User 1', 'User');
