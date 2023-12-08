@@ -1,0 +1,23 @@
+I have acheived the first task, now i want to acheive the second task, please implement the second task and give me code of this:
+
+. Requesting manual switch control:
+
+Front-end:
+
+Add a button for teachers to request manual control.
+
+Implement a function to send a request to the server upon clicking the button.
+
+Display a "request sent" message or loading indicator while waiting for server response.
+
+Back-end:
+
+Create an API endpoint to receive requests from teachers.
+
+Store the request in the database with information like teacher ID, lab ID, and request timestamp.
+
+Send a notification or email to the admin about the request.
+
+
+
+remember teacher must ask permission foe=r mannual control by specifying the building and labs and the admin shpuld receive the request and can have the option to grant premission pr not. The admin's response to the request of the teacher must alslo be visible to the teacher.

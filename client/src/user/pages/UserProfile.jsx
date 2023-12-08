@@ -1,0 +1,93 @@
+import { useState, useEffect  } from "react";
+import { useNavigate } from "react-router-dom";
+
+
+const UserProfile = () => {
+  const [user, setUser] = useState(null);
+
+  const get = async () => {
+    try {
+      // Get the email from local storage
+      const email = localStorage.getItem('email');
+      
+      // Check if email exists
+      if (!email) {
+        console.error("Email not found in local storage");
+        return;
+      }
+
+      const response = await fetch(`http://localhost:3001/user-details?email=${email}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      setUser(data);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    }
+  };
+
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    const email = localStorage.getItem("email");
+
+    try {
+      const response = await fetch("http://localhost:3001/logout", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      localStorage.removeItem("email");
+      navigate("/"); // Redirect to the login page after logout
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    get();
+  }, []);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+     <div className="flex items-center justify-center h-screen">
+      <div className="bg-gray-200 p-8 rounded shadow-md">
+        <h2 className="text-2xl font-bold mb-4">Profile</h2>
+        <div className="mb-4">
+          <label>Name:</label>
+          <p className="p-2 border rounded">{user.name}</p>
+        </div>
+        <div className="mb-4">
+          <label>Email:</label>
+          <p className="p-2 border rounded">{user.email}</p>
+        </div>
+        <div className="mb-4">
+          <label>Role:</label>
+          <p className="p-2 border rounded">{user.role}</p>
+        </div>
+        <button className="bg-red-500 text-white p-2 rounded" onClick={handleLogout}>Logout</button>
+      </div>
+      
+    </div>
+    </div>
+  );
+};
+
+export default UserProfile;

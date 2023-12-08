@@ -11,16 +11,16 @@ app.use(cors());
 
 // SQL Server configuration
 const config = {
-	host: "localhost",
-	user: "admin",
-	password: "admin123",
-	server: "DESKTOP-L1BR7L9\\SQLEXPRESS", // Replace with your SQL Server instance name
-	database: "fyp", // Replace with your database name
-	options: {
-		encrypt: true,
-		trustServerCertificate: true, // Change to true for local dev / self-signed certs
-		trustedConnection: true, // Use Windows Authentication
-	},
+  host: "localhost",
+  user: "admin",
+  password: "admin112233",
+  server: "DESKTOP-RE32RAN\\SQLEXPRESS", // Replace with your SQL Server instance name
+  database: "fyp", // Replace with your database name
+  options: {
+	encrypt: true,
+    trustedConnection: true, 
+	trustServerCertificate: true
+  },
 };
 
 // SQL Server connection pool
@@ -30,7 +30,96 @@ const poolConnect = pool.connect();
 poolConnect
 	.then(() => {
 		console.log("Connected to SQL Server");
+		
 
+		//  ---------------login endpoint----------------- 
+  app.post("/login", async (req, res) => {
+	const { email, password } = req.body;
+  
+	try {
+	  const request = pool.request();
+	  const updateResult = await request.query(
+		`UPDATE users SET logged_in = 1 WHERE email = '${email}'`
+	  );
+  
+	  // Check if update was successful
+	  if (updateResult.rowsAffected > 0) {
+		const result = await request.query(
+		  `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`
+		);
+  
+		if (result.recordset.length > 0) {
+		  const user = result.recordset[0];
+		  const responsePayload = { email: user.email, role: user.role };
+  
+		  // Send the response with the payload
+		  res.status(200).json(responsePayload);
+		} else {
+		  // Update failed, but user provided correct credentials. Log error and send a specific message.
+		  console.error("User logged in successfully, but database update failed.", error);
+		  res.status(500).json({ message: "Internal server error." });
+		}
+	  } else {
+		// Update failed, user might have invalid credentials.
+		console.error("Login error:", error);
+		res.status(401).json({ message: "Invalid credentials." });
+	  }
+	} catch (error) {
+	  console.error("Login error:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+
+//   --------------Logout endpoint-----------------
+  app.post("/logout", async (req, res) => {
+	try {
+	  const { email } = req.body;
+  
+	  // Update user logged_in status to 0
+	  const request = pool.request();
+	  await request.input("email", sql.VarChar, email).query("UPDATE users SET logged_in = 0 WHERE email = @email");
+  
+	  // Respond with success message
+	  res.status(200).json({ message: "Successfully logged out." });
+	} catch (error) {
+	  console.error("Error during logout:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+
+// -------------User details endpoint--------------------
+app.get("/user-details", async (req, res) => {
+	try {
+	  const { email } = req.query;
+	  const request = pool.request();
+	  const result = await request.query(`SELECT * FROM users WHERE email = '${email}'`);
+  
+	  if (result.recordset.length > 0) {
+		const user = result.recordset[0];
+		res.status(200).json(user);
+	  } else {
+		res.status(404).json({ message: "User not found" });
+	  }
+	} catch (error) {
+	  console.error("Error fetching user details:", error);
+	  res.status(500).json({ message: "Internal server error" });
+	}
+  });
+  
+
+  // ----------Get Users for Users.js in Admin Dashboard endpoint-------------
+app.get("/users", async (req, res) => {
+	try {
+	  const request = pool.request();
+	  const result = await request.query("SELECT email, name, role, logged_in FROM users WHERE role = 'user';");
+	  res.status(200).json(result.recordset);
+	} catch (error) {
+	  console.error("Error fetching users:", error);
+	  res.status(500).json({ message: "Internal server error" });
+	}
+  });
 		// -------- Building Data Endpoints --------
 		// send data to database
 		app.post("/insertBuilding", async (req, res) => {
@@ -55,9 +144,9 @@ poolConnect
 			try {
 				const request = pool.request();
 				const result = await request.query(
-					"SELECT id, buildingName FROM BuildingData"
+					"SELECT id, buildingName FROM BuildingData" 
 				);
-				console.log(result.recordset);
+				
 				res.status(200).json(result.recordset);
 			} catch (error) {
 				console.error("Failed to get buildings from SQL Server:", error);
@@ -105,9 +194,6 @@ poolConnect
 				);
 				const deleteBuilding = result.recordset[0];
 				if (deleteBuilding) {
-					await request.query(
-						`DELETE FROM cameraData where buildingId = ${id}`
-					);
 					await request.query(`DELETE FROM BuildingData WHERE id = ${id}`);
 					res.status(200).send("Building Deleted Successfully");
 				} else {
@@ -346,6 +432,86 @@ poolConnect
 				}
 			}
 		);
+
+		app.put("/grant-manual-control/:requestId", async (req, res) => {
+			try {
+			  const { requestId } = req.params;
+		  
+			  // Update the request status in the database (you may want to implement notification logic here)
+			  await pool
+				.request()
+				.input("requestId", sql.Int, requestId)
+				.query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId");
+		  
+			  res.status(200).json({ message: "Access granted successfully!" });
+			} catch (error) {
+			  console.error("Error granting manual control access:", error);
+			  res.status(500).json({ message: "Internal server error." });
+			}
+		  });
+		  
+		  // Endpoint to deny manual control access
+		  app.put("/deny-manual-control/:requestId", async (req, res) => {
+			try {
+			  const { requestId } = req.params;
+		  
+			  // Update the request status in the database (you may want to implement notification logic here)
+			  await pool
+				.request()
+				.input("requestId", sql.Int, requestId)
+				.query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId");
+		  
+			  res.status(200).json({ message: "Access denied successfully!" });
+			} catch (error) {
+			  console.error("Error denying manual control access:", error);
+			  res.status(500).json({ message: "Internal server error." });
+			}
+		  });
+		  
+		  // Endpoint to handle manual control request
+		  app.post("/request-manual-control", async (req, res) => {
+			try {
+			  const { teacherEmail, labId, buildingId } = req.body;
+		  
+			  // Fetch teacher ID using email from the users table
+			  const requestUser = await pool
+				.request()
+				.input("email", sql.NVarChar, teacherEmail)
+				.query("SELECT id FROM users WHERE email = @email");
+		  
+			  if (requestUser.recordset.length === 0) {
+				console.error("User not found with the provided email.");
+				res.status(404).json({ message: "User not found." });
+				return;
+			  }
+		  
+			  const teacherId = requestUser.recordset[0].id;
+		  
+			  // Update the 'manualControlRequested' status for the user
+			  const updateRequest = pool.request();
+			  await updateRequest
+				.input("teacherId", sql.Int, teacherId)
+				.query("UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId");
+		  
+			  // Store the request in the database
+			  const insertRequest = pool.request();
+			  await insertRequest
+				.input("teacherId", sql.Int, teacherId)
+				.input("labId", sql.Int, labId)
+				.input("buildingId", sql.Int, buildingId)
+				.query(
+				  "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
+				);
+		  
+			  res.status(200).json({ message: "Request sent successfully!" });
+			} catch (error) {
+			  console.error("Error processing manual control request:", error);
+			  res.status(500).json({ message: "Internal server error." });
+			}
+		  });
+		  
+
+		app.use("/images", express.static(path.join(__dirname, "images")));
 	})
 	.catch((err) => {
 		console.error("Failed to connect to SQL Server:", err);
