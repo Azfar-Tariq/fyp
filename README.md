@@ -2,6 +2,13 @@
 
 npm start to run the code <br>
 
+install following dependencies:
+<br>
+-node modules for client, server and the parent folder <br>
+-express and cors
+
+<br>
+
 Database Structure <br> <br>
 -- Create table BuildingData <br>
 CREATE TABLE BuildingData (
