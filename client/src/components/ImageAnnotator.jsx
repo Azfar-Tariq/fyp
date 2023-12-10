@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import image from "../assets/images/labs/lab8.jpg";
+import { debounce } from "lodash";
 
 const MINIMUM_SHAPE_SIZE = 10;
 
 function ImageAnnotator({ onBoxCreated, pcData }) {
 	const [annotations, setAnnotations] = useState([]);
+	const [selectedAnnotation, setSelectedAnnotation] = useState(null);
 	const [drawing, setDrawing] = useState(false);
 	const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 	const [currentAnnotation, setCurrentAnnotation] = useState({
@@ -12,7 +14,6 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 		y: 0,
 		width: 0,
 		height: 0,
-		editing: false,
 	});
 	const wrapperRef = useRef(null);
 	const canvasRef = useRef(null);
@@ -46,8 +47,11 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 			);
 
 			if (clickedAnnotation) {
-				setCurrentAnnotation({ ...clickedAnnotation, editing: true });
+				// Select the clicked annotation for editing
+				setSelectedAnnotation(clickedAnnotation);
+				setStartPoint({ x, y });
 			} else {
+				// Start drawing a new annotation
 				setStartPoint({ x, y });
 				setDrawing(true);
 				setCurrentAnnotation({
@@ -55,11 +59,35 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 					y,
 					width: 0,
 					height: 0,
-					editing: false,
 				});
 			}
 		},
 		[annotations, isPointInsideRectangle]
+	);
+
+	const debouncedHandleMouseMove = useRef(
+		debounce((e, selectedAnnotation) => {
+			const wrapper = wrapperRef.current;
+			const rect = wrapper.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+
+			const deltaX = x - selectedAnnotation.x - selectedAnnotation.width / 2;
+			const deltaY = y - selectedAnnotation.y - selectedAnnotation.height / 2;
+
+			const updatedAnnotation = {
+				...selectedAnnotation,
+				x: selectedAnnotation.x + deltaX,
+				y: selectedAnnotation.y + deltaY,
+			};
+
+			setAnnotations((prevAnnotations) =>
+				prevAnnotations.map((annotation) =>
+					annotation === selectedAnnotation ? updatedAnnotation : annotation
+				)
+			);
+			setSelectedAnnotation(updatedAnnotation);
+		}, 16) // Adjust the debounce delay (e.g., 16ms for 60fps)
 	);
 
 	const handleMouseMove = useCallback(
@@ -80,9 +108,33 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 						height,
 					});
 				}
+			} else if (selectedAnnotation) {
+				// Move the selected annotation
+				const wrapper = wrapperRef.current;
+				const rect = wrapper.getBoundingClientRect();
+				const x = e.clientX - rect.left;
+				const y = e.clientY - rect.top;
+
+				const deltaX = x - selectedAnnotation.x - selectedAnnotation.width / 2;
+				const deltaY = y - selectedAnnotation.y - selectedAnnotation.height / 2;
+
+				const updatedAnnotation = {
+					...selectedAnnotation,
+					x: selectedAnnotation.x + deltaX,
+					y: selectedAnnotation.y + deltaY,
+				};
+
+				setAnnotations((prevAnnotations) =>
+					prevAnnotations.map((annotation) =>
+						annotation === selectedAnnotation ? updatedAnnotation : annotation
+					)
+				);
+				setSelectedAnnotation(updatedAnnotation);
+
+				debouncedHandleMouseMove.current(e, selectedAnnotation);
 			}
 		},
-		[drawing, startPoint, currentAnnotation]
+		[drawing, selectedAnnotation, startPoint.x, startPoint.y, currentAnnotation]
 	);
 
 	const handleMouseUp = useCallback(() => {
@@ -108,10 +160,17 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
 				y: 0,
 				width: 0,
 				height: 0,
-				editing: false,
 			});
+		} else if (selectedAnnotation) {
+			setSelectedAnnotation(null);
 		}
-	}, [drawing, currentAnnotation, annotations, onBoxCreated]);
+	}, [
+		drawing,
+		selectedAnnotation,
+		currentAnnotation,
+		onBoxCreated,
+		annotations,
+	]);
 
 	const handleClearChanges = () => {
 		// Clear both drawn rectangles and rectangles from pcData
