@@ -5,6 +5,7 @@ import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
 import graph from "../assets/images/graph.png";
+import Chart from 'react-apexcharts';
 
 export default function Analytics() {
 	const [buildingList, setBuildingList] = useState([]);
@@ -16,6 +17,22 @@ export default function Analytics() {
 	const [selectedLabName, setSelectedLabName] = useState("");
 	// const [selectedPcStatus, setSelectedPcStatus] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [chartData, setChartData] = useState({
+    options: {
+      chart: {
+        id: "basic-bar",
+      },
+      xaxis: {
+        categories: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+      },
+    },
+    series: [
+      {
+        name: "Usage",
+        data: [80, 120, 60, 150, 90, 110, 70, 100, 130],
+      },
+    ],
+  });
 
 	useEffect(() => {
 		setLoading(true);
@@ -137,10 +154,13 @@ export default function Analytics() {
 							<div>
 								<strong>Selected Lab: </strong> {selectedLabName}
 							</div>
-							<div>
-								<img src={graph} />
-							</div>
-							<p>No Data Available for {selectedLabName}</p>
+							<Chart 
+								options={chartData.options}
+								series={chartData.series}
+								type="bar"
+								width={500}
+								height={320}
+							/>
 						</div>
 					)}
 				</div>

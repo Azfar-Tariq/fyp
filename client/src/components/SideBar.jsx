@@ -35,7 +35,7 @@ export default function SideBar() {
 }
 
 const sidebarItems = [
-	{ name: "Dashboard", img: <MaterialSymbolsHome />, dest: "/admin" },
+	{ name: "Dashboard", img: <MaterialSymbolsHome />, dest: "/" },
 	{ name: "Analytics", img: <MajesticonsAnalytics />, dest: "/analytics" },
 	{ name: "Users", img: <PhUsersBold />, dest: "/users" },
 	{ name: "Profile", img: <MaterialSymbolsAccountCircle />, dest: "/profile" },
