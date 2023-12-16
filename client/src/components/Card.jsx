@@ -39,7 +39,7 @@ export default function Card({ val, updatedBuildingData, onSelect }) {
 
 	const handleSubmitDialog = () => {
 		Axios.put(`http://localhost:3001/updateBuilding/${val.id}`, {
-			buildingName: editBuildingName,
+			newBuildingName: editBuildingName,
 		})
 			.then((res) => {
 				console.log(res.data);
@@ -54,7 +54,6 @@ export default function Card({ val, updatedBuildingData, onSelect }) {
 
 	return (
 		<div>
-			<ToastContainer />
 			<div
 				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
 				onClick={() => onSelect(val.id, val.buildingName)}

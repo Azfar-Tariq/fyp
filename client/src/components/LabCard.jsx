@@ -48,7 +48,7 @@ export default function LabCard({
 		Axios.put(
 			`http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val.id}`,
 			{
-				labName: editLabName,
+				newLabName: editLabName,
 			}
 		)
 			.then((res) => {
@@ -64,7 +64,6 @@ export default function LabCard({
 
 	return (
 		<div>
-			<ToastContainer />
 			<div
 				className='border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer'
 				onClick={() => onSelect(val.id, val.labName)}
@@ -84,7 +83,7 @@ export default function LabCard({
 				</div>
 			</div>
 			{isMenuOpen && (
-				<div className='absolute bottom-12 right-0 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
+				<div className='absolute bottom-0 right-12 bg-white border border-gray-300 rounded shadow-md z-10 w-24'>
 					<ul>
 						<li>
 							<button

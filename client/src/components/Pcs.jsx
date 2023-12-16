@@ -86,7 +86,6 @@ export default function Pcs({
 
 	return (
 		<div>
-			<ToastContainer />
 			<div className='flex items-center gap-2 mb-2'>
 				<p
 					className='text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold'

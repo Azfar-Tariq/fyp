@@ -85,7 +85,6 @@ export default function Labs({
 
 	return (
 		<div>
-			<ToastContainer />
 			{selectedLabId === null ? (
 				<div>
 					<div className='flex'>
