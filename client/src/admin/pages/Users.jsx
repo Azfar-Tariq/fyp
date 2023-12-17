@@ -14,9 +14,9 @@ const Users = () => {
       .then((response) => response.json())
       .then((data) => setUsers(data));
 
-      Axios.get("http://localhost:3001/manual-control-requests")
-      .then((response) => setManualControlRequests(response.data))
-      .catch((error) => console.error("Failed to get manual control requests:", error));
+      // Axios.get("http://localhost:3001/manual-control-requests")
+      // .then((response) => setManualControlRequests(response.data))
+      // .catch((error) => console.error("Failed to get manual control requests:", error));
   }, []);
 
   const handleGrantRequest = async (requestId) => {

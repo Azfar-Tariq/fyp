@@ -1,6 +1,5 @@
-import { useState, useEffect  } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -9,7 +8,7 @@ const UserProfile = () => {
     try {
       // Get the email from local storage
       const email = localStorage.getItem('email');
-      
+
       // Check if email exists
       if (!email) {
         console.error("Email not found in local storage");
@@ -54,38 +53,33 @@ const UserProfile = () => {
       console.error("Error during logout:", error);
     }
   };
-  
-  
 
   useEffect(() => {
     get();
   }, []);
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
-    <div>
-     <div className="flex items-center justify-center h-screen">
-      <div className="bg-gray-200 p-8 rounded shadow-md">
+    <div className="flex items-center justify-center h-screen">
+      <div className="bg-gray-200 p-8 rounded shadow-md w-96">
         <h2 className="text-2xl font-bold mb-4">Profile</h2>
         <div className="mb-4">
-          <label>Name:</label>
+          <label className="block text-sm font-medium text-gray-600">Name:</label>
           <p className="p-2 border rounded">{user.name}</p>
         </div>
         <div className="mb-4">
-          <label>Email:</label>
+          <label className="block text-sm font-medium text-gray-600">Email:</label>
           <p className="p-2 border rounded">{user.email}</p>
         </div>
         <div className="mb-4">
-          <label>Role:</label>
+          <label className="block text-sm font-medium text-gray-600">Role:</label>
           <p className="p-2 border rounded">{user.role}</p>
         </div>
         <button className="bg-red-500 text-white p-2 rounded" onClick={handleLogout}>Logout</button>
       </div>
-      
-    </div>
     </div>
   );
 };

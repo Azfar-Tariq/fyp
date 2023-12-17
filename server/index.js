@@ -13,8 +13,8 @@ app.use(cors());
 const config = {
   host: "localhost",
   user: "admin",
-  password: "admin112233",
-  server: "DESKTOP-RE32RAN\\SQLEXPRESS", // Replace with your SQL Server instance name
+  password: "admin123",
+  server: "DESKTOP-946V6E1", // Replace with your SQL Server instance name
   database: "fyp", // Replace with your database name
   options: {
 	encrypt: true,
