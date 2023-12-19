@@ -1,32 +1,34 @@
 import Header from "../components/Header";
-// import { MaterialSymbolsNotifications } from "../assets/icons/notification"; // Import the notification icon
 import { useEffect, useState } from "react";
-import ManualRequestCard from "../components/MannualRequestCard"; // Import the new component
+import ManualRequestCard from "../components/MannualRequestCard";
 import { toast } from "react-toastify";
-import { Axios } from "axios";
+import Axios from "axios";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [manualControlRequests, setManualControlRequests] = useState([]);
 
   useEffect(() => {
+    // Fetch users
     fetch("http://localhost:3001/users") // Replace with your actual API endpoint
       .then((response) => response.json())
       .then((data) => setUsers(data));
 
-      // Axios.get("http://localhost:3001/manual-control-requests")
-      // .then((response) => setManualControlRequests(response.data))
-      // .catch((error) => console.error("Failed to get manual control requests:", error));
+    // Fetch manual control requests
+    Axios.get("http://localhost:3001/manual-control-requests")
+      .then((response) => setManualControlRequests(response.data))
+      .catch((error) => console.error("Failed to fetch manual control requests:", error));
   }, []);
 
   const handleGrantRequest = async (requestId) => {
     try {
+      // Send a request to the backend to grant manual control
       await Axios.put(`http://localhost:3001/grant-manual-control/${requestId}`);
-      toast.success("Manual control request granted!");
 
-      // Update the list of manual control requests after granting
-      const updatedRequests = manualControlRequests.filter((request) => request.id !== requestId);
-      setManualControlRequests(updatedRequests);
+      // Remove the granted request from the list
+      setManualControlRequests(manualControlRequests.filter((request) => request.id !== requestId));
+
+      toast.success("Manual control request granted!");
     } catch (error) {
       console.error("Error granting manual control request:", error);
       toast.error("Failed to grant request. Please try again.");
@@ -35,12 +37,13 @@ const Users = () => {
 
   const handleDenyRequest = async (requestId) => {
     try {
+      // Send a request to the backend to deny manual control
       await Axios.put(`http://localhost:3001/deny-manual-control/${requestId}`);
-      toast.success("Manual control request denied!");
 
-      // Update the list of manual control requests after denying
-      const updatedRequests = manualControlRequests.filter((request) => request.id !== requestId);
-      setManualControlRequests(updatedRequests);
+      // Remove the denied request from the list
+      setManualControlRequests(manualControlRequests.filter((request) => request.id !== requestId));
+
+      toast.success("Manual control request denied!");
     } catch (error) {
       console.error("Error denying manual control request:", error);
       toast.error("Failed to deny request. Please try again.");
@@ -50,14 +53,11 @@ const Users = () => {
   return (
     <div className="col-span-4">
       <Header title="Users" />
+
+      {/* Manual Control Requests */}
       {manualControlRequests.length > 0 && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold mb-2">Manual Control Requests</h2>
-          <ul>
-            {/* Manual Control Requests */}
-      {manualControlRequests.length > 0 && (
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold mb-2">Manual Control Requests</h2>
+          <h2 className="text-xl font-bold mb-2">Manual Control Requests</h2>
           <ul>
             {manualControlRequests.map((request) => (
               <ManualRequestCard
@@ -70,9 +70,7 @@ const Users = () => {
           </ul>
         </div>
       )}
-          </ul>
-        </div>
-      )}
+
       <ul className="flex flex-col space-y-4 list-none">
         {users.map((user) => (
           <li key={user.email} className="flex items-center space-x-4">

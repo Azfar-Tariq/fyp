@@ -433,40 +433,56 @@ app.get("/users", async (req, res) => {
 			}
 		);
 
-		app.put("/grant-manual-control/:requestId", async (req, res) => {
-			try {
-			  const { requestId } = req.params;
-		  
-			  // Update the request status in the database (you may want to implement notification logic here)
-			  await pool
-				.request()
-				.input("requestId", sql.Int, requestId)
-				.query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId");
-		  
-			  res.status(200).json({ message: "Access granted successfully!" });
-			} catch (error) {
-			  console.error("Error granting manual control access:", error);
-			  res.status(500).json({ message: "Internal server error." });
-			}
-		  });
-		  
-		  // Endpoint to deny manual control access
-		  app.put("/deny-manual-control/:requestId", async (req, res) => {
-			try {
-			  const { requestId } = req.params;
-		  
-			  // Update the request status in the database (you may want to implement notification logic here)
-			  await pool
-				.request()
-				.input("requestId", sql.Int, requestId)
-				.query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId");
-		  
-			  res.status(200).json({ message: "Access denied successfully!" });
-			} catch (error) {
-			  console.error("Error denying manual control access:", error);
-			  res.status(500).json({ message: "Internal server error." });
-			}
-		  });
+		// Endpoint to grant manual control access
+app.put("/grant-manual-control/:requestId", async (req, res) => {
+	try {
+	  const { requestId } = req.params;
+  
+	  // Update the request status in the database (you may want to implement notification logic here)
+	  await Promise.all([
+		pool
+		  .request()
+		  .input("requestId", sql.Int, requestId)
+		  .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
+		pool
+		  .request()
+		  .input("requestId", sql.Int, requestId)
+		  .query("UPDATE users SET manualControlRequested = '2' WHERE id = @requestId")
+	  ]);
+  
+	  res.status(200).json({ message: "Access granted successfully!" });
+	} catch (error) {
+	  console.error("Error granting manual control access:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+  
+  // Endpoint to deny manual control access
+  app.put("/deny-manual-control/:requestId", async (req, res) => {
+	try {
+	  const { requestId } = req.params;
+  
+	  // Update the request status and manualControlRequested in the database
+	  await Promise.all([
+		pool
+		  .request()
+		  .input("requestId", sql.Int, requestId)
+		  .query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"),
+		pool
+		  .request()
+		  .input("requestId", sql.Int, requestId)
+		  .query("UPDATE users SET manualControlRequested = '0' WHERE id = @requestId")
+	  ]);
+  
+	  res.status(200).json({ message: "Access denied successfully!" });
+	} catch (error) {
+	  console.error("Error denying manual control access:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+  
 		  
 		  // Endpoint to handle manual control request
 		  app.post("/request-manual-control", async (req, res) => {
@@ -509,8 +525,25 @@ app.get("/users", async (req, res) => {
 			  res.status(500).json({ message: "Internal server error." });
 			}
 		  });
-		  
 
+// Endpoint to get manual control requests
+app.get('/manual-control-requests', async (req, res) => {
+	try {
+	  const request = pool.request();
+	  const result = await request.query('SELECT * FROM ManualControlRequests ');
+  
+	  if (result.recordset.length > 0) {
+		const manualRequests = result.recordset;
+		res.status(200).json(manualRequests);
+	  } else {
+		res.status(404).json({ message: 'No manual control requests found' });
+	  }
+	} catch (error) {
+	  console.error('Error fetching manual control requests:', error);
+	  res.status(500).json({ message: 'Internal Server Error' });
+	}
+  });
+  
 		app.use("/images", express.static(path.join(__dirname, "images")));
 	})
 	.catch((err) => {

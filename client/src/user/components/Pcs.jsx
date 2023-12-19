@@ -33,7 +33,7 @@ export default function UserPcs({
 
   const handleManualRequest = async () => {
     try {
-      const loggedInEmail = localStorage.getItem("loggedInEmail");
+      const loggedInEmail = localStorage.getItem("email");
       if (!loggedInEmail) {
         console.error("No logged-in email found.");
         return;
