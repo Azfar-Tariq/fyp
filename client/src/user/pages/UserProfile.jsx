@@ -63,25 +63,28 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="bg-gray-200 p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-4">Profile</h2>
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded shadow-md w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 mx-4">
+        <h2 className="text-2xl font-bold mb-4 text-center">Profile</h2>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">Name:</label>
-          <p className="p-2 border rounded">{user.name}</p>
+          <label className="block mb-2 text-sm font-semibold">Name:</label>
+          <p className="p-2 border rounded bg-gray-100">{user.name}</p>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">Email:</label>
-          <p className="p-2 border rounded">{user.email}</p>
+          <label className="block mb-2 text-sm font-semibold">Email:</label>
+          <p className="p-2 border rounded bg-gray-100">{user.email}</p>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600">Role:</label>
-          <p className="p-2 border rounded">{user.role}</p>
+          <label className="block mb-2 text-sm font-semibold">Role:</label>
+          <p className="p-2 border rounded bg-gray-100">{user.role}</p>
         </div>
-        <button className="bg-red-500 text-white p-2 rounded" onClick={handleLogout}>Logout</button>
+        <button className="bg-red-500 text-white p-2 rounded w-full" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </div>
   );
+
 };
 
 export default UserProfile;

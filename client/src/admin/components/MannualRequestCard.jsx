@@ -2,7 +2,7 @@ import { MaterialSymbolsNotifications } from "../assets/icons/notification";
 
 const ManualRequestCard = ({ request, onGrant, onDeny }) => {
   return (
-    <li className="flex items-center space-x-2">
+    <li className="flex items-center space-x-2 p-2 border-b last:border-b-none">
       <span className="font-semibold flex-grow">
         {request.teacherName} is requesting manual control in {request.labName}, {request.buildingName}
       </span>
@@ -15,7 +15,8 @@ const ManualRequestCard = ({ request, onGrant, onDeny }) => {
         </button>
       </div>
     </li>
-  );
+);
+
 };
 
 export default ManualRequestCard;

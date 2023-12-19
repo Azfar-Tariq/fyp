@@ -51,12 +51,21 @@ const Users = () => {
   };
 
   return (
-    <div className="col-span-4">
+    <div className="col-span-4 p-6 bg-gray-100">
       <Header title="Users" />
+
+      <ul className="flex flex-col space-y-4 list-none">
+        {users.map((user) => (
+          <li key={user.email} className="flex items-center space-x-4 p-2 bg-white rounded shadow">
+            <span className={user.logged_in ? "bg-green-500 w-3 h-3 rounded-full" : "bg-red-500 w-3 h-3 rounded-full"}></span>
+            <span className="font-semibold">{user.name}</span>
+          </li>
+        ))}
+      </ul>
 
       {/* Manual Control Requests */}
       {manualControlRequests.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 mt-6 p-4 bg-white rounded shadow">
           <h2 className="text-xl font-bold mb-2">Manual Control Requests</h2>
           <ul>
             {manualControlRequests.map((request) => (
@@ -70,17 +79,9 @@ const Users = () => {
           </ul>
         </div>
       )}
-
-      <ul className="flex flex-col space-y-4 list-none">
-        {users.map((user) => (
-          <li key={user.email} className="flex items-center space-x-4">
-            <span className={user.logged_in ? "online" : "offline"}></span>
-            <span className="font-semibold">{user.name}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
+
 };
 
 export default Users;

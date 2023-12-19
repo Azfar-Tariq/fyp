@@ -61,17 +61,7 @@ export default function Labs({
     <div>
       {selectedLabId === null ? (
         <div>
-          <div className="flex items-center gap-2">
-            <a
-              onClick={backToBuildings}
-              className="text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer"
-            >
-              Buildings
-            </a>
-            <MaterialSymbolsArrowForwardIosRounded />
-            <span>Labs</span>
-          </div>
-          <div className="flex">
+                    <div className="flex">
             <p
               className="text-gray-700 hover:text-blue-600 font-semibold mb-2 cursor-pointer"
               onClick={backToBuildings}

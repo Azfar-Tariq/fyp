@@ -484,53 +484,69 @@ app.put("/grant-manual-control/:requestId", async (req, res) => {
   
   
 		  
-		  // Endpoint to handle manual control request
-		  app.post("/request-manual-control", async (req, res) => {
-			try {
-			  const { teacherEmail, labId, buildingId } = req.body;
-		  
-			  // Fetch teacher ID using email from the users table
-			  const requestUser = await pool
-				.request()
-				.input("email", sql.NVarChar, teacherEmail)
-				.query("SELECT id FROM users WHERE email = @email");
-		  
-			  if (requestUser.recordset.length === 0) {
-				console.error("User not found with the provided email.");
-				res.status(404).json({ message: "User not found." });
-				return;
-			  }
-		  
-			  const teacherId = requestUser.recordset[0].id;
-		  
-			  // Update the 'manualControlRequested' status for the user
-			  const updateRequest = pool.request();
-			  await updateRequest
-				.input("teacherId", sql.Int, teacherId)
-				.query("UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId");
-		  
-			  // Store the request in the database
-			  const insertRequest = pool.request();
-			  await insertRequest
-				.input("teacherId", sql.Int, teacherId)
-				.input("labId", sql.Int, labId)
-				.input("buildingId", sql.Int, buildingId)
-				.query(
-				  "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
-				);
-		  
-			  res.status(200).json({ message: "Request sent successfully!" });
-			} catch (error) {
-			  console.error("Error processing manual control request:", error);
-			  res.status(500).json({ message: "Internal server error." });
-			}
-		  });
+		 // Endpoint to handle manual control request
+app.post("/request-manual-control", async (req, res) => {
+	try {
+	  const { teacherEmail, labId, buildingId } = req.body;
+  
+	  // Fetch teacher details using email from the users table
+	  const requestUser = await pool
+		.request()
+		.input("email", sql.NVarChar, teacherEmail)
+		.query("SELECT id, name FROM users WHERE email = @email");
+  
+	  if (requestUser.recordset.length === 0) {
+		console.error("User not found with the provided email.");
+		res.status(404).json({ message: "User not found." });
+		return;
+	  }
+  
+	  const teacherId = requestUser.recordset[0].id;
+	  const teacherName = requestUser.recordset[0].name;
+  
+	  // Update the 'manualControlRequested' status for the user
+	  const updateRequest = pool.request();
+	  await updateRequest
+		.input("teacherId", sql.Int, teacherId)
+		.query("UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId");
+  
+	  // Store the request in the database
+	  const insertRequest = pool.request();
+	  await insertRequest
+		.input("teacherId", sql.Int, teacherId)
+		.input("labId", sql.Int, labId)
+		.input("buildingId", sql.Int, buildingId)
+		.query(
+		  "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
+		);
+  
+	  // Return the details of the manual control request, including teacher's name
+	  res.status(200).json({
+		message: "Request sent successfully!",
+		teacherName: teacherName,
+		labId: labId,
+		buildingId: buildingId,
+	  });
+	} catch (error) {
+	  console.error("Error processing manual control request:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
 
 // Endpoint to get manual control requests
 app.get('/manual-control-requests', async (req, res) => {
 	try {
 	  const request = pool.request();
-	  const result = await request.query('SELECT * FROM ManualControlRequests ');
+	  const result = await request.query(`
+    SELECT MCR.*, U.name AS teacherName, L.labName, B.buildingName
+    FROM ManualControlRequests MCR
+    JOIN users U ON MCR.teacherId = U.id
+    JOIN Lab L ON MCR.labId = L.id
+    JOIN BuildingData B ON MCR.buildingId = B.id
+    WHERE MCR.status = 'Pending'
+`);
+
   
 	  if (result.recordset.length > 0) {
 		const manualRequests = result.recordset;

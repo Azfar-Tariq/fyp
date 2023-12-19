@@ -74,23 +74,6 @@ export default function Pcs({
 
 	return (
 		<div>
-			<div className='flex items-center gap-2'>
-				<a
-					onClick={backToBuildings}
-					className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
-				>
-					Buildings
-				</a>
-				<MaterialSymbolsArrowForwardIosRounded />
-				<a
-					onClick={backToLabs}
-					className='text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer'
-				>
-					Labs
-				</a>
-				<MaterialSymbolsArrowForwardIosRounded />
-				<span>PCs</span>
-			</div>
 			<ToastContainer />
 			<div className='flex items-center gap-2 mb-2'>
 				<p

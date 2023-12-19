@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
 import ImageAnnotator from "./ImageAnnotator";
+import MannualRequestButtons from "./MannualRequestButtons"
 
 
 
@@ -66,24 +67,7 @@ export default function UserPcs({
   }, [parentBuildingId, parentLabId]);
 
   return (
-    <div>
-      <div className="flex items-center gap-2">
-        <a
-          onClick={backToBuildings}
-          className="text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer"
-        >
-          Buildings
-        </a>
-        <MaterialSymbolsArrowForwardIosRounded />
-        <a
-          onClick={backToLabs}
-          className="text-gray-700 text-lg font-semibold hover:text-blue-600 cursor-pointer"
-        >
-          Labs
-        </a>
-        <MaterialSymbolsArrowForwardIosRounded />
-        <span>PCs</span>
-      </div>
+    <div className="bg-gray-100 p-4 rounded shadow">
       <ToastContainer />
       <div className="flex items-center gap-2 mb-2">
         <p
@@ -99,13 +83,23 @@ export default function UserPcs({
         >
           {parentLabName}
         </p>
-		{requestSent ? (
-        <div className="text-green-600">Request Sent</div>
-      ) : (
-        <button onClick={handleManualRequest}>Request Manual Control</button>
-      )}
+        
       </div>
+        
       <ImageAnnotator pcData={pcData} readOnly={true} />
+
+<div className="mt-4">
+  {requestSent ? (
+    <div className="text-green-600">Request Sent</div>
+  ) : (
+    <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={handleManualRequest}>Request Manual Control</button>
+  )}
+</div>
+
+<div className="mt-4">
+  <MannualRequestButtons/>
+</div>
+
     </div>
   );
 }
