@@ -8,7 +8,7 @@ import ErrorPage from "./pages/ErrorPage";
 
 function AdminDashboard() {
   return (
-    <div className="grid grid-cols-5">
+    <div className="block sm:grid grid-cols-5">
       <AdminSideBar />
       <div className="col-span-4">
         <Routes>
