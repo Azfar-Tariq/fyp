@@ -77,7 +77,7 @@ export default function Dashboard() {
   return (
     <div className="col-span-4 px-6 py-4 h-screen block sm:flex flex-col">
       <Header title="Dashboard" />
-      <ToastContainer />
+      <ToastContainer className="w-11/12 m-4 sm:block sm:w-80 sm:m-0" />
       <div className="overflow-y-auto">
         {selectedBuildingId === null ? (
           <div>

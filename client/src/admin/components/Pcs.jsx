@@ -90,29 +90,39 @@ export default function Pcs({
   };
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       <div className="flex items-center gap-2 mb-2">
         <p
-          className="text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold"
+          className="text-2xl sm:text-lg text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 px-2 rounded-lg cursor-pointer font-semibold"
           onClick={backToBuildings}
         >
           {parentBuildingName}
         </p>
         <MaterialSymbolsArrowForwardIosRounded />
         <p
-          className="text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold"
+          className="text-2xl sm:text-lg text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 px-2 rounded-lg cursor-pointer font-semibold"
           onClick={backToLabs}
         >
           {parentLabName}
         </p>
       </div>
-      <ImageAnnotator onBoxCreated={handleBoxCreated} pcData={pcData} />
-      <button
-        className="bg-blue-500 text-white p-2 rounded"
-        onClick={handleSaveButtonClick}
-      >
-        Save Changes
-      </button>
+      <div className="flex sm:hidden">
+        <p className="m-2">To edit, please use a desktop browser</p>
+        <span className="bg-blue-700 p-1 m-2 text-lg rounded-lg text-white text-center">
+          View-only mode
+        </span>
+      </div>
+      <div className="overflow-x-auto">
+        <ImageAnnotator onBoxCreated={handleBoxCreated} pcData={pcData} />
+      </div>
+      <div className="hidden sm:block m-2">
+        <button
+          className="bg-blue-500 text-white p-2 rounded"
+          onClick={handleSaveButtonClick}
+        >
+          Save Changes
+        </button>
+      </div>
     </div>
   );
 }

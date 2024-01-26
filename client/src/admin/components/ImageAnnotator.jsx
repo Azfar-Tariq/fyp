@@ -235,7 +235,7 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
-      <div className="flex gap-2 m-2">
+      <div className="hidden sm:block m-2">
         <button
           className="bg-red-500 text-white p-2 rounded"
           onClick={handleClearChanges}
