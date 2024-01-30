@@ -38,7 +38,7 @@ export default function Analytics() {
     series: [
       {
         name: "Usage",
-        data: [80, 120, 60, 150, 90, 110, 70, 100, 130],
+        data: [80, 120, 100, 150, 90, 110, 70, 100, 130],
       },
     ],
   });
@@ -107,8 +107,7 @@ export default function Analytics() {
   return (
     <div className="col-span-4 px-6 py-4 h-screen">
       <Header title="Analytics" />
-
-      <div className="flex">
+      <div className="block sm:flex">
         <div className="flex flex-col w-72">
           {loading && (
             <div>
@@ -160,13 +159,15 @@ export default function Analytics() {
               <div>
                 <strong>Selected Lab: </strong> {selectedLabName}
               </div>
-              <Chart
-                options={chartData.options}
-                series={chartData.series}
-                type="bar"
-                width={500}
-                height={320}
-              />
+              <div className="overflow-x-auto">
+                <Chart
+                  options={chartData.options}
+                  series={chartData.series}
+                  type="bar"
+                  width={500}
+                  height={320}
+                />
+              </div>
             </div>
           )}
         </div>
