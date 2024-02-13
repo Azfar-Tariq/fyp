@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import ManualRequestCard from "../components/ManualRequestCard";
 import { toast } from "react-toastify";
 import Axios from "axios";
+import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -59,26 +60,50 @@ const Users = () => {
   };
 
   return (
-    <div className="col-span-4 p-6 bg-gray-100">
+    <div className="col-span-4 p-6">
       <Header title="Users" />
 
-      <ul className="flex flex-col space-y-4 list-none">
-        {users.map((user) => (
-          <li
-            key={user.email}
-            className="flex items-center space-x-4 p-2 bg-white rounded shadow"
-          >
-            <span
-              className={
-                user.logged_in
-                  ? "bg-green-500 w-3 h-3 rounded-full"
-                  : "bg-red-500 w-3 h-3 rounded-full"
-              }
-            ></span>
-            <span className="font-semibold">{user.name}</span>
-          </li>
-        ))}
-      </ul>
+      <section className="text-gray-600 body-font">
+        <div className="container px-5 py-5 mx-auto">
+          <div className="flex flex-wrap -m-2">
+            {users.map((user, index) => (
+              <div key={index} className="p-2 lg:w-1/3 md:w-1/2 w-full">
+                <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg shadow">
+                  <img
+                    className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
+                    src="https://dummyimage.com/80x80"
+                  />
+                  <div className="flex-grow">
+                    <h2 className="text-gray-900 title-font font-medium">
+                      {user.name}
+                    </h2>
+                    <p className="text-gray-500">{user.email}</p>
+                  </div>
+                  <span
+                    className={
+                      user.logged_in
+                        ? "bg-green-500 w-3 h-3 rounded-full"
+                        : "bg-red-500 w-3 h-3 rounded-full"
+                    }
+                  ></span>
+                </div>
+              </div>
+            ))}
+            <div className="p-2 lg:w-1/3 md:w-1/2 w-full">
+              <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg shadow hover:bg-gray-100">
+                <div className="mr-4">
+                  <MaterialSymbolsAddRounded />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-gray-900 title-font font-medium">
+                    Add More Users
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Manual Control Requests */}
       {manualControlRequests.length > 0 && (

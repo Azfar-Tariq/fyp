@@ -70,9 +70,8 @@ const AdminProfile = () => {
           <div className="bg-white drop-shadow-2xl rounded-lg p-3">
             <div className="photo-wrapper p-2">
               <img
-                className="w-32 h-32 rounded-full mx-auto"
-                src="https://www.gravatar.com/avatar/2acfb745ecf9d4dccb3364752d17f65f?s=260&d=mp"
-                alt="Profile"
+                className="w-32 h-32 rounded-full mx-auto bg-slate-600"
+                src="" // Add user image
               />
             </div>
             <div className="p-2">
