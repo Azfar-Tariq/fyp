@@ -25,39 +25,43 @@ const Users = () => {
 
   const handleGrantRequest = async (requestId) => {
     try {
-      // Send a request to the backend to grant manual control
-      await Axios.put(
-        `http://localhost:3001/grant-manual-control/${requestId}`
-      );
-
+      // Code for granting manual control request
+      await Axios.put(`http://localhost:3001/grant-manual-control/${requestId}`);
+  
       // Remove the granted request from the list
       setManualControlRequests(
         manualControlRequests.filter((request) => request.id !== requestId)
       );
-
+  
+      // Display success toast notification
       toast.success("Manual control request granted!");
     } catch (error) {
-      console.error("Error granting manual control request:", error);
+      // Display error toast notification if request fails
       toast.error("Failed to grant request. Please try again.");
+      console.error("Error granting manual control request:", error);
     }
   };
-
+  
   const handleDenyRequest = async (requestId) => {
     try {
-      // Send a request to the backend to deny manual control
+      // Code for denying manual control request
       await Axios.put(`http://localhost:3001/deny-manual-control/${requestId}`);
-
+  
       // Remove the denied request from the list
       setManualControlRequests(
         manualControlRequests.filter((request) => request.id !== requestId)
       );
-
+  
+      // Display success toast notification
       toast.success("Manual control request denied!");
     } catch (error) {
-      console.error("Error denying manual control request:", error);
+      // Display error toast notification if request fails
       toast.error("Failed to deny request. Please try again.");
+      console.error("Error denying manual control request:", error);
     }
   };
+  
+  
 
   return (
     <div className="col-span-4 p-6">

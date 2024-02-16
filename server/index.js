@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require('http'); // Import the http module
 const cors = require("cors");
 const sql = require("mssql");
 const app = express();
@@ -9,12 +10,21 @@ const fs = require("fs");
 app.use(express.json());
 app.use(cors());
 
+const server = http.createServer(app); // Create HTTP server
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+
+
 // SQL Server configuration
 const config = {
   host: "localhost",
   user: "admin",
   password: "admin123",
-  server: "DESKTOP-L1BR7L9\\SQLEXPRESS", // Replace with your SQL Server instance name
+  server: "DESKTOP-946V6E1", // Replace with your SQL Server instance name
   database: "fyp", // Replace with your database name
   options: {
     encrypt: true,
@@ -130,57 +140,119 @@ poolConnect
     app.put("/grant-manual-control/:requestId", async (req, res) => {
       try {
         const { requestId } = req.params;
+        const result = await pool
+          .request()
+          .input("requestId", sql.Int, requestId)
+          .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
+          const teacherId = result.recordset[0].teacherId;
+        const emailResult = await pool
+      .request()
+      .input("teacherId", sql.Int, teacherId)
+      .query("SELECT email FROM users WHERE id = @teacherId");
 
+    const loggedInEmail = emailResult.recordset[0].email;
+        console.log(loggedInEmail)
+
+        // Emit a Socket.IO event to notify the user
+        io.to(loggedInEmail).emit("manualControlNotification", {
+          status: "Granted",
+          email: loggedInEmail,
+        });
+    
+        console.log(requestId);
+        // Fetch the teacherId associated with the requestId
+        
         // Update the request status in the database (you may want to implement notification logic here)
         await Promise.all([
-          pool
-            .request()
-            .input("requestId", sql.Int, requestId)
-            .query(
-              "UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"
-            ),
-          pool
-            .request()
-            .input("requestId", sql.Int, requestId)
-            .query(
-              "UPDATE users SET manualControlRequested = '2' WHERE id = @requestId"
-            ),
+    
+          
+        pool
+          .request()
+          .input("requestId", sql.Int, requestId)
+          .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
+        pool
+          .request()
+          .input("teacherId", sql.Int, teacherId)
+          .query("UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId")
         ]);
-
+      
         res.status(200).json({ message: "Access granted successfully!" });
       } catch (error) {
         console.error("Error granting manual control access:", error);
         res.status(500).json({ message: "Internal server error." });
       }
-    });
-
-    // Endpoint to deny manual control access
-    app.put("/deny-manual-control/:requestId", async (req, res) => {
+      });
+      
+      
+      // Endpoint to deny manual control access
+      app.put("/deny-manual-control/:requestId", async (req, res) => {
       try {
         const { requestId } = req.params;
+        const loggedInEmail = req.body.loggedInEmail
 
+        // Emit a Socket.IO event to notify the user
+        io.to(loggedInEmail).emit("manualControlNotification", {
+          status: "Denied",
+          email: loggedInEmail,
+        });
+        const result = await pool
+          .request()
+          .input("requestId", sql.Int, requestId)
+          .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
+    
+        const teacherId = result.recordset[0].teacherId;
+      
         // Update the request status and manualControlRequested in the database
         await Promise.all([
-          pool
-            .request()
-            .input("requestId", sql.Int, requestId)
-            .query(
-              "UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"
-            ),
-          pool
-            .request()
-            .input("requestId", sql.Int, requestId)
-            .query(
-              "UPDATE users SET manualControlRequested = '0' WHERE id = @requestId"
-            ),
+        pool
+          .request()
+          .input("requestId", sql.Int, requestId)
+          .query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"),
+          await pool
+          .request()
+          .input("teacherId", sql.Int, teacherId)
+          .query("UPDATE users SET manualControlRequested = '0' WHERE id = @teacherId")
         ]);
-
+      
         res.status(200).json({ message: "Access denied successfully!" });
       } catch (error) {
         console.error("Error denying manual control access:", error);
         res.status(500).json({ message: "Internal server error." });
       }
-    });
+      });
+      // // Grant  Mnual Control Endpoint
+      // app.put("/grant-manual-control/:requestId", async (req, res) => {
+      // try {
+      //   const { requestId } = req.params;
+    
+      //   console.log(requestId);
+      //   // Fetch the teacherId associated with the requestId
+      //   const result = await pool
+      //     .request()
+      //     .input("requestId", sql.Int, requestId)
+      //     .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
+      //     const teacherId = result.recordset[0].teacherId;
+      //   // Update the request status in the database (you may want to implement notification logic here)
+      //   await Promise.all([
+    
+          
+      //   pool
+      //     .request()
+      //     .input("requestId", sql.Int, requestId)
+      //     .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
+      //   pool
+      //     .request()
+      //     .input("teacherId", sql.Int, teacherId)
+      //     .query("UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId")
+      //   ]);
+      
+      //   res.status(200).json({ message: "Access granted successfully!" });
+      // } catch (error) {
+      //   console.error("Error granting manual control access:", error);
+      //   res.status(500).json({ message: "Internal server error." });
+      // }
+      // });
+      
 
     // Endpoint to handle manual control request
     app.post("/request-manual-control", async (req, res) => {
