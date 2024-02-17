@@ -6,9 +6,9 @@ import ErrorPage from "./pages/ErrorPage"; // Import UserErrorPage
 
 function UserDashboard() {
   return (
-    <div className='grid grid-cols-5'>
+    <div className="block sm:grid grid-cols-5">
       <UserSideBar />
-      <div className='col-span-4'>
+      <div className="col-span-4">
         <Routes>
           <Route path="/" element={<Outlet />}>
             <Route index element={<DashboardUser />} />
@@ -22,14 +22,6 @@ function UserDashboard() {
 }
 
 export default UserDashboard;
-
-
-
-
-
-
-
-
 
 // import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // import SideBar from "./components/Sidebar";

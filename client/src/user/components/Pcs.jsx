@@ -40,13 +40,13 @@ export default function UserPcs({
         console.error("No logged-in email found.");
         return;
       }
-  
+
       await Axios.post("http://localhost:3001/request-manual-control", {
         teacherEmail: loggedInEmail,
         labId: parentLabId,
         buildingId: parentBuildingId,
       });
-  
+
       setRequestSent(true);
       toast.success("Request sent successfully!");
     } catch (error) {
@@ -54,21 +54,20 @@ export default function UserPcs({
       toast.error("Failed to send request. Please try again.");
     }
   };
-  
 
- useEffect(() => {
+  useEffect(() => {
     // Subscribe to manual control notifications
     socket.on("manualControlNotification", (data) => {
-     // if (data.email === localStorage.getItem("email")) {
-        // Check if the notification is intended for the logged-in user
-        
-        if (data.status === "Granted") {
-          toast.success("Manual control request granted!");
-        } else if (data.status === "Denied") {
-          toast.error("Manual control request denied!");
-        }
-     // }
-     console.log(data.email, data.status);
+      // if (data.email === localStorage.getItem("email")) {
+      // Check if the notification is intended for the logged-in user
+
+      if (data.status === "Granted") {
+        toast.success("Manual control request granted!");
+      } else if (data.status === "Denied") {
+        toast.error("Manual control request denied!");
+      }
+      // }
+      console.log(data.email, data.status);
     });
 
     // Fetch PC data
@@ -78,7 +77,7 @@ export default function UserPcs({
       // Clean up event listeners
       socket.off("manualControlNotification");
     };
-  },);
+  }, [parentBuildingId, parentLabId]);
 
   return (
     <div className="bg-gray-100 p-4 rounded shadow">
@@ -113,9 +112,9 @@ export default function UserPcs({
         )}
       </div>
 
-      <div className="mt-4">
+      {/*<div className="mt-4">
         <MannualRequestButtons />
-      </div>
+        </div>*/}
     </div>
   );
 }

@@ -22,7 +22,6 @@ export default function DashboardUser() {
   const [selectedBuildingName, setSelectedBuildingName] = useState("");
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     setLoading(true);
     Axios.get("http://localhost:3001/readBuilding")
@@ -47,14 +46,14 @@ export default function DashboardUser() {
   };
 
   return (
-    <div className='col-span-4 px-6 py-4 h-screen flex flex-col'>
-      <Header title='Dashboard' />
-      <ToastContainer />
-      <div className='overflow-y-auto'>
+    <div className="col-span-4 px-6 py-4 h-screen block sm:flex flex-col">
+      <Header title="Dashboard" />
+      <ToastContainer className="w-11/12 m-4 sm:block sm:w-80 sm:m-0" />
+      <div className="overflow-y-auto">
         {selectedBuildingId === null ? (
           <div>
-            <div className='mb-2'>
-              <a className='text-lg font-semibold'>Buildings</a> 
+            <div className="mb-2">
+              <a className="text-lg font-semibold">Buildings</a>
             </div>
             {loading && (
               <div>
@@ -64,9 +63,9 @@ export default function DashboardUser() {
             {buildingList.length === 0 ? (
               <p>No Buildings currently</p>
             ) : (
-              <div className='grid grid-cols-3 gap-4'>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {buildingList.map((val, index) => (
-                  <div key={index} className='relative'>
+                  <div key={index} className="relative">
                     <Card
                       val={val}
                       onSelect={() =>

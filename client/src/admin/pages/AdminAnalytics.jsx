@@ -168,6 +168,10 @@ export default function Analytics() {
                   height={320}
                 />
               </div>
+              <div>
+                <p className="font-semibold text-lg">Statistics:</p>
+                <p className="font-normal text-sm">Highest Usage is at 11:00</p>
+              </div>
             </div>
           )}
         </div>

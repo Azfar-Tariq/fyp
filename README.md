@@ -51,9 +51,9 @@ mannualControlRequested int
 
 CREATE TABLE ManualControlRequests (
 id INT PRIMARY KEY IDENTITY,
-teacherId INT FOREIGN KEY REFERENCES users(id),
-labId INT FOREIGN KEY REFERENCES Lab(id),
-buildingId INT FOREIGN KEY REFERENCES BuildingData(id),
+teacherId INT FOREIGN KEY REFERENCES users(id) on delete cascade,
+labId INT FOREIGN KEY REFERENCES Lab(id) on delete cascade,
+buildingId INT FOREIGN KEY REFERENCES BuildingData(id) on delete no action,
 status NVARCHAR(50) DEFAULT 'Pending',
 timestamp DATETIME DEFAULT GETDATE()
 );<br>
