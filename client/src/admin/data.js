@@ -1,0 +1,32 @@
+export const nodes = [
+  {
+    id: 1,
+    areaName: "Block 1",
+    cameraName: "Camera 1",
+    boundedRectangleId: 1,
+    x1: 45,
+    y1: 45,
+    x2: 55,
+    y2: 55,
+  },
+  {
+    id: 2,
+    areaName: "Block 2",
+    cameraName: "Camera 1",
+    boundedRectangleId: 2,
+    x1: 45,
+    y1: 45,
+    x2: 55,
+    y2: 55,
+  },
+  {
+    id: 3,
+    areaName: "Block 3",
+    cameraName: "Camera 1",
+    boundedRectangleId: 3,
+    x1: 45,
+    y1: 45,
+    x2: 55,
+    y2: 55,
+  },
+];
