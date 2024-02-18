@@ -1,15 +1,15 @@
-/* eslint-disable no-unused-vars */
 import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
 import Dialog from "./Dialog";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 
-export default function Card({ val, updatedBuildingData, onSelect }) {
+export default function Card({ val, updatedAreaData, onSelect }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editBuildingName, setEditBuildingName] = useState("");
+  const [editAreaName, setEditAreaName] = useState(val.areaName);
+  const [editAreaDescription, setEditAreaDescription] = useState(val.description);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -19,32 +19,40 @@ export default function Card({ val, updatedBuildingData, onSelect }) {
     setIsMenuOpen(false);
   };
 
-  const deleteBuilding = (id) => {
-    Axios.delete(`http://localhost:3001/deletebuilding/${id}`)
+  const deleteArea = (id) => {
+    if (!id) {
+      console.error("Invalid area id:", id);
+      return;
+    }
+    
+    Axios.delete(`http://localhost:3001/deleteArea/${id}`)
       .then((res) => {
         console.log(res.data);
-        updatedBuildingData();
-        toast.success("Building deleted successfully");
+        updatedAreaData();
+        toast.success("Area deleted successfully");
       })
       .catch((err) => {
         console.log(err);
       });
   };
+  
 
   const openEditDialog = () => {
-    setEditBuildingName(val.buildingName);
+    setEditAreaName(val.areaName);
+    setEditAreaDescription(val.description);
     setIsEditDialogOpen(true);
     closeMenu();
   };
 
   const handleSubmitDialog = () => {
-    Axios.put(`http://localhost:3001/updateBuilding/${val.id}`, {
-      newBuildingName: editBuildingName,
+    Axios.put(`http://localhost:3001/updateArea/${val.id}`, {
+      newAreaName: editAreaName,
+      newDescription: editAreaDescription,
     })
       .then((res) => {
         console.log(res.data);
-        updatedBuildingData();
-        toast.success("Building updated successfully");
+        updatedAreaData();
+        toast.success("Area updated successfully");
       })
       .catch((err) => {
         console.log(err);
@@ -56,12 +64,16 @@ export default function Card({ val, updatedBuildingData, onSelect }) {
     <div>
       <div
         className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
-        onClick={() => onSelect(val.id, val.buildingName)}
+        onClick={() => onSelect(val.id, val.areaName, val.description)}
+
       >
         <div className="p-4 flex justify-between items-center">
-          <p className=" text-xl font-bold tracking-tight text-white">
-            {val.buildingName}
-          </p>
+          <div>
+            <p className="text-xl font-bold tracking-tight text-white">
+              {val.areaName}
+            </p>
+            <p className="text-sm text-gray-400">{val.description}</p>
+          </div>
           <MiOptionsVertical
             color="white"
             className="hover:bg-gray-700 hover:rounded-md"
@@ -88,7 +100,7 @@ export default function Card({ val, updatedBuildingData, onSelect }) {
                 className="block px-4 py-2 text-red-600 hover:bg-red-200 w-full text-left"
                 onClick={() => {
                   closeMenu();
-                  deleteBuilding(val.id);
+                  deleteArea(val.id);
                 }}
               >
                 Delete
@@ -100,10 +112,12 @@ export default function Card({ val, updatedBuildingData, onSelect }) {
       {isEditDialogOpen && (
         <ModalOverlay isOpen={isEditDialogOpen}>
           <Dialog
-            text="Edit Building"
-            text2="Building"
-            name={editBuildingName}
-            setName={setEditBuildingName}
+            text="Edit Area"
+            text2="Area"
+            name={editAreaName}
+            setName={setEditAreaName}
+            description={editAreaDescription}
+            setDescription={setEditAreaDescription}
             onClose={() => setIsEditDialogOpen(false)}
             onSubmit={handleSubmitDialog}
           />

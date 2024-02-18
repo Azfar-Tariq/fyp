@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Add from "../components/Add";
-import Card from "../components/Card";
+import AreaCard from "../components/Card";
 import Header from "../components/Header";
 import Dialog from "../components/Dialog";
 import Axios from "axios";
@@ -10,36 +10,37 @@ import { ToastContainer, toast } from "react-toastify";
 import ModalOverlay from "../components/ModalOverlay";
 import { PulseLoader } from "react-spinners";
 
-const fetchData = async (setBuildingList) => {
+const fetchData = async (setAreaList) => {
   try {
-    const response = await Axios.get("http://localhost:3001/readBuilding");
-    setBuildingList(response.data);
+    const response = await Axios.get("http://localhost:3001/readArea");
+    setAreaList(response.data);
   } catch (err) {
-    console.error("Failed to get buildings:", err);
+    console.error("Failed to get Areas:", err);
   }
 };
 
 export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [buildingName, setBuildingName] = useState("");
-  const [buildingList, setBuildingList] = useState([]);
-  const [selectedBuildingId, setSelectedBuildingId] = useState(null);
-  const [selectedBuildingName, setSelectedBuildingName] = useState("");
+  const [areaName, setAreaName] = useState("");
+  const [areaDescription, setAreaDescription] = useState(""); // Added areaDescription state
+  const [areaList, setAreaList] = useState([]);
+  const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const [selectedAreaName, setSelectedAreaName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const updatedBuildingData = () => {
-    fetchData(setBuildingList);
+  const updatedAreaData = () => {
+    fetchData(setAreaList);
   };
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/readBuilding")
+    Axios.get("http://localhost:3001/readArea")
       .then((response) => {
-        setBuildingList(response.data);
+        setAreaList(response.data);
         setLoading(false);
       }, [])
       .catch((err) => {
-        console.error("Failed to get buildings:", err);
+        console.error("Failed to get areas:", err);
         setLoading(false);
       });
   }, []);
@@ -49,29 +50,38 @@ export default function Dashboard() {
   };
 
   const handleSubmitDialog = () => {
-    Axios.post("http://localhost:3001/insertBuilding", {
-      buildingName: buildingName,
+    Axios.post("http://localhost:3001/insertArea", {
+      areaName: areaName,
+      description: areaDescription, // Passed areaDescription to the request
     })
       .then((response) => {
         console.log(response.data);
-        updatedBuildingData();
-        toast.success("Building added successfully");
+        updatedAreaData();
+        toast.success("Area added successfully");
       })
       .catch((error) => {
-        console.error("Failed to save building:", error);
+        console.error("Failed to save area:", error);
       });
     setIsDialogOpen(false);
-    setBuildingName("");
+    setAreaName("");
+    setAreaDescription(""); // Reset areaDescription after submission
   };
 
-  const handleSelectBuilding = (buildingId, buildingName) => {
-    setSelectedBuildingId(buildingId);
-    setSelectedBuildingName(buildingName);
+  const handleSelectArea = (id, areaName) => {
+    console.log("Selected area id:", id); // Log to check if id is defined
+    setSelectedAreaId(id); // Ensure id is set correctly
+    setSelectedAreaName(areaName);
+  };
+  
+
+  const handleBackToAreas = () => {
+    setSelectedAreaId(null);
+    setSelectedAreaName("");
   };
 
-  const handleBackToBuildings = () => {
-    setSelectedBuildingId(null);
-    setSelectedBuildingName("");
+  // Function to handle changes in the area description input
+  const handleAreaDescriptionChange = (event) => {
+    setAreaDescription(event.target.value);
   };
 
   return (
@@ -79,40 +89,42 @@ export default function Dashboard() {
       <Header title="Dashboard" />
       <ToastContainer className="w-11/12 m-4 sm:block sm:w-80 sm:m-0" />
       <div className="overflow-y-auto">
-        {selectedBuildingId === null ? (
+        {selectedAreaId === null ? (
           <div>
             {loading && (
               <div>
                 <PulseLoader />
               </div>
             )}
-            {buildingList.length === 0 ? (
-              <p>No Buildings currently</p>
+            {areaList.length === 0 ? (
+              <p>No Areas currently</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {buildingList.map((val, index) => (
-                  <div key={index} className="relative">
-                    <Card
-                      val={val}
-                      updatedBuildingData={updatedBuildingData}
-                      onSelect={() =>
-                        handleSelectBuilding(val.id, val.buildingName)
-                      }
-                    />
-                  </div>
-                ))}
+                {areaList.map((val, index) => (
+  <div key={index} className="relative">
+    <AreaCard
+      val={val}
+      updatedAreaData={updatedAreaData}
+      onSelect={() => handleSelectArea(val.id, val.areaName, val.description)}
+    />
+  </div>
+))}
+
               </div>
             )}
-            <Add toggleDialog={toggleDialog} text="Building" />
+            <Add toggleDialog={toggleDialog} text="Area" />
             {isDialogOpen && (
               <ModalOverlay isOpen={isDialogOpen}>
                 <Dialog
-                  text="Add Building"
-                  text2="Building"
-                  name={buildingName}
-                  setName={setBuildingName}
+                  text="Add Area"
+                  text2="Area"
+                  name={areaName}
+                  setName={setAreaName}
+                  description={areaDescription} // Passed areaDescription to the Dialog component
+                  setDescription={setAreaDescription} // Added setDescription to handle areaDescription changes
                   onClose={toggleDialog}
                   onSubmit={handleSubmitDialog}
+                  onDescriptionChange={handleAreaDescriptionChange} // Passed handleAreaDescriptionChange to handle changes in areaDescription
                 />
               </ModalOverlay>
             )}
@@ -120,9 +132,9 @@ export default function Dashboard() {
         ) : (
           <div>
             <Labs
-              parentBuildingId={selectedBuildingId}
-              parentBuildingName={selectedBuildingName}
-              backToBuildings={handleBackToBuildings}
+              parentAreaId={selectedAreaId}
+              parentAreaName={selectedAreaName}
+              backToAreas={handleBackToAreas}
             />
           </div>
         )}

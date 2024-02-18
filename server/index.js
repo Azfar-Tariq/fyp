@@ -332,93 +332,96 @@ poolConnect
       }
     });
 
-    // -------- Building Data Endpoints --------
-    // send data to database
-    app.post("/insertBuilding", async (req, res) => {
-      const buildingName = req.body.buildingName;
+    // -------- Area Data Endpoints --------
+// send data to database
+app.post("/insertArea", async (req, res) => {
+  const { areaName, description } = req.body;
 
-      try {
-        const request = pool.request();
-        await request
-          .input("buildingName", sql.NVarChar, buildingName)
-          .query(
-            "INSERT INTO BuildingData (buildingName) VALUES (@buildingName)"
-          );
-        res.status(200).send("Building saved to database");
-      } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to save building to database");
-      }
-    });
+  try {
+    if (!areaName) {
+      // Return a 400 Bad Request status if 'areaName' is not provided
+      return res.status(400).send("Area name is required");
+    }
 
-    // get data from database
-    app.get("/readBuilding", async (req, res) => {
-      try {
-        const request = pool.request();
-        const result = await request.query(
-          "SELECT id, buildingName FROM BuildingData"
-        );
-        console.log(result.recordset);
-        res.status(200).json(result.recordset);
-      } catch (error) {
-        console.error("Failed to get buildings from SQL Server:", error);
-        res.status(500).send(error);
-      }
-    });
+    const request = pool.request();
+    await request
+      .input("areaName", sql.NVarChar, areaName)
+      .input("description", sql.NVarChar, description)
+      .query(
+        "INSERT INTO Area (areaName, description) VALUES (@areaName, @description)"
+      );
+    res.status(200).send("Area saved to database");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to save area to database");
+  }
+});
+// get data from database
+app.get("/readArea", async (req, res) => {
+  try {
+    const request = pool.request();
+    const result = await request.query(
+      "SELECT areaId, areaName, description FROM Area"
+    );
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.error("Failed to get areas from SQL Server:", error);
+    res.status(500).send(error);
+  }
+});
 
-    // edit data from database
-    app.put("/updateBuilding/:id", async (req, res) => {
-      const newBuildingName = req.body.newBuildingName;
-      const id = req.params.id;
+// edit data from database
+app.put("/updateArea/:id", async (req, res) => {
+  const { newAreaName, newDescription } = req.body;
+  const id = req.params.id;
 
-      try {
-        const request = pool.request();
-        const result = await request.query(
-          `SELECT * FROM BuildingData WHERE id = ${id}`
-        );
-        const building = result.recordset[0];
+  try {
+    const request = pool.request();
+    const result = await request.query(
+      `SELECT * FROM Area WHERE areaId = ${id}`
+    );
+    const area = result.recordset[0];
 
-        if (!building) {
-          res.status(404).send("Building not found");
-          return;
-        }
+    if (!area) {
+      res.status(404).send("Area not found");
+      return;
+    }
 
-        if (newBuildingName) {
-          await request.query(
-            `UPDATE BuildingData SET buildingName = '${newBuildingName}' WHERE id = ${id}`
-          );
-        }
-        res.status(200).send("Building updated successfully");
-      } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to update building in the database");
-      }
-    });
+    if (newAreaName || newDescription) {
+      await request.query(
+        `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}' WHERE areaId = ${id}`
+      );
+    }
+    res.status(200).send("Area updated successfully");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Failed to update area in the database");
+  }
+});
 
-    // delete data from database
-    app.delete("/deleteBuilding/:id", async (req, res) => {
-      const id = req.params.id;
+// delete data from database
+app.delete("/deleteArea/:id", async (req, res) => {
+  const id = req.params.id;
 
-      try {
-        const request = pool.request();
-        const result = await request.query(
-          `SELECT * FROM BuildingData WHERE id = ${id}`
-        );
-        const deleteBuilding = result.recordset[0];
-        if (deleteBuilding) {
-          await request.query(
-            `DELETE FROM cameraData where buildingId = ${id}`
-          );
-          await request.query(`DELETE FROM BuildingData WHERE id = ${id}`);
-          res.status(200).send("Building Deleted Successfully");
-        } else {
-          res.status(404).send("Building Not Found");
-        }
-      } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to delete building from database");
-      }
-    });
+  try {
+    const request = pool.request();
+    const result = await request.query(
+      `SELECT * FROM Area WHERE areaId = ${id}`
+    );
+    const deleteArea = result.recordset[0];
+    if (deleteArea) {
+      // Add logic to delete related data from other tables, if any
+      await request.query(`DELETE FROM Area WHERE areaId = ${id}`);
+      res.status(200).send("Area Deleted Successfully");
+    } else {
+      res.status(404).send("Area Not Found");
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Failed to delete area from database");
+  }
+});
+
 
     // -------- Lab Data Endpoints --------
     // send data to database
