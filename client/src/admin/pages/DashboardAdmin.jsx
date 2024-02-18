@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Add from "../components/Add";
-import AreaCard from "../components/Card";
+import Card from "../components/Card";
 import Header from "../components/Header";
 import Dialog from "../components/Dialog";
 import Axios from "axios";
@@ -67,11 +67,18 @@ export default function Dashboard() {
     setAreaDescription(""); // Reset areaDescription after submission
   };
 
-  const handleSelectArea = (id, areaName) => {
+  // Ensure that handleSelectArea function correctly passes the area ID
+  const handleSelectArea = (id, areaName, description) => {
+    
+    setSelectedAreaId(id); // Ensure the correct ID field is set
     console.log("Selected area id:", id); // Log to check if id is defined
-    setSelectedAreaId(id); // Ensure id is set correctly
+    console.log("Area StateL", selectedAreaId)
     setSelectedAreaName(areaName);
   };
+
+// Ensure that the API endpoints for deleting and updating area data are correctly implemented
+// Make sure that the correct field names are used for identification
+
   
 
   const handleBackToAreas = () => {
@@ -100,12 +107,15 @@ export default function Dashboard() {
               <p>No Areas currently</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {areaList.map((val, index) => (
+{areaList.map((val, index) => (
   <div key={index} className="relative">
-    <AreaCard
+    <Card
       val={val}
       updatedAreaData={updatedAreaData}
-      onSelect={() => handleSelectArea(val.id, val.areaName, val.description)}
+      onSelect={() =>
+        handleSelectArea(val.id, val.buildingName)
+      }
+      
     />
   </div>
 ))}

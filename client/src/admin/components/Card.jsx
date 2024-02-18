@@ -19,23 +19,19 @@ export default function Card({ val, updatedAreaData, onSelect }) {
     setIsMenuOpen(false);
   };
 
+  // Update deleteArea function to use the correct ID field
   const deleteArea = (id) => {
-    if (!id) {
-      console.error("Invalid area id:", id);
-      return;
-    }
-    
     Axios.delete(`http://localhost:3001/deleteArea/${id}`)
       .then((res) => {
         console.log(res.data);
         updatedAreaData();
+        console.log(id)
         toast.success("Area deleted successfully");
       })
       .catch((err) => {
         console.log(err);
       });
   };
-  
 
   const openEditDialog = () => {
     setEditAreaName(val.areaName);
@@ -51,6 +47,7 @@ export default function Card({ val, updatedAreaData, onSelect }) {
     })
       .then((res) => {
         console.log(res.data);
+        
         updatedAreaData();
         toast.success("Area updated successfully");
       })
