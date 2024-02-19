@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { MiOptionsVertical } from "../assets/icons/options";
 import Axios from "axios";
@@ -6,15 +5,15 @@ import Dialog from "./Dialog";
 import { toast, ToastContainer } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 
-export default function LabCard({
+export default function CameraCard({
   val,
-  parentBuildingId,
-  updatedLabData,
+  parentAreaId,
+  updatedCameraData,
   onSelect,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
-  const [editLabName, setEditLabName] = useState(val.labName);
+  const [editCameraDescription, setEditCameraDescription] = useState(val.Description);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -24,14 +23,14 @@ export default function LabCard({
     setIsMenuOpen(false);
   };
 
-  const deleteLab = (id) => {
+  const deleteCamera = (id) => {
     Axios.delete(
-      `http://localhost:3001/readbuilding/${parentBuildingId}/deleteLab/${id}`
+      `http://localhost:3001/readArea/${parentAreaId}/deleteCamera/${id}`
     )
       .then((res) => {
         console.log(res.data);
-        updatedLabData();
-        toast.success("Lab deleted successfully");
+        updatedCameraData();
+        toast.success("Camera deleted successfully");
       })
       .catch((err) => {
         console.log(err);
@@ -39,22 +38,22 @@ export default function LabCard({
   };
 
   const openEditDialog = () => {
-    setEditLabName(val.labName);
+    setEditCameraDescription(val.Description);
     setIsEditingDialogOpen(true);
     closeMenu();
   };
 
   const handleSubmitDialog = () => {
     Axios.put(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/updateLab/${val.id}`,
+      `http://localhost:3001/readArea/${parentAreaId}/updateCamera/${val.CameraID}`,
       {
-        newLabName: editLabName,
+        newDescription: editCameraDescription,
       }
     )
       .then((res) => {
         console.log(res.data);
-        updatedLabData();
-        toast.success("Lab updated successfully");
+        updatedCameraData();
+        toast.success("Camera updated successfully");
       })
       .catch((err) => {
         console.log(err);
@@ -66,11 +65,11 @@ export default function LabCard({
     <div>
       <div
         className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
-        onClick={() => onSelect(val.id, val.labName)}
+        onClick={() => onSelect(val.CameraID, val.Description)}
       >
         <div className="flex justify-between items-center p-4">
           <p className="text-xl font-bold tracking-tight text-white">
-            {val.labName}
+            {val.Description}
           </p>
           <MiOptionsVertical
             color="white"
@@ -98,7 +97,7 @@ export default function LabCard({
                 className="block px-4 py-2 text-red-600 hover:bg-red-200 w-full text-left"
                 onClick={() => {
                   closeMenu();
-                  deleteLab(val.id);
+                  deleteCamera(val.CameraID);
                 }}
               >
                 Delete
@@ -110,10 +109,10 @@ export default function LabCard({
       {isEditingDialogOpen && (
         <ModalOverlay isOpen={isEditingDialogOpen}>
           <Dialog
-            text="Edit Lab"
-            text2="Lab"
-            name={editLabName}
-            setName={setEditLabName}
+            text="Edit Camera"
+            text2="Camera"
+            name={editCameraDescription}
+            setName={setEditCameraDescription}
             onClose={() => setIsEditingDialogOpen(false)}
             onSubmit={handleSubmitDialog}
           />

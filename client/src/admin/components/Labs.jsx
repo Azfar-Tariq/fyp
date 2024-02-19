@@ -1,53 +1,44 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import LabCard from "./LabCard";
+import LabCard from "./LabCard"; // Make sure to import the correct component
 import Axios from "axios";
 import Add from "./Add";
 import Dialog from "./Dialog";
-import Pcs from "./Pcs";
 import { toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 import { PulseLoader } from "react-spinners";
 
-const fetchLabData = async (parentBuildingId, setLabData) => {
+const fetchCameraData = async (parentAreaId, setCameraData) => {
   try {
     const response = await Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab`
+      `http://localhost:3001/readArea/${parentAreaId}/readCamera`
     );
-    setLabData(response.data);
+    setCameraData(response.data);
   } catch (err) {
-    console.error("Failed to get lab data:", err);
+    console.error("Failed to get camera data:", err);
   }
 };
 
-export default function Labs({
-  parentBuildingId,
-  parentBuildingName,
-  backToBuildings,
+export default function Cameras({
+  parentAreaId,
+  parentAreaName,
+  backToAreas,
 }) {
-  const [labData, setLabData] = useState([]);
-  const [labName, setLabName] = useState("");
-  const [selectedLabId, setSelectedLabId] = useState(null);
-  const [selectedLabName, setSelectedLabName] = useState("");
+  const [cameraData, setCameraData] = useState([]);
+  const [cameraDescription, setCameraDescription] = useState("");
+  const [selectedCameraId, setSelectedCameraId] = useState(null);
+  const [selectedCameraDescription, setSelectedCameraDescription] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const updatedLabData = () => {
-    fetchLabData(parentBuildingId, setLabData);
+  const updatedCameraData = () => {
+    fetchCameraData(parentAreaId, setCameraData);
   };
 
   useEffect(() => {
     setLoading(true);
-    Axios.get(`http://localhost:3001/readBuilding/${parentBuildingId}/readLab`)
-      .then((response) => {
-        setLabData(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Failed to get labs:", error);
-        setLoading(false);
-      });
-  }, [parentBuildingId]);
+    fetchCameraData(parentAreaId, setCameraData);
+    setLoading(false);
+  }, [parentAreaId]);
 
   const toggleDialog = () => {
     setIsDialogOpen(!isDialogOpen);
@@ -55,43 +46,43 @@ export default function Labs({
 
   const handleSubmitDialog = () => {
     Axios.post(
-      `http://localhost:3001/readbuilding/${parentBuildingId}/addLab`,
+      `http://localhost:3001/readArea/${parentAreaId}/addCamera`,
       {
-        labName: labName,
+        description: cameraDescription,
       }
     )
       .then((response) => {
         console.log(response.data);
-        updatedLabData();
-        toast.success("Lab added successfully");
+        updatedCameraData();
+        toast.success("Camera added successfully");
       })
       .catch((err) => {
-        console.error("Failed to save lab:", err);
+        console.error("Failed to save camera:", err);
       });
     setIsDialogOpen(false);
-    setLabName("");
+    setCameraDescription("");
   };
 
-  const handleSelectLab = (labId, labName) => {
-    setSelectedLabId(labId);
-    setSelectedLabName(labName);
+  const handleSelectCamera = (cameraId, cameraDescription) => {
+    setSelectedCameraId(cameraId);
+    setSelectedCameraDescription(cameraDescription);
   };
 
-  const handleBackToLabs = () => {
-    setSelectedLabId(null);
-    setSelectedLabName("");
+  const handleBackToCameras = () => {
+    setSelectedCameraId(null);
+    setSelectedCameraDescription("");
   };
 
   return (
     <div>
-      {selectedLabId === null ? (
+      {selectedCameraId === null ? (
         <div>
           <div className="flex">
             <p
               className="text-2xl sm:text-lg text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 px-2 rounded-lg font-semibold mb-2 cursor-pointer"
-              onClick={backToBuildings}
+              onClick={backToAreas}
             >
-              {parentBuildingName}
+              {parentAreaName}
             </p>
           </div>
           {loading && (
@@ -99,32 +90,32 @@ export default function Labs({
               <PulseLoader />
             </div>
           )}
-          {labData.length === 0 ? (
+          {cameraData.length === 0 ? (
             <div>
-              <p>No Labs currently</p>
+              <p>No Cameras currently</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {labData.map((val, index) => (
+              {cameraData.map((val, index) => (
                 <div key={index} className="relative">
                   <LabCard
                     val={val}
-                    parentBuildingId={parentBuildingId}
-                    updatedLabData={updatedLabData}
-                    onSelect={() => handleSelectLab(val.id, val.labName)}
+                    parentAreaId={parentAreaId}
+                    updatedCameraData={updatedCameraData}
+                    onSelect={() => handleSelectCamera(val.CameraID, val.Description)}
                   />
                 </div>
               ))}
             </div>
           )}
-          <Add toggleDialog={toggleDialog} text="Lab" />
+          <Add toggleDialog={toggleDialog} text="Camera" />
           {isDialogOpen && (
             <ModalOverlay isOpen={isDialogOpen}>
               <Dialog
-                text="Add Lab"
-                text2="Lab"
-                name={labName}
-                setName={setLabName}
+                text="Add Camera"
+                text2="Camera"
+                name={cameraDescription}
+                setName={setCameraDescription}
                 onClose={toggleDialog}
                 onSubmit={handleSubmitDialog}
               />
@@ -133,14 +124,7 @@ export default function Labs({
         </div>
       ) : (
         <div>
-          <Pcs
-            parentBuildingId={parentBuildingId}
-            parentBuildingName={parentBuildingName}
-            parentLabId={selectedLabId}
-            parentLabName={selectedLabName}
-            backToLabs={handleBackToLabs}
-            backToBuildings={backToBuildings}
-          />
+          {/* Content for selected camera */}
         </div>
       )}
     </div>

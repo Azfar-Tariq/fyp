@@ -19,19 +19,18 @@ export default function Card({ val, updatedAreaData, onSelect }) {
     setIsMenuOpen(false);
   };
 
-  // Update deleteArea function to use the correct ID field
-  const deleteArea = (id) => {
-    Axios.delete(`http://localhost:3001/deleteArea/${id}`)
+  const deleteArea = (areaId) => {
+    Axios.delete(`http://localhost:3001/deleteArea/${areaId}`)
       .then((res) => {
         console.log(res.data);
         updatedAreaData();
-        console.log(id)
         toast.success("Area deleted successfully");
       })
       .catch((err) => {
         console.log(err);
       });
   };
+  
 
   const openEditDialog = () => {
     setEditAreaName(val.areaName);
@@ -41,7 +40,7 @@ export default function Card({ val, updatedAreaData, onSelect }) {
   };
 
   const handleSubmitDialog = () => {
-    Axios.put(`http://localhost:3001/updateArea/${val.id}`, {
+    Axios.put(`http://localhost:3001/updateArea/${val.areaId}`, {
       newAreaName: editAreaName,
       newDescription: editAreaDescription,
     })
@@ -60,10 +59,11 @@ export default function Card({ val, updatedAreaData, onSelect }) {
   return (
     <div>
       <div
-        className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
-        onClick={() => onSelect(val.id, val.areaName, val.description)}
-
-      >
+  className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
+  onClick={() => {
+    onSelect(val.areaId, val.areaName, val.description);
+  }}
+>
         <div className="p-4 flex justify-between items-center">
           <div>
             <p className="text-xl font-bold tracking-tight text-white">
@@ -97,7 +97,7 @@ export default function Card({ val, updatedAreaData, onSelect }) {
                 className="block px-4 py-2 text-red-600 hover:bg-red-200 w-full text-left"
                 onClick={() => {
                   closeMenu();
-                  deleteArea(val.id);
+                  deleteArea(val.areaId);
                 }}
               >
                 Delete

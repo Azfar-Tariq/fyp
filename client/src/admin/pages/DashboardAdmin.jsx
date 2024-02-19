@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Add from "../components/Add";
 import Card from "../components/Card";
@@ -15,14 +14,14 @@ const fetchData = async (setAreaList) => {
     const response = await Axios.get("http://localhost:3001/readArea");
     setAreaList(response.data);
   } catch (err) {
-    console.error("Failed to get Areas:", err);
+    console.error("Failed to get areas:", err);
   }
 };
 
 export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [areaName, setAreaName] = useState("");
-  const [areaDescription, setAreaDescription] = useState(""); // Added areaDescription state
+  const [areaDescription, setAreaDescription] = useState("");
   const [areaList, setAreaList] = useState([]);
   const [selectedAreaId, setSelectedAreaId] = useState(null);
   const [selectedAreaName, setSelectedAreaName] = useState("");
@@ -34,15 +33,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/readArea")
-      .then((response) => {
-        setAreaList(response.data);
-        setLoading(false);
-      }, [])
-      .catch((err) => {
-        console.error("Failed to get areas:", err);
-        setLoading(false);
-      });
+    fetchData(setAreaList).then(() => setLoading(false));
   }, []);
 
   const toggleDialog = () => {
@@ -52,7 +43,7 @@ export default function Dashboard() {
   const handleSubmitDialog = () => {
     Axios.post("http://localhost:3001/insertArea", {
       areaName: areaName,
-      description: areaDescription, // Passed areaDescription to the request
+      description: areaDescription,
     })
       .then((response) => {
         console.log(response.data);
@@ -64,31 +55,17 @@ export default function Dashboard() {
       });
     setIsDialogOpen(false);
     setAreaName("");
-    setAreaDescription(""); // Reset areaDescription after submission
+    setAreaDescription("");
   };
 
-  // Ensure that handleSelectArea function correctly passes the area ID
-  const handleSelectArea = (id, areaName, description) => {
-    
-    setSelectedAreaId(id); // Ensure the correct ID field is set
-    console.log("Selected area id:", id); // Log to check if id is defined
-    console.log("Area StateL", selectedAreaId)
+  const handleSelectArea = (areaId, areaName) => {
+    setSelectedAreaId(areaId);
     setSelectedAreaName(areaName);
   };
-
-// Ensure that the API endpoints for deleting and updating area data are correctly implemented
-// Make sure that the correct field names are used for identification
-
-  
 
   const handleBackToAreas = () => {
     setSelectedAreaId(null);
     setSelectedAreaName("");
-  };
-
-  // Function to handle changes in the area description input
-  const handleAreaDescriptionChange = (event) => {
-    setAreaDescription(event.target.value);
   };
 
   return (
@@ -107,19 +84,17 @@ export default function Dashboard() {
               <p>No Areas currently</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-{areaList.map((val, index) => (
-  <div key={index} className="relative">
-    <Card
-      val={val}
-      updatedAreaData={updatedAreaData}
-      onSelect={() =>
-        handleSelectArea(val.id, val.buildingName)
-      }
-      
-    />
-  </div>
-))}
-
+                {areaList.map((val, index) => (
+                  <div key={index} className="relative">
+                    <Card
+                      val={val}
+                      updatedAreaData={updatedAreaData}
+                      onSelect={() =>
+                        handleSelectArea(val.id, val.areaName)
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             )}
             <Add toggleDialog={toggleDialog} text="Area" />
@@ -130,11 +105,10 @@ export default function Dashboard() {
                   text2="Area"
                   name={areaName}
                   setName={setAreaName}
-                  description={areaDescription} // Passed areaDescription to the Dialog component
-                  setDescription={setAreaDescription} // Added setDescription to handle areaDescription changes
+                  description={areaDescription}
+                  setDescription={setAreaDescription}
                   onClose={toggleDialog}
                   onSubmit={handleSubmitDialog}
-                  onDescriptionChange={handleAreaDescriptionChange} // Passed handleAreaDescriptionChange to handle changes in areaDescription
                 />
               </ModalOverlay>
             )}
