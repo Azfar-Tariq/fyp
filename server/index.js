@@ -307,11 +307,163 @@ poolConnect
       }
     });
 
+<<<<<<< Updated upstream
     // Endpoint to get manual control requests
     app.get("/manual-control-requests", async (req, res) => {
       try {
         const request = pool.request();
         const result = await request.query(`
+=======
+					res.status(200).send("PC updated successfully");
+				} catch (err) {
+					console.log(err);
+					res.status(500).send("Failed to update PC in the database");
+				}
+			}
+		);
+
+		// delete data from database
+		app.delete(
+			"/readBuilding/:buildingId/readLab/:labId/deleteCoordinates/:cellId",
+			async (req, res) => {
+				const cellId = req.params.cellId;
+
+				try {
+					const request = pool.request();
+					await request.query(`DELETE FROM cameraData WHERE id = '${cellId}'`);
+
+					res.status(200).send("Coordinates deleted successfully");
+				} catch (err) {
+					console.log(err);
+					res
+						.status(500)
+						.send("Failed to delete Coordinates from the database");
+				}
+			}
+		);
+
+		// Endpoint to grant manual control access
+app.put("/grant-manual-control/:requestId", async (req, res) => {
+	try {
+	  const { requestId } = req.params;
+
+    console.log(requestId);
+    // Fetch the teacherId associated with the requestId
+    const result = await pool
+      .request()
+      .input("requestId", sql.Int, requestId)
+      .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
+      const teacherId = result.recordset[0].teacherId;
+	  // Update the request status in the database (you may want to implement notification logic here)
+	  await Promise.all([
+
+      
+		pool
+		  .request()
+		  .input("requestId", sql.Int, requestId)
+		  .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
+		pool
+		  .request()
+      .input("teacherId", sql.Int, teacherId)
+      .query("UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId")
+	  ]);
+  
+	  res.status(200).json({ message: "Access granted successfully!" });
+	} catch (error) {
+	  console.error("Error granting manual control access:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+  
+  // Endpoint to deny manual control access
+  app.put("/deny-manual-control/:requestId", async (req, res) => {
+	try {
+	  const { requestId } = req.params;
+    const result = await pool
+      .request()
+      .input("requestId", sql.Int, requestId)
+      .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
+
+    const teacherId = result.recordset[0].teacherId;
+  
+	  // Update the request status and manualControlRequested in the database
+	  await Promise.all([
+		pool
+		  .request()
+		  .input("requestId", sql.Int, requestId)
+		  .query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"),
+      await pool
+      .request()
+      .input("teacherId", sql.Int, teacherId)
+      .query("UPDATE users SET manualControlRequested = '0' WHERE id = @teacherId")
+	  ]);
+  
+	  res.status(200).json({ message: "Access denied successfully!" });
+	} catch (error) {
+	  console.error("Error denying manual control access:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+  
+		  
+		 // Endpoint to handle manual control request
+app.post("/request-manual-control", async (req, res) => {
+	try {
+	  const { teacherEmail, labId, buildingId } = req.body;
+  
+	  // Fetch teacher details using email from the users table
+	  const requestUser = await pool
+		.request()
+		.input("email", sql.NVarChar, teacherEmail)
+		.query("SELECT id, name FROM users WHERE email = @email");
+  
+	  if (requestUser.recordset.length === 0) {
+		console.error("User not found with the provided email.");
+		res.status(404).json({ message: "User not found." });
+		return;
+	  }
+  
+	  const teacherId = requestUser.recordset[0].id;
+	  const teacherName = requestUser.recordset[0].name;
+  
+	  // Update the 'manualControlRequested' status for the user
+	  const updateRequest = pool.request();
+	  await updateRequest
+		.input("teacherId", sql.Int, teacherId)
+		.query("UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId");
+  
+	  // Store the request in the database
+	  const insertRequest = pool.request();
+	  await insertRequest
+		.input("teacherId", sql.Int, teacherId)
+		.input("labId", sql.Int, labId)
+		.input("buildingId", sql.Int, buildingId)
+		.query(
+		  "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
+		);
+  
+	  // Return the details of the manual control request, including teacher's name
+	  res.status(200).json({
+		message: "Request sent successfully!",
+		teacherName: teacherName,
+		labId: labId,
+		buildingId: buildingId,
+	  });
+	} catch (error) {
+	  console.error("Error processing manual control request:", error);
+	  res.status(500).json({ message: "Internal server error." });
+	}
+  });
+  
+
+// Endpoint to get manual control requests
+app.get('/manual-control-requests', async (req, res) => {
+	try {
+	  const request = pool.request();
+	  const result = await request.query(`
+>>>>>>> Stashed changes
     SELECT MCR.*, U.name AS teacherName, L.labName, B.buildingName
     FROM ManualControlRequests MCR
     JOIN users U ON MCR.teacherId = U.id
@@ -725,6 +877,17 @@ app.delete(
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
   });
+<<<<<<< Updated upstream
+=======
+
+
+app.get
+		app.use("/images", express.static(path.join(__dirname, "images")));
+	})
+	.catch((err) => {
+		console.error("Failed to connect to SQL Server:", err);
+	});
+>>>>>>> Stashed changes
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
