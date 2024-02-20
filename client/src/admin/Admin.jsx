@@ -10,7 +10,7 @@ import ErrorPage from "./pages/ErrorPage";
 export default function Admin() {
   return (
     <div className="block sm:grid grid-cols-5">
-      <SideBar className="w-64" />
+      <SideBar />
       <div className="col-span-4">
         <Routes>
           <Route path="/" element={<Outlet />}>

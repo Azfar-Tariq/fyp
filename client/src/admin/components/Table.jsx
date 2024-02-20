@@ -2,6 +2,7 @@ import { CompactTable } from "@table-library/react-table-library/compact";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 import { useSort } from "@table-library/react-table-library/sort";
+import { usePagination } from "@table-library/react-table-library/pagination";
 import { nodes } from "../data";
 import { useState } from "react";
 
@@ -13,6 +14,18 @@ export default function Table() {
   };
 
   let data = { nodes };
+
+  const pagination = usePagination(data, {
+    state: {
+      page: 0,
+      size: 4,
+    },
+    onChange: onPaginationChange,
+  });
+
+  function onPaginationChange(action, state) {
+    console.log(action, state);
+  }
 
   data = {
     nodes: data.nodes.filter((item) =>
@@ -65,9 +78,9 @@ export default function Table() {
 
   const COLUMNS = [
     {
-      label: "Task",
+      label: "Area",
       renderCell: (item) => item.areaName,
-      sort: { sortKey: "TASK" },
+      sort: { sortKey: "Area" },
       resize: true,
     },
     {
@@ -111,7 +124,7 @@ export default function Table() {
   return (
     <div>
       <label htmlFor="search" className="p-3">
-        Search by Task:&nbsp;
+        Search by Area:&nbsp;
         <input
           id="search"
           type="text"
@@ -120,8 +133,42 @@ export default function Table() {
           onChange={handleSearch}
         />
       </label>
+      <button className="px-2 py-1 text-sm bg-blue-500 text-white rounded-md">
+        Save
+      </button>
       <div className="m-2">
-        <CompactTable columns={COLUMNS} data={data} theme={theme} sort={sort} />
+        <CompactTable
+          columns={COLUMNS}
+          data={data}
+          theme={theme}
+          sort={sort}
+          pagination={pagination}
+        />
+        <br />
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>Total Pages: {pagination.state.getTotalPages(data.nodes)}</span>
+
+          <span>
+            Page:{" "}
+            {pagination.state.getPages(data.nodes).map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                className="mx-1 px-1 hover:bg-gray-200 rounded-md"
+                style={{
+                  fontWeight:
+                    pagination.state.page === index ? "bold" : "normal",
+                  color: pagination.state.page === index ? "white" : "black",
+                  backgroundColor:
+                    pagination.state.page === index ? "blueviolet" : "white",
+                }}
+                onClick={() => pagination.fns.onSetPage(index)}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </span>
+        </div>
       </div>
     </div>
   );

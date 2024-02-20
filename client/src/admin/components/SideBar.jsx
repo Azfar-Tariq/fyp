@@ -18,7 +18,7 @@ export default function SideBar() {
   };
 
   return (
-    <div>
+    <div className="w-64">
       <div className="sm:hidden p-6 flex items-center justify-between">
         <div
           className="bg-gray-800 p-2 rounded-lg inline-block"
@@ -51,8 +51,8 @@ export default function SideBar() {
           </div>
         )}
       </div>
-      <div className="hidden sm:block">
-        <aside className="top-0 left-0 z-40 w-full h-screen">
+      <div className="hidden sm:block w-full">
+        <aside className="fixed top-0 left-0 flex flex-1 h-screen">
           <div className="h-full px-4 py-4 flex flex-col bg-gray-800">
             <div className="flex items-center gap-6 p-4">
               <img src={logo} className="h-6" alt="Logo" />
