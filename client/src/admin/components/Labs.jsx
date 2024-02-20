@@ -12,6 +12,8 @@ const fetchCameraData = async (parentAreaId, setCameraData) => {
     const response = await Axios.get(
       `http://localhost:3001/readArea/${parentAreaId}/readCamera`
     );
+    console.log("Received parent area id:", parentAreaId);
+    console.log("Received parent area id:", parentAreaId);
     setCameraData(response.data);
   } catch (err) {
     console.error("Failed to get camera data:", err);

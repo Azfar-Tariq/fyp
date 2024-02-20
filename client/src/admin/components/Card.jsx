@@ -62,6 +62,8 @@ export default function Card({ val, updatedAreaData, onSelect }) {
   className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
   onClick={() => {
     onSelect(val.areaId, val.areaName, val.description);
+    console.log("AreaCard val prop:", val);
+
   }}
 >
         <div className="p-4 flex justify-between items-center">

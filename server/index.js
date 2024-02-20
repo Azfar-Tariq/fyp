@@ -61,14 +61,13 @@ poolConnect
           } else {
             // Update failed, but user provided correct credentials. Log error and send a specific message.
             console.error(
-              "User logged in successfully, but database update failed.",
-              error
+              "User logged in successfully, but database update failed."
             );
             res.status(500).json({ message: "Internal server error." });
           }
         } else {
           // Update failed, user might have invalid credentials.
-          console.error("Login error:", error);
+          console.error("Login error:");
           res.status(401).json({ message: "Invalid credentials." });
         }
       } catch (error) {
@@ -224,246 +223,60 @@ poolConnect
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    // // Grant  Mnual Control Endpoint
-    // app.put("/grant-manual-control/:requestId", async (req, res) => {
-    // try {
-    //   const { requestId } = req.params;
 
-    //   console.log(requestId);
-    //   // Fetch the teacherId associated with the requestId
-    //   const result = await pool
-    //     .request()
-    //     .input("requestId", sql.Int, requestId)
-    //     .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
-    //     const teacherId = result.recordset[0].teacherId;
-    //   // Update the request status in the database (you may want to implement notification logic here)
-    //   await Promise.all([
-
-    //   pool
-    //     .request()
-    //     .input("requestId", sql.Int, requestId)
-    //     .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
-    //   pool
-    //     .request()
-    //     .input("teacherId", sql.Int, teacherId)
-    //     .query("UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId")
-    //   ]);
-
-    //   res.status(200).json({ message: "Access granted successfully!" });
-    // } catch (error) {
-    //   console.error("Error granting manual control access:", error);
-    //   res.status(500).json({ message: "Internal server error." });
-    // }
-    // });
-
-    // Endpoint to handle manual control request
-    app.post("/request-manual-control", async (req, res) => {
-      try {
-        const { teacherEmail, labId, buildingId } = req.body;
-
-        // Fetch teacher details using email from the users table
-        const requestUser = await pool
-          .request()
-          .input("email", sql.NVarChar, teacherEmail)
-          .query("SELECT id, name FROM users WHERE email = @email");
-
-        if (requestUser.recordset.length === 0) {
-          console.error("User not found with the provided email.");
-          res.status(404).json({ message: "User not found." });
-          return;
-        }
-
-        const teacherId = requestUser.recordset[0].id;
-        const teacherName = requestUser.recordset[0].name;
-
-        // Update the 'manualControlRequested' status for the user
-        const updateRequest = pool.request();
-        await updateRequest
-          .input("teacherId", sql.Int, teacherId)
-          .query(
-            "UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId"
-          );
-
-        // Store the request in the database
-        const insertRequest = pool.request();
-        await insertRequest
-          .input("teacherId", sql.Int, teacherId)
-          .input("labId", sql.Int, labId)
-          .input("buildingId", sql.Int, buildingId)
-          .query(
-            "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
-          );
-
-        // Return the details of the manual control request, including teacher's name
-        res.status(200).json({
-          message: "Request sent successfully!",
-          teacherName: teacherName,
-          labId: labId,
-          buildingId: buildingId,
-        });
-      } catch (error) {
-        console.error("Error processing manual control request:", error);
-        res.status(500).json({ message: "Internal server error." });
-      }
-    });
-
-<<<<<<< Updated upstream
-    // Endpoint to get manual control requests
-    app.get("/manual-control-requests", async (req, res) => {
-      try {
-        const request = pool.request();
-        const result = await request.query(`
-=======
-					res.status(200).send("PC updated successfully");
-				} catch (err) {
-					console.log(err);
-					res.status(500).send("Failed to update PC in the database");
-				}
-			}
-		);
-
-		// delete data from database
-		app.delete(
-			"/readBuilding/:buildingId/readLab/:labId/deleteCoordinates/:cellId",
-			async (req, res) => {
-				const cellId = req.params.cellId;
-
-				try {
-					const request = pool.request();
-					await request.query(`DELETE FROM cameraData WHERE id = '${cellId}'`);
-
-					res.status(200).send("Coordinates deleted successfully");
-				} catch (err) {
-					console.log(err);
-					res
-						.status(500)
-						.send("Failed to delete Coordinates from the database");
-				}
-			}
-		);
-
-		// Endpoint to grant manual control access
-app.put("/grant-manual-control/:requestId", async (req, res) => {
-	try {
-	  const { requestId } = req.params;
-
-    console.log(requestId);
-    // Fetch the teacherId associated with the requestId
-    const result = await pool
-      .request()
-      .input("requestId", sql.Int, requestId)
-      .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
-      const teacherId = result.recordset[0].teacherId;
-	  // Update the request status in the database (you may want to implement notification logic here)
-	  await Promise.all([
-
-      
-		pool
-		  .request()
-		  .input("requestId", sql.Int, requestId)
-		  .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
-		pool
-		  .request()
-      .input("teacherId", sql.Int, teacherId)
-      .query("UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId")
-	  ]);
-  
-	  res.status(200).json({ message: "Access granted successfully!" });
-	} catch (error) {
-	  console.error("Error granting manual control access:", error);
-	  res.status(500).json({ message: "Internal server error." });
-	}
-  });
-  
-  
-  // Endpoint to deny manual control access
-  app.put("/deny-manual-control/:requestId", async (req, res) => {
-	try {
-	  const { requestId } = req.params;
-    const result = await pool
-      .request()
-      .input("requestId", sql.Int, requestId)
-      .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
-
-    const teacherId = result.recordset[0].teacherId;
-  
-	  // Update the request status and manualControlRequested in the database
-	  await Promise.all([
-		pool
-		  .request()
-		  .input("requestId", sql.Int, requestId)
-		  .query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"),
-      await pool
-      .request()
-      .input("teacherId", sql.Int, teacherId)
-      .query("UPDATE users SET manualControlRequested = '0' WHERE id = @teacherId")
-	  ]);
-  
-	  res.status(200).json({ message: "Access denied successfully!" });
-	} catch (error) {
-	  console.error("Error denying manual control access:", error);
-	  res.status(500).json({ message: "Internal server error." });
-	}
-  });
-  
-  
-		  
-		 // Endpoint to handle manual control request
+ // Endpoint to handle manual control request
 app.post("/request-manual-control", async (req, res) => {
-	try {
-	  const { teacherEmail, labId, buildingId } = req.body;
-  
-	  // Fetch teacher details using email from the users table
-	  const requestUser = await pool
-		.request()
-		.input("email", sql.NVarChar, teacherEmail)
-		.query("SELECT id, name FROM users WHERE email = @email");
-  
-	  if (requestUser.recordset.length === 0) {
-		console.error("User not found with the provided email.");
-		res.status(404).json({ message: "User not found." });
-		return;
-	  }
-  
-	  const teacherId = requestUser.recordset[0].id;
-	  const teacherName = requestUser.recordset[0].name;
-  
-	  // Update the 'manualControlRequested' status for the user
-	  const updateRequest = pool.request();
-	  await updateRequest
-		.input("teacherId", sql.Int, teacherId)
-		.query("UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId");
-  
-	  // Store the request in the database
-	  const insertRequest = pool.request();
-	  await insertRequest
-		.input("teacherId", sql.Int, teacherId)
-		.input("labId", sql.Int, labId)
-		.input("buildingId", sql.Int, buildingId)
-		.query(
-		  "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
-		);
-  
-	  // Return the details of the manual control request, including teacher's name
-	  res.status(200).json({
-		message: "Request sent successfully!",
-		teacherName: teacherName,
-		labId: labId,
-		buildingId: buildingId,
-	  });
-	} catch (error) {
-	  console.error("Error processing manual control request:", error);
-	  res.status(500).json({ message: "Internal server error." });
-	}
-  });
-  
+  try {
+    const { teacherEmail, labId, buildingId } = req.body;
 
+    // Fetch teacher details using email from the users table
+    const requestUser = await pool
+      .request()
+      .input("email", sql.NVarChar, teacherEmail)
+      .query("SELECT id, name FROM users WHERE email = @email");
+
+    if (requestUser.recordset.length === 0) {
+      console.error("User not found with the provided email.");
+      res.status(404).json({ message: "User not found." });
+      return;
+    }
+
+    const teacherId = requestUser.recordset[0].id;
+    const teacherName = requestUser.recordset[0].name;
+
+    // Update the 'manualControlRequested' status for the user
+    const updateRequest = pool.request();
+    await updateRequest
+      .input("teacherId", sql.Int, teacherId)
+      .query("UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId");
+
+    // Store the request in the database
+    const insertRequest = pool.request();
+    await insertRequest
+      .input("teacherId", sql.Int, teacherId)
+      .input("labId", sql.Int, labId)
+      .input("buildingId", sql.Int, buildingId)
+      .query(
+        "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
+      );
+
+    // Return the details of the manual control request, including teacher's name
+    res.status(200).json({
+      message: "Request sent successfully!",
+      teacherName: teacherName,
+      labId: labId,
+      buildingId: buildingId,
+    });
+  } catch (error) {
+    console.error("Error processing manual control request:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
 // Endpoint to get manual control requests
 app.get('/manual-control-requests', async (req, res) => {
 	try {
 	  const request = pool.request();
 	  const result = await request.query(`
->>>>>>> Stashed changes
     SELECT MCR.*, U.name AS teacherName, L.labName, B.buildingName
     FROM ManualControlRequests MCR
     JOIN users U ON MCR.teacherId = U.id
@@ -485,279 +298,277 @@ app.get('/manual-control-requests', async (req, res) => {
     });
 
     // -------- Area Data Endpoints --------
-// send data to database
-app.post("/insertArea", async (req, res) => {
-  const { areaName, description } = req.body;
+    // send data to database
+    app.post("/insertArea", async (req, res) => {
+      const { areaName, description } = req.body;
 
-  try {
-    if (!areaName) {
-      // Return a 400 Bad Request status if 'areaName' is not provided
-      return res.status(400).send("Area name is required");
-    }
+      try {
+        if (!areaName) {
+          // Return a 400 Bad Request status if 'areaName' is not provided
+          return res.status(400).send("Area name is required");
+        }
 
-    const request = pool.request();
-    await request
-      .input("areaName", sql.NVarChar, areaName)
-      .input("description", sql.NVarChar, description)
-      .query(
-        "INSERT INTO Area (areaName, description) VALUES (@areaName, @description)"
-      );
-    res.status(200).send("Area saved to database");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to save area to database");
-  }
-});
-// get data from database
-app.get("/readArea", async (req, res) => {
-  try {
-    const request = pool.request();
-    const result = await request.query(
-      "SELECT areaId, areaName, description FROM Area"
-    );
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    console.error("Failed to get areas from SQL Server:", error);
-    res.status(500).send(error);
-  }
-});
-
-// edit data from database
-app.put("/updateArea/:id", async (req, res) => {
-  const { newAreaName, newDescription } = req.body;
-  const id = req.params.id;
-
-  try {
-    const request = pool.request();
-    const result = await request.query(
-      `SELECT * FROM Area WHERE areaId = ${id}`
-    );
-    const area = result.recordset[0];
-
-    if (!area) {
-      res.status(404).send("Area not found");
-      return;
-    }
-
-    if (newAreaName || newDescription) {
-      await request.query(
-        `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}' WHERE areaId = ${id}`
-      );
-    }
-    res.status(200).send("Area updated successfully");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Failed to update area in the database");
-  }
-});
-
-// delete data from database
-app.delete("/deleteArea/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const request = pool.request();
-    // Changed the query to select area by areaId
-    const result = await request.query(
-      `SELECT * FROM Area WHERE areaId = ${id}`
-    );
-    const deleteArea = result.recordset[0];
-    if (deleteArea) {
-      // Add logic to delete related data from other tables, if any
-
-      // Corrected the table name in the delete query
-      await request.query(`DELETE FROM Area WHERE areaId = ${id}`);
-      res.status(200).send("Area Deleted Successfully");
-    } else {
-      res.status(404).send("Area Not Found");
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Failed to delete area from database");
-  }
-});
-
-//  -------------------Camera Endpoints--------------------
-// Send camera data to database
-app.post("/readArea/:areaId/addCamera", async (req, res) => {
-  const areaId = req.params.areaId;
-  const newCamera = req.body;
-
-  try {
-    const request = pool.request();
-    await request
-      .input("areaId", sql.Int, areaId)
-      .input("description", sql.NVarChar, newCamera.description)
-      .query(
-        "INSERT INTO Camera (AreaID, Description) VALUES (@areaId, @description)"
-      );
-
-    res.status(200).send("Camera saved to database");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Failed to save camera to the database");
-  }
-});
-
-// Get camera data from database
-app.get("/readArea/:areaId/readCamera", async (req, res) => {
-  const areaId = req.params.areaId;
-
-  try {
-    const request = pool.request();
-    const result = await request.query(
-      `SELECT CameraID, Description FROM Camera WHERE AreaID = ${areaId}`
-    );
-    res.status(200).json(result.recordset);
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Failed to get cameras from the database");
-  }
-});
-
- // Edit camera data in database
-app.put("/readArea/:areaId/updateCamera/:cameraId", async (req, res) => {
-  const areaId = req.params.areaId;
-  const cameraId = req.params.cameraId;
-  const newDescription = req.body.newDescription;
-
-  try {
-    const request = pool.request();
-    await request
-      .input("newDescription", sql.NVarChar, newDescription)
-      .query(
-        `UPDATE Camera SET Description = @newDescription WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`
-      );
-
-    res.status(200).send("Camera updated successfully");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Failed to update camera in the database");
-  }
-});
-
-// Delete camera data from database
-app.delete("/readArea/:areaId/deleteCamera/:cameraId", async (req, res) => {
-  const areaId = req.params.areaId;
-  const cameraId = req.params.cameraId;
-
-  try {
-    const request = pool.request();
-    await request.query(
-      `DELETE FROM Camera WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`
-    );
-
-    res.status(200).send("Camera deleted successfully");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Failed to delete camera from the database");
-  }
-});
-
-// -------- Bounded Rectangle Data Endpoints --------
-// send data to database
-app.post(
-  "/readCamera/:cameraId/addBoundedRectangle",
-  async (req, res) => {
-    const cameraId = req.params.cameraId;
-    const { x1, y1, x2, y2, status } = req.body;
-
-    try {
-      const request = pool.request();
-      const cameraResult = await request.query(
-        `SELECT * FROM Camera WHERE CameraID = ${cameraId}`
-      );
-      const camera = cameraResult.recordset[0];
-
-      if (!camera) {
-        res.status(404).send("Camera not found");
-        return;
+        const request = pool.request();
+        await request
+          .input("areaName", sql.NVarChar, areaName)
+          .input("description", sql.NVarChar, description)
+          .query(
+            "INSERT INTO Area (areaName, description) VALUES (@areaName, @description)"
+          );
+        res.status(200).send("Area saved to database");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to save area to database");
       }
+    });
 
-      await request
-        .input("cameraId", sql.Int, cameraId)
-        .input("x1", sql.Int, x1)
-        .input("y1", sql.Int, y1)
-        .input("x2", sql.Int, x2)
-        .input("y2", sql.Int, y2)
-        .input("status", sql.Bit, status)
-        .query(
-          `INSERT INTO BoundedRectangle (CameraID, x1, y1, x2, y2, Status) VALUES (@cameraId, @x1, @y1, @x2, @y2, @status)`
+    // get data from database
+    app.get("/readArea", async (req, res) => {
+      try {
+        const request = pool.request();
+        const result = await request.query(
+          "SELECT areaId, areaName, description FROM Area"
         );
+        res.status(200).json(result.recordset);
+      } catch (error) {
+        console.error("Failed to get areas from SQL Server:", error);
+        res.status(500).send(error);
+      }
+    });
 
-      res.status(200).send("Bounded Rectangle saved to database");
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Failed to save Bounded Rectangle to the database");
-    }
-  }
-);
+    // edit data from database
+    app.put("/updateArea/:id", async (req, res) => {
+      const { newAreaName, newDescription } = req.body;
+      const id = req.params.id;
 
-// get data from database
-app.get(
-  "/readCamera/:cameraId/readBoundedRectangles",
-  async (req, res) => {
-    const cameraId = req.params.cameraId;
-
-    try {
-      const request = pool.request();
-      const result = await request.query(
-        `SELECT * FROM BoundedRectangle WHERE CameraID = ${cameraId}`
-      );
-      res.status(200).json(result.recordset);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Failed to get Bounded Rectangles from the database");
-    }
-  }
-);
-
-// edit data from database
-app.put(
-  "/updateBoundedRectangle/:rectangleId",
-  async (req, res) => {
-    const rectangleId = req.params.rectangleId;
-    const { x1, y1, x2, y2, status } = req.body;
-
-    try {
-      const request = pool.request();
-      await request
-        .input("rectangleId", sql.Int, rectangleId)
-        .input("x1", sql.Int, x1)
-        .input("y1", sql.Int, y1)
-        .input("x2", sql.Int, x2)
-        .input("y2", sql.Int, y2)
-        .input("status", sql.Bit, status)
-        .query(
-          `UPDATE BoundedRectangle SET x1 = @x1, y1 = @y1, x2 = @x2, y2 = @y2, Status = @status WHERE RectangleID = @rectangleId`
+      try {
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT * FROM Area WHERE areaId = ${id}`
         );
+        const area = result.recordset[0];
 
-      res.status(200).send("Bounded Rectangle updated successfully");
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Failed to update Bounded Rectangle in the database");
-    }
-  }
-);
+        if (!area) {
+          res.status(404).send("Area not found");
+          return;
+        }
 
-// delete data from database
-app.delete(
-  "/deleteBoundedRectangle/:rectangleId",
-  async (req, res) => {
-    const rectangleId = req.params.rectangleId;
+        if (newAreaName || newDescription) {
+          await request.query(
+            `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}' WHERE areaId = ${id}`
+          );
+        }
+        res.status(200).send("Area updated successfully");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update area in the database");
+      }
+    });
 
-    try {
-      const request = pool.request();
-      await request.query(`DELETE FROM BoundedRectangle WHERE RectangleID = ${rectangleId}`);
+    // delete data from database
+    app.delete("/deleteArea/:id", async (req, res) => {
+      const id = req.params.id;
 
-      res.status(200).send("Bounded Rectangle deleted successfully");
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Failed to delete Bounded Rectangle from the database");
-    }
-  }
-);
+      try {
+        const request = pool.request();
+        // Changed the query to select area by areaId
+        const result = await request.query(
+          `SELECT * FROM Area WHERE areaId = ${id}`
+        );
+        const deleteArea = result.recordset[0];
+        if (deleteArea) {
+          // Add logic to delete related data from other tables, if any
 
+          // Corrected the table name in the delete query
+          await request.query(`DELETE FROM Area WHERE areaId = ${id}`);
+          res.status(200).send("Area Deleted Successfully");
+        } else {
+          res.status(404).send("Area Not Found");
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to delete area from database");
+      }
+    });
+
+    //  -------------------Camera Endpoints--------------------
+    // Send camera data to database
+    app.post("/readArea/:areaId/addCamera", async (req, res) => {
+      const areaId = req.params.areaId;
+      const newCamera = req.body;
+
+      try {
+        const request = pool.request();
+        await request
+          .input("areaId", sql.Int, areaId)
+          .input("description", sql.NVarChar, newCamera.description)
+          .query(
+            "INSERT INTO Camera (AreaID, Description) VALUES (@areaId, @description)"
+          );
+
+        res.status(200).send("Camera saved to database");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to save camera to the database");
+      }
+    });
+
+    // Get camera data from database
+    app.get("/readArea/:areaId/readCamera", async (req, res) => {
+      const areaId = req.params.areaId;
+
+      try {
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT CameraID, Description FROM Camera WHERE AreaID = ${areaId}`
+        );
+        res.status(200).json(result.recordset);
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to get cameras from the database");
+      }
+    });
+
+    // Edit camera data in database
+    app.put("/readArea/:areaId/updateCamera/:cameraId", async (req, res) => {
+      const areaId = req.params.areaId;
+      const cameraId = req.params.cameraId;
+      const newDescription = req.body.newDescription;
+
+      try {
+        const request = pool.request();
+        await request
+          .input("newDescription", sql.NVarChar, newDescription)
+          .query(
+            `UPDATE Camera SET Description = @newDescription WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`
+          );
+
+        res.status(200).send("Camera updated successfully");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update camera in the database");
+      }
+    });
+
+    // Delete camera data from database
+    app.delete("/readArea/:areaId/deleteCamera/:cameraId", async (req, res) => {
+      const areaId = req.params.areaId;
+      const cameraId = req.params.cameraId;
+
+      try {
+        const request = pool.request();
+        await request.query(`DELETE FROM Camera WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`);
+
+        res.status(200).send("Camera deleted successfully");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to delete camera from the database");
+      }
+    });
+
+    // -------- Bounded Rectangle Data Endpoints --------
+    // send data to database
+    app.post(
+      "/readCamera/:cameraId/addBoundedRectangle",
+      async (req, res) => {
+        const cameraId = req.params.cameraId;
+        const { x1, y1, x2, y2, status } = req.body;
+
+        try {
+          const request = pool.request();
+          const cameraResult = await request.query(
+            `SELECT * FROM Camera WHERE CameraID = ${cameraId}`
+          );
+          const camera = cameraResult.recordset[0];
+
+          if (!camera) {
+            res.status(404).send("Camera not found");
+            return;
+          }
+
+          await request
+            .input("cameraId", sql.Int, cameraId)
+            .input("x1", sql.Int, x1)
+            .input("y1", sql.Int, y1)
+            .input("x2", sql.Int, x2)
+            .input("y2", sql.Int, y2)
+            .input("status", sql.Bit, status)
+            .query(
+              `INSERT INTO BoundedRectangle (CameraID, x1, y1, x2, y2, Status) VALUES (@cameraId, @x1, @y1, @x2, @y2, @status)`
+            );
+
+          res.status(200).send("Bounded Rectangle saved to database");
+        } catch (err) {
+          console.log(err);
+          res.status(500).send("Failed to save Bounded Rectangle to the database");
+        }
+      }
+    );
+
+    // get data from database
+    app.get(
+      "/readCamera/:cameraId/readBoundedRectangles",
+      async (req, res) => {
+        const cameraId = req.params.cameraId;
+
+        try {
+          const request = pool.request();
+          const result = await request.query(
+            `SELECT * FROM BoundedRectangle WHERE CameraID = ${cameraId}`
+          );
+          res.status(200).json(result.recordset);
+        } catch (err) {
+          console.log(err);
+          res.status(500).send("Failed to get Bounded Rectangles from the database");
+        }
+      }
+    );
+
+    // edit data from database
+    app.put(
+      "/updateBoundedRectangle/:rectangleId",
+      async (req, res) => {
+        const rectangleId = req.params.rectangleId;
+        const { x1, y1, x2, y2, status } = req.body;
+
+        try {
+          const request = pool.request();
+          await request
+            .input("rectangleId", sql.Int, rectangleId)
+            .input("x1", sql.Int, x1)
+            .input("y1", sql.Int, y1)
+            .input("x2", sql.Int, x2)
+            .input("y2", sql.Int, y2)
+            .input("status", sql.Bit, status)
+            .query(
+              `UPDATE BoundedRectangle SET x1 = @x1, y1 = @y1, x2 = @x2, y2 = @y2, Status = @status WHERE RectangleID = @rectangleId`
+            );
+
+          res.status(200).send("Bounded Rectangle updated successfully");
+        } catch (err) {
+          console.log(err);
+          res.status(500).send("Failed to update Bounded Rectangle in the database");
+        }
+      }
+    );
+
+    // delete data from database
+    app.delete(
+      "/deleteBoundedRectangle/:rectangleId",
+      async (req, res) => {
+        const rectangleId = req.params.rectangleId;
+
+        try {
+          const request = pool.request();
+          await request.query(`DELETE FROM BoundedRectangle WHERE RectangleID = ${rectangleId}`);
+
+          res.status(200).send("Bounded Rectangle deleted successfully");
+        } catch (err) {
+          console.log(err);
+          res.status(500).send("Failed to delete Bounded Rectangle from the database");
+        }
+      }
+    );
 
     // -------- PC's Data Endpoints --------
     // send data to database
@@ -877,17 +688,6 @@ app.delete(
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
   });
-<<<<<<< Updated upstream
-=======
-
-
-app.get
-		app.use("/images", express.static(path.join(__dirname, "images")));
-	})
-	.catch((err) => {
-		console.error("Failed to connect to SQL Server:", err);
-	});
->>>>>>> Stashed changes
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");

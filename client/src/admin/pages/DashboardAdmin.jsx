@@ -61,7 +61,9 @@ export default function Dashboard() {
   const handleSelectArea = (areaId, areaName) => {
     setSelectedAreaId(areaId);
     setSelectedAreaName(areaName);
+    console.log("AREA ID ",areaId); 
   };
+  
 
   const handleBackToAreas = () => {
     setSelectedAreaId(null);
