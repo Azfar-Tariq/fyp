@@ -6,7 +6,7 @@ import { usePagination } from "@table-library/react-table-library/pagination";
 import { nodes } from "../data";
 import { useState } from "react";
 
-export default function Table() {
+export default function Table({ selectedArea, selectedCamera }) {
   const [search, setSearch] = useState("");
 
   const handleSearch = (event) => {
@@ -27,10 +27,26 @@ export default function Table() {
     console.log(action, state);
   }
 
+  if (selectedArea && selectedCamera) {
+    const area = nodes.find((node) => node.id === selectedArea);
+    if (area) {
+      const camera = area.cameras.find((cam) => cam.id === selectedCamera);
+      if (camera) {
+        data = camera.boundedRectangles.map((rectangle) => ({
+          ...rectangle,
+          areaName: area.areaName,
+          cameraName: camera.cameraName,
+        }));
+      }
+    }
+  }
+
   data = {
-    nodes: data.nodes.filter((item) =>
-      item.areaName.toLowerCase().includes(search.toLowerCase())
-    ),
+    nodes: data.nodes
+      .filter((item) => item.id === selectedArea)
+      .flatMap((item) => item.cameras)
+      .filter((camera) => camera.id === selectedCamera)
+      .flatMap((camera) => camera.boundedRectangles),
   };
 
   const theme = useTheme([
@@ -58,10 +74,6 @@ export default function Table() {
     },
     {
       sortFns: {
-        TASK: (array) =>
-          array.sort((a, b) => a.areaName.localeCompare(b.areaName)),
-        CAMERA: (array) =>
-          array.sort((a, b) => a.cameraName.localeCompare(b.cameraName)),
         RECTANGLE_ID: (array) =>
           array.sort((a, b) => a.boundedRectangleId - b.boundedRectangleId),
         X1: (array) => array.sort((a, b) => a.x1 - b.x1),
@@ -77,18 +89,6 @@ export default function Table() {
   }
 
   const COLUMNS = [
-    {
-      label: "Area",
-      renderCell: (item) => item.areaName,
-      sort: { sortKey: "Area" },
-      resize: true,
-    },
-    {
-      label: "Camera",
-      renderCell: (item) => item.cameraName,
-      sort: { sortKey: "CAMERA" },
-      resize: true,
-    },
     {
       label: "Rectangle ID",
       renderCell: (item) => item.boundedRectangleId,
@@ -123,8 +123,10 @@ export default function Table() {
 
   return (
     <div>
+      {selectedArea && <div>Selected Area ID: {selectedArea}</div>}
+      {selectedCamera && <div>Selected Camera ID: {selectedCamera}</div>}
       <label htmlFor="search" className="p-3">
-        Search by Area:&nbsp;
+        Search by Rectangle:&nbsp;
         <input
           id="search"
           type="text"

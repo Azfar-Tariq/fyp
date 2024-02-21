@@ -8,11 +8,11 @@ app.use(express.json());
 app.use(cors());
 
 const server = http.createServer(app); // Create HTTP server
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-  },
-});
+// const io = require("socket.io")(server, {
+//   cors: {
+//     origin: "*",
+//   },
+// });
 
 // SQL Server configuration
 const config = {

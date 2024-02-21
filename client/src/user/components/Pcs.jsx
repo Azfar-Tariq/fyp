@@ -8,18 +8,18 @@ import { io } from "socket.io-client";
 import ImageAnnotator from "./ImageAnnotator";
 import MannualRequestButtons from "./MannualRequestButtons";
 
-const socket = io("http://localhost:3001"); // Connect to the backend Socket.IO server
+// const socket = io("http://localhost:3001"); // Connect to the backend Socket.IO server
 
-const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
-  try {
-    const response = await Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
-    );
-    setPcData(response.data);
-  } catch (err) {
-    console.error("Failed to get PC Data:", err);
-  }
-};
+// const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
+//   try {
+//     const response = await Axios.get(
+//       `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
+//     );
+//     setPcData(response.data);
+//   } catch (err) {
+//     console.error("Failed to get PC Data:", err);
+//   }
+// };
 
 export default function UserPcs({
   parentBuildingId,
@@ -55,29 +55,29 @@ export default function UserPcs({
     }
   };
 
-  useEffect(() => {
-    // Subscribe to manual control notifications
-    socket.on("manualControlNotification", (data) => {
-      // if (data.email === localStorage.getItem("email")) {
-      // Check if the notification is intended for the logged-in user
+  // useEffect(() => {
+  //   // Subscribe to manual control notifications
+  //   socket.on("manualControlNotification", (data) => {
+  //     // if (data.email === localStorage.getItem("email")) {
+  //     // Check if the notification is intended for the logged-in user
 
-      if (data.status === "Granted") {
-        toast.success("Manual control request granted!");
-      } else if (data.status === "Denied") {
-        toast.error("Manual control request denied!");
-      }
-      // }
-      console.log(data.email, data.status);
-    });
+  //     if (data.status === "Granted") {
+  //       toast.success("Manual control request granted!");
+  //     } else if (data.status === "Denied") {
+  //       toast.error("Manual control request denied!");
+  //     }
+  //     // }
+  //     console.log(data.email, data.status);
+  //   });
 
-    // Fetch PC data
-    fetchPcData(parentBuildingId, parentLabId, setPcData);
+  //   // Fetch PC data
+  //   fetchPcData(parentBuildingId, parentLabId, setPcData);
 
-    return () => {
-      // Clean up event listeners
-      socket.off("manualControlNotification");
-    };
-  }, [parentBuildingId, parentLabId]);
+  //   return () => {
+  //     // Clean up event listeners
+  //     socket.off("manualControlNotification");
+  //   };
+  // }, [parentBuildingId, parentLabId]);
 
   return (
     <div className="bg-gray-100 p-4 rounded shadow">
