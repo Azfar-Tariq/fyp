@@ -61,6 +61,7 @@ export default function Card({ val, updatedAreaData, onSelect }) {
       <div
   className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
   onClick={() => {
+    console.log("value of value is OnCick in card.jsx = ",val);
     onSelect(val.areaId, val.areaName, val.description);
     console.log("AreaCard val prop:", val);
 

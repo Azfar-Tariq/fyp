@@ -26,9 +26,8 @@ export default function Cameras({
   backToAreas,
 }) {
   const [cameraData, setCameraData] = useState([]);
-  const [cameraDescription, setCameraDescription] = useState("");
+  const [cameraName, setcameraName] = useState("");
   const [selectedCameraId, setSelectedCameraId] = useState(null);
-  const [selectedCameraDescription, setSelectedCameraDescription] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,7 +49,7 @@ export default function Cameras({
     Axios.post(
       `http://localhost:3001/readArea/${parentAreaId}/addCamera`,
       {
-        description: cameraDescription,
+        description: cameraName,
       }
     )
       .then((response) => {
@@ -62,17 +61,16 @@ export default function Cameras({
         console.error("Failed to save camera:", err);
       });
     setIsDialogOpen(false);
-    setCameraDescription("");
+    setcameraName("");
   };
 
-  const handleSelectCamera = (cameraId, cameraDescription) => {
+  const handleSelectCamera = (cameraId, cameraName) => {
     setSelectedCameraId(cameraId);
-    setSelectedCameraDescription(cameraDescription);
+    setSelectedcameraName(cameraName);
   };
 
   const handleBackToCameras = () => {
     setSelectedCameraId(null);
-    setSelectedCameraDescription("");
   };
 
   return (
@@ -104,6 +102,7 @@ export default function Cameras({
                     val={val}
                     parentAreaId={parentAreaId}
                     updatedCameraData={updatedCameraData}
+                    showDescriptionField={false}
                     onSelect={() => handleSelectCamera(val.CameraID, val.Description)}
                   />
                 </div>
@@ -114,13 +113,14 @@ export default function Cameras({
           {isDialogOpen && (
             <ModalOverlay isOpen={isDialogOpen}>
               <Dialog
-                text="Add Camera"
-                text2="Camera"
-                name={cameraDescription}
-                setName={setCameraDescription}
-                onClose={toggleDialog}
-                onSubmit={handleSubmitDialog}
-              />
+  text="Add Camera"
+  text2="Camera"
+  name={cameraName}
+  setName={setcameraName}
+  onClose={toggleDialog}
+  onSubmit={handleSubmitDialog}
+/>
+
             </ModalOverlay>
           )}
         </div>

@@ -13,7 +13,7 @@ export default function CameraCard({
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
-  const [editCameraDescription, setEditCameraDescription] = useState(val.Description);
+  const [editcameraName, setEditcameraName] = useState(val.Description);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -38,7 +38,7 @@ export default function CameraCard({
   };
 
   const openEditDialog = () => {
-    setEditCameraDescription(val.Description);
+    setEditcameraName(val.Description);
     setIsEditingDialogOpen(true);
     closeMenu();
   };
@@ -47,7 +47,7 @@ export default function CameraCard({
     Axios.put(
       `http://localhost:3001/readArea/${parentAreaId}/updateCamera/${val.CameraID}`,
       {
-        newDescription: editCameraDescription,
+        newDescription: editcameraName,
       }
     )
       .then((res) => {
@@ -111,8 +111,8 @@ export default function CameraCard({
           <Dialog
             text="Edit Camera"
             text2="Camera"
-            name={editCameraDescription}
-            setName={setEditCameraDescription}
+            name={editcameraName}
+            setName={setEditcameraName}
             onClose={() => setIsEditingDialogOpen(false)}
             onSubmit={handleSubmitDialog}
           />

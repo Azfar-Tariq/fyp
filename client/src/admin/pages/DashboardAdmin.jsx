@@ -87,16 +87,21 @@ export default function Dashboard() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {areaList.map((val, index) => (
-                  <div key={index} className="relative">
-                    <Card
-                      val={val}
-                      updatedAreaData={updatedAreaData}
-                      onSelect={() =>
-                        handleSelectArea(val.id, val.areaName)
-                      }
-                    />
-                  </div>
-                ))}
+  <div key={index} className="relative">
+    <Card
+      val={val}
+      updatedAreaData={updatedAreaData}
+      showDescriptionField={true}
+      onSelect={() => {
+        console.log("Selected Area ID: ", val.areaId);
+        console.log("Selected Area Name: ", val.areaName);
+        handleSelectArea(val.areaId, val.areaName);
+      }}
+    />
+  </div>
+))}
+
+
               </div>
             )}
             <Add toggleDialog={toggleDialog} text="Area" />

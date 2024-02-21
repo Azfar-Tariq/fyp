@@ -1,3 +1,5 @@
+// Dialog.jsx
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -8,6 +10,7 @@ export default function Dialog({
   setName,
   description,
   setDescription,
+  showDescriptionField, // New prop to control the visibility of the description field
   onClose,
   onSubmit,
 }) {
@@ -17,7 +20,7 @@ export default function Dialog({
     } else {
       onSubmit();
       setName("");
-      setDescription("");
+      setDescription(""); // Clearing the description field after submission
     }
   };
 
@@ -39,14 +42,18 @@ export default function Dialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            <label htmlFor="areaDescription">{`Enter ${text2} Description:`}</label>
-            <textarea
-              id="areaDescription"
-              className="outline-1 border-2 border-black rounded-md p-2 w-full h-32 resize-none"
-              placeholder={`Enter description for ${text2}`}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
+            {showDescriptionField && ( // Conditionally render the description field based on the prop
+              <>
+                <label htmlFor="areaDescription">{`Enter ${text2} Description:`}</label>
+                <textarea
+                  id="areaDescription"
+                  className="outline-1 border-2 border-black rounded-md p-2 w-full h-32 resize-none"
+                  placeholder={`Enter description for ${text2}`}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                ></textarea>
+              </>
+            )}
           </div>
           <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
             <button
