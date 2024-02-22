@@ -1,6 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import AdminSideBar from "./components/AdminSideBar";
-import DashboardAdmin from "./pages/DashboardAdmin";
+import Area from "./pages/Area";
 import AdminAnalytics from "./pages/AdminAnalytics"; // Import admin analytics
 import AdminUsers from "./pages/Users";
 import AdminProfile from "./pages/AdminProfile";
@@ -13,7 +13,7 @@ function AdminDashboard() {
       <div className="col-span-4">
         <Routes>
           <Route path="/" element={<Outlet />}>
-            <Route path="/" element={<DashboardAdmin />} />
+            <Route path="/" element={<Area />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="profile" element={<AdminProfile />} />

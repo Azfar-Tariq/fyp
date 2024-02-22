@@ -186,15 +186,18 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
       const drawLoop = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        pcData.forEach((coordinates) => {
-          const annotation = {
-            x: coordinates.x1,
-            y: coordinates.y1,
-            width: coordinates.x2 - coordinates.x1,
-            height: coordinates.y2 - coordinates.y1,
-          };
-          drawRectangle(ctx, annotation);
-        });
+        if (Array.isArray(pcData)) {
+          pcData.forEach((coordinates) => {
+            const annotation = {
+              x: coordinates.x1,
+              y: coordinates.y1,
+              width: coordinates.x2 - coordinates.x1,
+              height: coordinates.y2 - coordinates.y1,
+            };
+            drawRectangle(ctx, annotation);
+          });
+        };
+        
         annotations.forEach((annotation) => {
           drawRectangle(ctx, annotation);
         });
@@ -219,7 +222,7 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
     handleMouseMove,
     handleMouseUp,
     pcData,
-  ]);
+  ], [annotations]);
 
   return (
     <div style={{ position: "relative" }} ref={wrapperRef}>

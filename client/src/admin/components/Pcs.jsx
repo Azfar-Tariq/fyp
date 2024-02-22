@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -6,47 +5,40 @@ import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
 import ImageAnnotator from "./ImageAnnotator";
 
-const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
+const fetchRectangleData = async (cameraId, setRectangleData) => {
   try {
     const response = await Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
+      `http://localhost:3001/readCamera/${cameraId}/readBoundedRectangles`
     );
-    setPcData(response.data);
+    setRectangleData(response.data);
   } catch (err) {
-    console.error("Failed to get PC Data:", err);
+    console.error("Failed to get Rectangle Data:", err);
   }
 };
 
 export default function Pcs({
-  parentBuildingId,
-  parentBuildingName,
-  parentLabId,
-  parentLabName,
-  backToLabs,
-  backToBuildings,
+  cameraId,
+  backToCameras,
 }) {
-  const [pcData, setPcData] = useState([]);
+  const [rectangleData, setRectangleData] = useState([]);
   const [drawnRectangles, setDrawnRectangles] = useState([]);
 
-  const updatePcData = () => {
-    fetchPcData(parentBuildingId, parentLabId, setPcData);
+  const updateRectangleData = () => {
+    fetchRectangleData(cameraId, setRectangleData);
   };
 
   useEffect(() => {
-    // setLoading(true);
     Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
+      `http://localhost:3001/readCamera/${cameraId}/readBoundedRectangles`
     )
       .then((response) => {
-        setPcData(response.data);
+        setRectangleData(response.data);
         console.log(response.data);
-        // setLoading(false);
       })
       .catch((error) => {
-        console.error("Failed to get labs:", error);
-        // setLoading(false);
+        console.error("Failed to get rectangles:", error);
       });
-  }, [parentBuildingId, parentLabId]);
+  }, [cameraId]);
 
   const handleBoxCreated = async (boxCoordinates) => {
     setDrawnRectangles((prevCoordinates) => [
@@ -63,19 +55,19 @@ export default function Pcs({
         const { topLeft, bottomRight } = latestCoordinates;
         const { x: x1, y: y1 } = topLeft;
         const { x: x2, y: y2 } = bottomRight;
-        const pcStatus = 0;
+        const status = 0;
         await Axios.post(
-          `http://localhost:3001/readbuilding/${parentBuildingId}/readLab/${parentLabId}/addCoordinates`,
+          `http://localhost:3001/readCamera/${cameraId}/addBoundedRectangle`,
           {
             x1,
             y1,
             x2,
             y2,
-            pcStatus,
+            status,
           }
         );
         // After successfully saving all rectangles, update the displayed data
-        updatePcData();
+        updateRectangleData();
         toast.success("Coordinates added successfully");
         // Clear the drawn rectangles after saving
         setDrawnRectangles((prevCoordinates) => [
@@ -94,16 +86,9 @@ export default function Pcs({
       <div className="flex items-center gap-2 mb-2">
         <p
           className="text-2xl sm:text-lg text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 px-2 rounded-lg cursor-pointer font-semibold"
-          onClick={backToBuildings}
+          onClick={backToCameras}
         >
-          {parentBuildingName}
-        </p>
-        <MaterialSymbolsArrowForwardIosRounded />
-        <p
-          className="text-2xl sm:text-lg text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 px-2 rounded-lg cursor-pointer font-semibold"
-          onClick={backToLabs}
-        >
-          {parentLabName}
+          {cameraId}
         </p>
       </div>
       <div className="flex sm:hidden">
@@ -113,7 +98,7 @@ export default function Pcs({
         </span>
       </div>
       <div className="overflow-x-auto">
-        <ImageAnnotator onBoxCreated={handleBoxCreated} pcData={pcData} />
+        <ImageAnnotator onBoxCreated={handleBoxCreated} rectangleData={rectangleData} />
       </div>
       <div className="hidden sm:block m-2">
         <button

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 
-export default function Card({ val, updatedAreaData, onSelect }) {
+export default function AreaCard({ val, updatedAreaData, onSelect }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editAreaName, setEditAreaName] = useState(val.areaName);
@@ -61,10 +61,7 @@ export default function Card({ val, updatedAreaData, onSelect }) {
       <div
   className="border rounded-lg shadow bg-gray-800 border-gray-700 cursor-pointer"
   onClick={() => {
-    console.log("value of value is OnCick in card.jsx = ",val);
     onSelect(val.areaId, val.areaName, val.description);
-    console.log("AreaCard val prop:", val);
-
   }}
 >
         <div className="p-4 flex justify-between items-center">

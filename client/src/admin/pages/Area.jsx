@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Add from "../components/Add";
-import Card from "../components/Card";
+import AreaCard from "../components/AreaCard";
 import Header from "../components/Header";
 import Dialog from "../components/Dialog";
 import Axios from "axios";
-import Labs from "../components/Labs";
+import Camera from "../components/Camera";
 import { ToastContainer, toast } from "react-toastify";
 import ModalOverlay from "../components/ModalOverlay";
 import { PulseLoader } from "react-spinners";
@@ -18,7 +18,7 @@ const fetchData = async (setAreaList) => {
   }
 };
 
-export default function Dashboard() {
+export default function Area() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [areaName, setAreaName] = useState("");
   const [areaDescription, setAreaDescription] = useState("");
@@ -61,7 +61,6 @@ export default function Dashboard() {
   const handleSelectArea = (areaId, areaName) => {
     setSelectedAreaId(areaId);
     setSelectedAreaName(areaName);
-    console.log("AREA ID ",areaId); 
   };
   
 
@@ -88,13 +87,11 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {areaList.map((val, index) => (
   <div key={index} className="relative">
-    <Card
+    <AreaCard
       val={val}
       updatedAreaData={updatedAreaData}
       showDescriptionField={true}
       onSelect={() => {
-        console.log("Selected Area ID: ", val.areaId);
-        console.log("Selected Area Name: ", val.areaName);
         handleSelectArea(val.areaId, val.areaName);
       }}
     />
@@ -122,7 +119,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div>
-            <Labs
+            <Camera
               parentAreaId={selectedAreaId}
               parentAreaName={selectedAreaName}
               backToAreas={handleBackToAreas}

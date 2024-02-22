@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
-import LabCard from "./LabCard"; // Make sure to import the correct component
+import CameraCard from "./CameraCard";
 import Axios from "axios";
 import Add from "./Add";
 import Dialog from "./Dialog";
 import { toast } from "react-toastify";
 import ModalOverlay from "./ModalOverlay";
 import { PulseLoader } from "react-spinners";
+import Pcs from "./Pcs";
 
 const fetchCameraData = async (parentAreaId, setCameraData) => {
   try {
     const response = await Axios.get(
       `http://localhost:3001/readArea/${parentAreaId}/readCamera`
     );
-    console.log("Received parent area id:", parentAreaId);
-    console.log("Received parent area id:", parentAreaId);
     setCameraData(response.data);
   } catch (err) {
     console.error("Failed to get camera data:", err);
@@ -28,6 +27,8 @@ export default function Cameras({
   const [cameraData, setCameraData] = useState([]);
   const [cameraName, setcameraName] = useState("");
   const [selectedCameraId, setSelectedCameraId] = useState(null);
+  const [selectedCameraName, setSelectedCameraName] = useState("");
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -66,7 +67,7 @@ export default function Cameras({
 
   const handleSelectCamera = (cameraId, cameraName) => {
     setSelectedCameraId(cameraId);
-    setSelectedcameraName(cameraName);
+    setSelectedCameraName(cameraName);
   };
 
   const handleBackToCameras = () => {
@@ -98,7 +99,7 @@ export default function Cameras({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {cameraData.map((val, index) => (
                 <div key={index} className="relative">
-                  <LabCard
+                  <CameraCard
                     val={val}
                     parentAreaId={parentAreaId}
                     updatedCameraData={updatedCameraData}
@@ -126,7 +127,8 @@ export default function Cameras({
         </div>
       ) : (
         <div>
-          {/* Content for selected camera */}
+          <Pcs cameraId={selectedCameraId} backToCameras={() => setSelectedCameraId(null)} />
+
         </div>
       )}
     </div>

@@ -63,48 +63,33 @@ const AdminProfile = () => {
   }
 
   return (
-    <div className="p-10 text-2xl font-bold ">
-      <h1>Profile</h1>
-      <div className="flex justify-center mt-20">
-        <div className="max-w-xs">
-          <div className="bg-white drop-shadow-2xl rounded-lg p-3">
-            <div className="photo-wrapper p-2">
-              <img
-                className="w-32 h-32 rounded-full mx-auto bg-slate-600"
-                src="" // Add user image
-              />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-2 sm:py-12">
+      <div className="p-4 bg-white shadow-lg rounded-lg">
+        <div className="flex-none lg:flex">
+          <div className="h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden">
+            <img src="" alt="" className="w-full h-full object-cover" /> {/* Add user image */}
+          </div>
+          <div className="flex-auto bg-white p-6 rounded-b lg:rounded-b-none lg:rounded-r">
+            <div className="flex flex-wrap">
+              <h1 className="flex-auto text-xl font-semibold">{user.name}</h1>
+              <div className="text-xl font-semibold text-gray-500">{user.role}</div>
+              {/* <div className="w-full flex-none text-sm font-medium text-gray-500 mt-2">
+                Last login: {user.lastLogin}
+              </div> */}
             </div>
-            <div className="p-2">
-              <h3 className="text-center text-xl text-gray-900 font-medium leading-8">
-                {user.name}
-              </h3>
-              <div className="text-center text-gray-400 text-xs font-semibold">
-                <p>{user.role}</p>
+            <div className=" w-full flex items-baseline mt-4 mb-6 text-gray-700">
+              <div className="space-x-2 flex">
+                <label>Email:</label>
+                <p className="">{user.email}</p>
               </div>
-              <table className="text-xs my-3">
-                <tbody>
-                  <tr>
-                    <td className="px-2 py-2 text-gray-500 font-semibold">
-                      Email
-                    </td>
-                    <td className="px-2 py-2">{user.email}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-2 py-2 text-gray-500 font-semibold">
-                      Phone
-                    </td>
-                    {/* Add user number */}
-                    <td className="px-2 py-2">+921234567890</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="text-center my-3">
-                <button
-                  className="inline-flex text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 hover:scale-105 transition ease-in-out rounded text-lg"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
+              <div className="space-x-2 flex">
+                <label>Phone:</label>
+                <p className="">+921234567890</p> {/* Add user number */}
+              </div>
+            </div>
+            <div className="flex space-x-3 mb-4 text-sm font-medium">
+              <div className="flex-auto flex space-x-3">
+                <button className="w-1/2 flex items-center justify-center rounded-md bg-black text-white" type="submit" onClick={handleLogout}>Logout</button>
               </div>
             </div>
           </div>
