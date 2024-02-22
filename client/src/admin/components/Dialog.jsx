@@ -42,18 +42,18 @@ export default function Dialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            {showDescriptionField && ( // Conditionally render the description field based on the prop
-              <>
-                <label htmlFor="areaDescription">{`Enter ${text2} Description:`}</label>
-                <textarea
-                  id="areaDescription"
-                  className="outline-1 border-2 border-black rounded-md p-2 w-full h-32 resize-none"
-                  placeholder={`Enter description for ${text2}`}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                ></textarea>
-              </>
-            )}
+             {showDescriptionField && ( // Conditionally render the description field based on the prop
+    <>
+      <label htmlFor="areaDescription">{`Enter ${text2} Description:`}</label>
+      <textarea
+        id="areaDescription"
+        className="outline-1 border-2 border-black rounded-md p-2 w-full h-32 resize-none"
+        placeholder={`Enter description for ${text2}`}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      ></textarea>
+    </>
+  )}
           </div>
           <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
             <button

@@ -109,13 +109,15 @@ export default function CameraCard({
       {isEditingDialogOpen && (
         <ModalOverlay isOpen={isEditingDialogOpen}>
           <Dialog
-            text="Edit Camera"
-            text2="Camera"
-            name={editcameraName}
-            setName={setEditcameraName}
-            onClose={() => setIsEditingDialogOpen(false)}
-            onSubmit={handleSubmitDialog}
-          />
+  text="Edit Camera"
+  text2="Camera"
+  name={editcameraName}
+  setName={setEditcameraName}
+  showDescriptionField={false} // Hide the description field for cameras
+  onClose={() => setIsEditingDialogOpen(false)}
+  onSubmit={handleSubmitDialog}
+/>
+
         </ModalOverlay>
       )}
     </div>

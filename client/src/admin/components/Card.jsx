@@ -112,15 +112,17 @@ export default function Card({ val, updatedAreaData, onSelect }) {
       {isEditDialogOpen && (
         <ModalOverlay isOpen={isEditDialogOpen}>
           <Dialog
-            text="Edit Area"
-            text2="Area"
-            name={editAreaName}
-            setName={setEditAreaName}
-            description={editAreaDescription}
-            setDescription={setEditAreaDescription}
-            onClose={() => setIsEditDialogOpen(false)}
-            onSubmit={handleSubmitDialog}
-          />
+  text="Edit Area"
+  text2="Area"
+  name={editAreaName}
+  setName={setEditAreaName}
+  description={editAreaDescription}
+  setDescription={setEditAreaDescription}
+  showDescriptionField={true} // Make sure this is set to true
+  onClose={() => setIsEditDialogOpen(false)}
+  onSubmit={handleSubmitDialog}
+/>
+
         </ModalOverlay>
       )}
     </div>
