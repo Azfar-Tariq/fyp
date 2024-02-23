@@ -23,7 +23,7 @@ export default function Configuration() {
           <div className="col-span-3">
             Configuration
             {selectedCamera && (
-              <img src="https://dummyimage.com/800x800" alt="" />
+              <img src="https://dummyimage.com/500x500" alt="" />
             )}
           </div>
           <div className="col-span-1">

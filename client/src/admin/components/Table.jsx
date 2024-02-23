@@ -27,27 +27,17 @@ export default function Table({ selectedArea, selectedCamera }) {
     console.log(action, state);
   }
 
-  if (selectedArea && selectedCamera) {
-    const area = nodes.find((node) => node.id === selectedArea);
-    if (area) {
-      const camera = area.cameras.find((cam) => cam.id === selectedCamera);
-      if (camera) {
-        data = camera.boundedRectangles.map((rectangle) => ({
-          ...rectangle,
-          areaName: area.areaName,
-          cameraName: camera.cameraName,
-        }));
-      }
-    }
-  }
+  console.log(data);
 
   data = {
-    nodes: data.nodes
-      .filter((item) => item.id === selectedArea)
-      .flatMap((item) => item.cameras)
-      .filter((camera) => camera.id === selectedCamera)
-      .flatMap((camera) => camera.boundedRectangles),
+    nodes:
+      nodes
+        .find((item) => item.areaId === selectedArea)
+        ?.cameras.find((camera) => camera.cameraId === selectedCamera)
+        ?.boundedRectangles || [],
   };
+
+  console.log(data);
 
   const theme = useTheme([
     getTheme(),
@@ -75,7 +65,7 @@ export default function Table({ selectedArea, selectedCamera }) {
     {
       sortFns: {
         RECTANGLE_ID: (array) =>
-          array.sort((a, b) => a.boundedRectangleId - b.boundedRectangleId),
+          array.sort((a, b) => a.rectangleId - b.rectangleId),
         X1: (array) => array.sort((a, b) => a.x1 - b.x1),
         Y1: (array) => array.sort((a, b) => a.y1 - b.y1),
         X2: (array) => array.sort((a, b) => a.x2 - b.x2),
@@ -91,7 +81,7 @@ export default function Table({ selectedArea, selectedCamera }) {
   const COLUMNS = [
     {
       label: "Rectangle ID",
-      renderCell: (item) => item.boundedRectangleId,
+      renderCell: (item) => item.rectangleId,
       sort: { sortKey: "RECTANGLE_ID" },
       resize: true,
     },

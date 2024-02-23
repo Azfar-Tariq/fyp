@@ -26,27 +26,27 @@ export default function Select({ setSelectedArea, setSelectedCamera }) {
       <h2 className="text-lg font-semibold">Areas</h2>
       <ul>
         {nodes.map((area) => (
-          <div key={area.id}>
+          <div key={area.areaId}>
             <div
               className="flex cursor-pointer"
-              onClick={() => handleAreaClick(area.areaName)}
+              onClick={() => handleAreaClick(area.areaId)}
             >
               <IcOutlineKeyboardArrowDown />
               <li
                 className={`${
-                  selectedArea === area.areaName ? "font-semibold" : ""
+                  selectedArea === area.areaId ? "font-semibold" : ""
                 }`}
               >
                 {area.areaName}
               </li>
             </div>
-            {selectedArea === area.areaName && (
+            {selectedArea === area.areaId && (
               <ul className="pl-4">
                 {area.cameras.map((camera) => (
-                  <div key={camera.id}>
+                  <div key={camera.cameraId}>
                     <div
                       className="flex cursor-pointer"
-                      onClick={() => handleCameraClick(camera.cameraName)}
+                      onClick={() => handleCameraClick(camera.cameraId)}
                     >
                       <IcOutlineKeyboardArrowDown />
                       <li className="font-semibold">{camera.cameraName}</li>
