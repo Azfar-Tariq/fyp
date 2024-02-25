@@ -61,14 +61,13 @@ poolConnect
           } else {
             // Update failed, but user provided correct credentials. Log error and send a specific message.
             console.error(
-              "User logged in successfully, but database update failed.",
-              error
+              "User logged in successfully, but database update failed."
             );
             res.status(500).json({ message: "Internal server error." });
           }
         } else {
           // Update failed, user might have invalid credentials.
-          console.error("Login error:", error);
+          console.error("Login error:");
           res.status(401).json({ message: "Invalid credentials." });
         }
       } catch (error) {
@@ -224,37 +223,6 @@ poolConnect
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    // // Grant  Mnual Control Endpoint
-    // app.put("/grant-manual-control/:requestId", async (req, res) => {
-    // try {
-    //   const { requestId } = req.params;
-
-    //   console.log(requestId);
-    //   // Fetch the teacherId associated with the requestId
-    //   const result = await pool
-    //     .request()
-    //     .input("requestId", sql.Int, requestId)
-    //     .query("SELECT teacherId FROM ManualControlRequests WHERE id = @requestId");
-    //     const teacherId = result.recordset[0].teacherId;
-    //   // Update the request status in the database (you may want to implement notification logic here)
-    //   await Promise.all([
-
-    //   pool
-    //     .request()
-    //     .input("requestId", sql.Int, requestId)
-    //     .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
-    //   pool
-    //     .request()
-    //     .input("teacherId", sql.Int, teacherId)
-    //     .query("UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId")
-    //   ]);
-
-    //   res.status(200).json({ message: "Access granted successfully!" });
-    // } catch (error) {
-    //   console.error("Error granting manual control access:", error);
-    //   res.status(500).json({ message: "Internal server error." });
-    // }
-    // });
 
     // Endpoint to handle manual control request
     app.post("/request-manual-control", async (req, res) => {
@@ -306,7 +274,6 @@ poolConnect
         res.status(500).json({ message: "Internal server error." });
       }
     });
-
     // Endpoint to get manual control requests
     app.get("/manual-control-requests", async (req, res) => {
       try {
@@ -332,321 +299,396 @@ poolConnect
       }
     });
 
-    // -------- Building Data Endpoints --------
+    // -------- Area Data Endpoints --------
     // send data to database
-    app.post("/insertBuilding", async (req, res) => {
-      const buildingName = req.body.buildingName;
+    app.post("/insertArea", async (req, res) => {
+      const { areaName, description } = req.body;
 
       try {
+        if (!areaName) {
+          // Return a 400 Bad Request status if 'areaName' is not provided
+          return res.status(400).send("Area name is required");
+        }
+
         const request = pool.request();
         await request
-          .input("buildingName", sql.NVarChar, buildingName)
+          .input("areaName", sql.NVarChar, areaName)
+          .input("description", sql.NVarChar, description)
           .query(
-            "INSERT INTO BuildingData (buildingName) VALUES (@buildingName)"
+            "INSERT INTO Area (areaName, description) VALUES (@areaName, @description)"
           );
-        res.status(200).send("Building saved to database");
+        res.status(200).send("Area saved to database");
       } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to save building to database");
+        console.error(err);
+        res.status(500).send("Failed to save area to database");
       }
     });
 
     // get data from database
-    app.get("/readBuilding", async (req, res) => {
+    app.get("/readArea", async (req, res) => {
       try {
         const request = pool.request();
         const result = await request.query(
-          "SELECT id, buildingName FROM BuildingData"
+          "SELECT areaId, areaName, description FROM Area"
         );
-        console.log(result.recordset);
         res.status(200).json(result.recordset);
       } catch (error) {
-        console.error("Failed to get buildings from SQL Server:", error);
+        console.error("Failed to get areas from SQL Server:", error);
         res.status(500).send(error);
       }
     });
 
     // edit data from database
-    app.put("/updateBuilding/:id", async (req, res) => {
-      const newBuildingName = req.body.newBuildingName;
+    app.put("/updateArea/:id", async (req, res) => {
+      const { newAreaName, newDescription } = req.body;
       const id = req.params.id;
 
       try {
         const request = pool.request();
         const result = await request.query(
-          `SELECT * FROM BuildingData WHERE id = ${id}`
+          `SELECT * FROM Area WHERE areaId = ${id}`
         );
-        const building = result.recordset[0];
+        const area = result.recordset[0];
 
-        if (!building) {
-          res.status(404).send("Building not found");
+        if (!area) {
+          res.status(404).send("Area not found");
           return;
         }
 
-        if (newBuildingName) {
+        if (newAreaName || newDescription) {
           await request.query(
-            `UPDATE BuildingData SET buildingName = '${newBuildingName}' WHERE id = ${id}`
+            `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}' WHERE areaId = ${id}`
           );
         }
-        res.status(200).send("Building updated successfully");
+        res.status(200).send("Area updated successfully");
       } catch (err) {
         console.log(err);
-        res.status(500).send("Failed to update building in the database");
+        res.status(500).send("Failed to update area in the database");
       }
     });
 
     // delete data from database
-    app.delete("/deleteBuilding/:id", async (req, res) => {
+    app.delete("/deleteArea/:id", async (req, res) => {
       const id = req.params.id;
 
       try {
         const request = pool.request();
+        // Changed the query to select area by areaId
         const result = await request.query(
-          `SELECT * FROM BuildingData WHERE id = ${id}`
+          `SELECT * FROM Area WHERE areaId = ${id}`
         );
-        const deleteBuilding = result.recordset[0];
-        if (deleteBuilding) {
-          await request.query(
-            `DELETE FROM cameraData where buildingId = ${id}`
-          );
-          await request.query(`DELETE FROM BuildingData WHERE id = ${id}`);
-          res.status(200).send("Building Deleted Successfully");
+        const deleteArea = result.recordset[0];
+        if (deleteArea) {
+          // Add logic to delete related data from other tables, if any
+
+          // Corrected the table name in the delete query
+          await request.query(`DELETE FROM Area WHERE areaId = ${id}`);
+          res.status(200).send("Area Deleted Successfully");
         } else {
-          res.status(404).send("Building Not Found");
+          res.status(404).send("Area Not Found");
         }
       } catch (err) {
         console.log(err);
-        res.status(500).send("Failed to delete building from database");
+        res.status(500).send("Failed to delete area from database");
       }
     });
 
-    // -------- Lab Data Endpoints --------
-    // send data to database
-    app.post("/readBuilding/:buildingId/addLab", async (req, res) => {
-      const buildingId = req.params.buildingId;
-      const newLab = req.body;
+    //  -------------------Camera Endpoints--------------------
+    // Send camera data to database
+    app.post("/readArea/:areaId/addCamera", async (req, res) => {
+      const areaId = req.params.areaId;
+      const newCamera = req.body;
 
       try {
         const request = pool.request();
-        const buildingResult = await request.query(
-          `SELECT * FROM BuildingData WHERE id = ${buildingId}`
-        );
-        const building = buildingResult.recordset[0];
-
-        if (!building) {
-          res.status(404).send("Building not found");
-          return;
-        }
-
         await request
-          .input("buildingId", sql.Int, buildingId)
-          .input("labName", sql.NVarChar, newLab.labName)
+          .input("areaId", sql.Int, areaId)
+          .input("cameraName", sql.NVarChar, newCamera.cameraName)
+          .input("description", sql.NVarChar, newCamera.description)
           .query(
-            "INSERT INTO Lab (buildingId, labName) VALUES (@buildingId, @labName)"
+            "INSERT INTO Camera (AreaID, CameraName, Description) VALUES (@areaId, @cameraName, @description)"
           );
-        res.status(200).send("Lab saved to database");
+
+        res.status(200).send("Camera saved to database");
       } catch (err) {
         console.log(err);
-        res.status(500).send("Failed to save lab to the database");
+        res.status(500).send("Failed to save camera to the database");
       }
     });
 
-    // get data from database
-    app.get("/readBuilding/:buildingId/readLab", async (req, res) => {
-      const buildingId = req.params.buildingId;
+    // Get camera data from database
+    app.get("/readArea/:areaId/readCamera", async (req, res) => {
+      const areaId = req.params.areaId;
+
       try {
         const request = pool.request();
         const result = await request.query(
-          `SELECT id, labName FROM Lab WHERE buildingId = ${buildingId}`
+          `SELECT CameraID, CameraName, Description FROM Camera WHERE AreaID = ${areaId}`
         );
         res.status(200).json(result.recordset);
       } catch (err) {
         console.log(err);
-        res.status(500).send("Failed to get labs from the database");
+        res.status(500).send("Failed to get cameras from the database");
       }
     });
 
-    // edit data from database
-    app.put("/readBuilding/:buildingId/updateLab/:labId", async (req, res) => {
-      const buildingId = req.params.buildingId;
-      const labId = req.params.labId;
-      const newLabName = req.body.newLabName;
+    // Edit camera data in database
+    app.put("/readArea/:areaId/updateCamera/:cameraId", async (req, res) => {
+      const areaId = req.params.areaId;
+      const cameraId = req.params.cameraId;
+      const newCameraName = req.body.newCameraName;
+      const newDescription = req.body.newDescription;
 
       try {
         const request = pool.request();
-        const buildingResult = await request.query(
-          `SELECT * FROM BuildingData WHERE id = ${buildingId}`
-        );
-        const building = buildingResult.recordset[0];
-        if (!building) {
-          res.status(404).send("Building not found");
-          return;
-        }
-        const labResult = await request.query(
-          `SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
-        );
-        const labToUpdate = labResult.recordset[0];
-        if (!labToUpdate) {
-          res.status(404).send("Lab not found in the building");
-          return;
-        }
-        if (newLabName) {
-          await request
-            .input("newLabName", sql.NVarChar, newLabName)
-            .query(
-              `UPDATE Lab SET labName = @newLabName WHERE id = ${labId} AND buildingId = ${buildingId}`
-            );
-        }
-        res.status(200).send("Lab updated successfully");
+        await request
+          .input("newCameraName", sql.NVarChar, newCameraName)
+          .input("newDescription", sql.NVarChar, newDescription)
+          .query(
+            `UPDATE Camera SET CameraName = @newCameraName, Description = @newDescription WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`
+          );
+
+        res.status(200).send("Camera updated successfully");
       } catch (err) {
         console.log(err);
-        res.status(500).send("Failed to update lab to the database");
+        res.status(500).send("Failed to update camera in the database");
+      }
+    });
+
+    // Delete camera data from database
+    app.delete("/readArea/:areaId/deleteCamera/:cameraId", async (req, res) => {
+      const areaId = req.params.areaId;
+      const cameraId = req.params.cameraId;
+
+      try {
+        const request = pool.request();
+        await request.query(
+          `DELETE FROM Camera WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`
+        );
+
+        res.status(200).send("Camera deleted successfully");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to delete camera from the database");
+      }
+    });
+
+    // -------- Bounded Rectangle Data Endpoints --------
+    // send data to database
+    app.post("/readCamera/:cameraId/addBoundedRectangle", async (req, res) => {
+      const cameraId = req.params.cameraId;
+      const { x1, y1, x2, y2, status } = req.body;
+
+      try {
+        const request = pool.request();
+        const cameraResult = await request.query(
+          `SELECT * FROM Camera WHERE CameraID = ${cameraId}`
+        );
+        const camera = cameraResult.recordset[0];
+
+        if (!camera) {
+          res.status(404).send("Camera not found");
+          return;
+        }
+
+        await request
+          .input("cameraId", sql.Int, cameraId)
+          .input("x1", sql.Int, x1)
+          .input("y1", sql.Int, y1)
+          .input("x2", sql.Int, x2)
+          .input("y2", sql.Int, y2)
+          .input("status", sql.Bit, status)
+          .query(
+            `INSERT INTO BoundedRectangle (CameraID, x1, y1, x2, y2, Status) VALUES (@cameraId, @x1, @y1, @x2, @y2, @status)`
+          );
+
+        res.status(200).send("Bounded Rectangle saved to database");
+      } catch (err) {
+        console.log(err);
+        res
+          .status(500)
+          .send("Failed to save Bounded Rectangle to the database");
+      }
+    });
+
+    // get data from database
+    app.get("/readCamera/:cameraId/readBoundedRectangles", async (req, res) => {
+      const cameraId = req.params.cameraId;
+
+      try {
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT * FROM BoundedRectangle WHERE CameraID = ${cameraId}`
+        );
+        res.status(200).json(result.recordset);
+      } catch (err) {
+        console.log(err);
+        res
+          .status(500)
+          .send("Failed to get Bounded Rectangles from the database");
+      }
+    });
+
+    // edit data from database
+    app.put("/updateBoundedRectangle/:rectangleId", async (req, res) => {
+      const rectangleId = req.params.rectangleId;
+      const { x1, y1, x2, y2, status } = req.body;
+
+      try {
+        const request = pool.request();
+        await request
+          .input("rectangleId", sql.Int, rectangleId)
+          .input("x1", sql.Int, x1)
+          .input("y1", sql.Int, y1)
+          .input("x2", sql.Int, x2)
+          .input("y2", sql.Int, y2)
+          .input("status", sql.Bit, status)
+          .query(
+            `UPDATE BoundedRectangle SET x1 = @x1, y1 = @y1, x2 = @x2, y2 = @y2, Status = @status WHERE RectangleID = @rectangleId`
+          );
+
+        res.status(200).send("Bounded Rectangle updated successfully");
+      } catch (err) {
+        console.log(err);
+        res
+          .status(500)
+          .send("Failed to update Bounded Rectangle in the database");
       }
     });
 
     // delete data from database
-    app.delete(
-      "/readBuilding/:buildingId/deleteLab/:labId",
-      async (req, res) => {
-        const buildingId = req.params.buildingId;
-        const labId = req.params.labId;
+    app.delete("/deleteBoundedRectangle/:rectangleId", async (req, res) => {
+      const rectangleId = req.params.rectangleId;
 
-        try {
-          const request = pool.request();
-          const labResult = await request.query(
-            `SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
-          );
-          const labToDelete = labResult.recordset[0];
+      try {
+        const request = pool.request();
+        await request.query(
+          `DELETE FROM BoundedRectangle WHERE RectangleID = ${rectangleId}`
+        );
 
-          if (!labToDelete) {
-            res.status(404).send("Lab not found");
-            return;
-          }
-
-          await request.query(`DELETE FROM Lab WHERE id = '${labId}'`);
-
-          res.status(200).send("Lab deleted successfully");
-        } catch (err) {
-          console.log(err);
-          res.status(500).send("Failed to delete lab from the database");
-        }
+        res.status(200).send("Bounded Rectangle deleted successfully");
+      } catch (err) {
+        console.log(err);
+        res
+          .status(500)
+          .send("Failed to delete Bounded Rectangle from the database");
       }
-    );
+    });
 
     // -------- PC's Data Endpoints --------
     // send data to database
-    app.post(
-      "/readBuilding/:buildingId/readLab/:labId/addCoordinates",
-      async (req, res) => {
-        const buildingId = req.params.buildingId;
-        const labId = req.params.labId;
-        const { x1, y1, x2, y2, pcStatus } = req.body;
+    // app.post(
+    //   "/readBuilding/:buildingId/readLab/:labId/addCoordinates",
+    //   async (req, res) => {
+    //     const buildingId = req.params.buildingId;
+    //     const labId = req.params.labId;
+    //     const { x1, y1, x2, y2, pcStatus } = req.body;
 
-        try {
-          const request = pool.request();
-          const buildingResult = await request.query(
-            `SELECT * FROM BuildingData WHERE id = ${buildingId}`
-          );
-          const building = buildingResult.recordset[0];
+    //     try {
+    //       const request = pool.request();
+    //       const buildingResult = await request.query(
+    //         `SELECT * FROM BuildingData WHERE id = ${buildingId}`
+    //       );
+    //       const building = buildingResult.recordset[0];
 
-          if (!building) {
-            res.status(404).send("Building not found");
-            return;
-          }
-          const labResult = await request.query(
-            `SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
-          );
-          const lab = labResult.recordset[0];
-          if (!lab) {
-            res.status(404).send("Lab not found in the building");
-            return;
-          }
-          await request
-            .input("buildingId", sql.Int, buildingId)
-            .input("labId", sql.Int, labId)
-            .input("x1", sql.Int, x1)
-            .input("y1", sql.Int, y1)
-            .input("x2", sql.Int, x2)
-            .input("y2", sql.Int, y2)
-            .input("pcStatus", sql.Bit, pcStatus)
-            .query(
-              `INSERT INTO cameraData (buildingId, labId, x1, y1, x2, y2, pcStatus) VALUES (@buildingID, @labId, @x1, @y1, @x2, @y2, @pcStatus)`
-            );
+    //       if (!building) {
+    //         res.status(404).send("Building not found");
+    //         return;
+    //       }
+    //       const labResult = await request.query(
+    //         `SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
+    //       );
+    //       const lab = labResult.recordset[0];
+    //       if (!lab) {
+    //         res.status(404).send("Lab not found in the building");
+    //         return;
+    //       }
+    //       await request
+    //         .input("buildingId", sql.Int, buildingId)
+    //         .input("labId", sql.Int, labId)
+    //         .input("x1", sql.Int, x1)
+    //         .input("y1", sql.Int, y1)
+    //         .input("x2", sql.Int, x2)
+    //         .input("y2", sql.Int, y2)
+    //         .input("pcStatus", sql.Bit, pcStatus)
+    //         .query(
+    //           `INSERT INTO cameraData (buildingId, labId, x1, y1, x2, y2, pcStatus) VALUES (@buildingID, @labId, @x1, @y1, @x2, @y2, @pcStatus)`
+    //         );
 
-          res.status(200).send("Coordinates saved to database");
-        } catch (err) {
-          console.log(err);
-          res.status(500).send("Failed to save Coordinates to the database");
-        }
-      }
-    );
+    //       res.status(200).send("Coordinates saved to database");
+    //     } catch (err) {
+    //       console.log(err);
+    //       res.status(500).send("Failed to save Coordinates to the database");
+    //     }
+    //   }
+    // );
 
-    // get data from database
-    app.get(
-      "/readBuilding/:buildingId/readLab/:labId/readCoordinates",
-      async (req, res) => {
-        const buildingId = req.params.buildingId;
-        const labId = req.params.labId;
+    // // get data from database
+    // app.get(
+    //   "/readBuilding/:buildingId/readLab/:labId/readCoordinates",
+    //   async (req, res) => {
+    //     const buildingId = req.params.buildingId;
+    //     const labId = req.params.labId;
 
-        try {
-          const request = pool.request();
-          const result = await request.query(
-            `SELECT id, x1, y1, x2, y2, pcStatus FROM cameraData WHERE labId = ${labId}`
-          );
-          res.status(200).json(result.recordset);
-        } catch (err) {
-          console.log(err);
-          res.status(500).send("Failed to get Coordinates from the database");
-        }
-      }
-    );
+    //     try {
+    //       const request = pool.request();
+    //       const result = await request.query(
+    //         `SELECT id, x1, y1, x2, y2, pcStatus FROM cameraData WHERE labId = ${labId}`
+    //       );
+    //       res.status(200).json(result.recordset);
+    //     } catch (err) {
+    //       console.log(err);
+    //       res.status(500).send("Failed to get Coordinates from the database");
+    //     }
+    //   }
+    // );
 
-    // edit data from database
-    app.put(
-      "/readBuilding/:buildingId/readLab/:labId/updatePC/:pcId",
-      async (req, res) => {
-        const buildingId = req.params.buildingId;
-        const labId = req.params.labId;
-        const pcId = req.params.pcId;
-        const { pcName, pcStatus } = req.body;
+    // // edit data from database
+    // app.put(
+    //   "/readBuilding/:buildingId/readLab/:labId/updatePC/:pcId",
+    //   async (req, res) => {
+    //     const buildingId = req.params.buildingId;
+    //     const labId = req.params.labId;
+    //     const pcId = req.params.pcId;
+    //     const { pcName, pcStatus } = req.body;
 
-        try {
-          const request = pool.request();
-          await request
-            .input("pcId", sql.Int, pcId)
-            .input("pcName", sql.NVarChar, pcName)
-            .input("pcStatus", sql.Bit, pcStatus)
-            .query(
-              `UPDATE PC SET pcName = @pcName, pcStatus = @pcStatus WHERE id = @pcId`
-            );
+    //     try {
+    //       const request = pool.request();
+    //       await request
+    //         .input("pcId", sql.Int, pcId)
+    //         .input("pcName", sql.NVarChar, pcName)
+    //         .input("pcStatus", sql.Bit, pcStatus)
+    //         .query(
+    //           `UPDATE PC SET pcName = @pcName, pcStatus = @pcStatus WHERE id = @pcId`
+    //         );
 
-          res.status(200).send("PC updated successfully");
-        } catch (err) {
-          console.log(err);
-          res.status(500).send("Failed to update PC in the database");
-        }
-      }
-    );
+    //       res.status(200).send("PC updated successfully");
+    //     } catch (err) {
+    //       console.log(err);
+    //       res.status(500).send("Failed to update PC in the database");
+    //     }
+    //   }
+    // );
 
-    // delete data from database
-    app.delete(
-      "/readBuilding/:buildingId/readLab/:labId/deleteCoordinates/:cellId",
-      async (req, res) => {
-        const cellId = req.params.cellId;
+    // // delete data from database
+    // app.delete(
+    //   "/readBuilding/:buildingId/readLab/:labId/deleteCoordinates/:cellId",
+    //   async (req, res) => {
+    //     const cellId = req.params.cellId;
 
-        try {
-          const request = pool.request();
-          await request.query(`DELETE FROM cameraData WHERE id = '${cellId}'`);
+    //     try {
+    //       const request = pool.request();
+    //       await request.query(`DELETE FROM cameraData WHERE id = '${cellId}'`);
 
-          res.status(200).send("Coordinates deleted successfully");
-        } catch (err) {
-          console.log(err);
-          res
-            .status(500)
-            .send("Failed to delete Coordinates from the database");
-        }
-      }
-    );
+    //       res.status(200).send("Coordinates deleted successfully");
+    //     } catch (err) {
+    //       console.log(err);
+    //       res
+    //         .status(500)
+    //         .send("Failed to delete Coordinates from the database");
+    //     }
+    //   }
+    // );
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);

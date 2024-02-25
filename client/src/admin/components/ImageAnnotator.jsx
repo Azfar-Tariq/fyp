@@ -3,7 +3,7 @@ import image from "../assets/images/labs/lab8.jpg";
 
 const MINIMUM_SHAPE_SIZE = 10;
 
-function ImageAnnotator({ onBoxCreated, pcData }) {
+function ImageAnnotator({ onBoxCreated, data }) {
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -186,7 +186,7 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
       const drawLoop = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        pcData.forEach((coordinates) => {
+        data.forEach((coordinates) => {
           const annotation = {
             x: coordinates.x1,
             y: coordinates.y1,
@@ -218,7 +218,7 @@ function ImageAnnotator({ onBoxCreated, pcData }) {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    pcData,
+    data,
   ]);
 
   return (

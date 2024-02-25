@@ -1,55 +1,71 @@
 /* eslint-disable no-unused-vars */
 import { useState } from "react";
-import { nodes } from "../data";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
+import { useEffect } from "react";
+import Axios from "axios";
 
-export default function Select({ setSelectedArea, setSelectedCamera }) {
-  const [selectedArea, setSelectedAreaLocal] = useState(null);
-  const [selectedCamera, setSelectedCameraLocal] = useState(null);
+export default function Select({
+  selectedArea,
+  selectedCamera,
+  onAreaChange,
+  onCameraChange,
+}) {
+  const [areas, setAreas] = useState([]);
+  const [cameras, setCameras] = useState([]);
+
+  useEffect(() => {
+    Axios.get("http://localhost:3001/readArea")
+      .then((response) => {
+        setAreas(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to get areas:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (selectedArea) {
+      Axios.get(`http://localhost:3001/readArea/${selectedArea}/readCamera`)
+        .then((response) => {
+          setCameras(response.data);
+        })
+        .catch((error) => {
+          console.error("Failed to get cameras:", error);
+        });
+    }
+  }, [selectedArea]);
 
   const handleAreaClick = (areaId) => {
-    if (areaId !== selectedArea) {
-      setSelectedArea(areaId === selectedArea ? null : areaId);
-      setSelectedAreaLocal(areaId === selectedArea ? null : areaId);
-    }
+    onAreaChange(areaId);
   };
 
   const handleCameraClick = (cameraId) => {
-    if (cameraId !== selectedCamera) {
-      setSelectedCamera(cameraId === selectedCamera ? null : cameraId);
-      setSelectedCameraLocal(cameraId === selectedCamera ? null : cameraId);
-    }
+    onCameraChange(cameraId);
   };
 
   return (
     <div className="flex flex-col">
       <h2 className="text-lg font-semibold">Areas</h2>
       <ul>
-        {nodes.map((area) => (
+        {areas.map((area) => (
           <div key={area.areaId}>
             <div
               className="flex cursor-pointer"
               onClick={() => handleAreaClick(area.areaId)}
             >
               <IcOutlineKeyboardArrowDown />
-              <li
-                className={`${
-                  selectedArea === area.areaId ? "font-semibold" : ""
-                }`}
-              >
-                {area.areaName}
-              </li>
+              <li>{area.areaName}</li>
             </div>
             {selectedArea === area.areaId && (
               <ul className="pl-4">
-                {area.cameras.map((camera) => (
-                  <div key={camera.cameraId}>
+                {cameras.map((camera) => (
+                  <div key={camera.CameraID}>
                     <div
                       className="flex cursor-pointer"
-                      onClick={() => handleCameraClick(camera.cameraId)}
+                      onClick={() => handleCameraClick(camera.CameraID)}
                     >
                       <IcOutlineKeyboardArrowDown />
-                      <li className="font-semibold">{camera.cameraName}</li>
+                      <li className="font-semibold">{camera.CameraName}</li>
                     </div>
                   </div>
                 ))}

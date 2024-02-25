@@ -1,166 +1,205 @@
-import { CompactTable } from "@table-library/react-table-library/compact";
-import { useTheme } from "@table-library/react-table-library/theme";
-import { getTheme } from "@table-library/react-table-library/baseline";
-import { useSort } from "@table-library/react-table-library/sort";
-import { usePagination } from "@table-library/react-table-library/pagination";
-import { nodes } from "../data";
-import { useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+} from "@tanstack/react-table";
+import Axios from "axios";
+import { useRef } from "react";
+// import mData from "./MOCK_DATA.json";
+import { useEffect, useState } from "react";
 
-export default function Table({ selectedArea, selectedCamera }) {
-  const [search, setSearch] = useState("");
+function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
+  const ref = useRef(null);
 
-  const handleSearch = (event) => {
-    setSearch(event.target.value);
-  };
-
-  let data = { nodes };
-
-  const pagination = usePagination(data, {
-    state: {
-      page: 0,
-      size: 4,
-    },
-    onChange: onPaginationChange,
-  });
-
-  function onPaginationChange(action, state) {
-    console.log(action, state);
-  }
-
-  console.log(data);
-
-  data = {
-    nodes:
-      nodes
-        .find((item) => item.areaId === selectedArea)
-        ?.cameras.find((camera) => camera.cameraId === selectedCamera)
-        ?.boundedRectangles || [],
-  };
-
-  console.log(data);
-
-  const theme = useTheme([
-    getTheme(),
-    {
-      HeaderRow: `
-        background-color: #eaf5fd;
-      `,
-      Row: `
-        &:nth-of-type(odd) {
-          background-color: #d2e9fb;
-        }
-
-        &:nth-of-type(even) {
-          background-color: #eaf5fd;
-        }
-      `,
-    },
-  ]);
-
-  const sort = useSort(
-    data,
-    {
-      onChange: onSortChange,
-    },
-    {
-      sortFns: {
-        RECTANGLE_ID: (array) =>
-          array.sort((a, b) => a.rectangleId - b.rectangleId),
-        X1: (array) => array.sort((a, b) => a.x1 - b.x1),
-        Y1: (array) => array.sort((a, b) => a.y1 - b.y1),
-        X2: (array) => array.sort((a, b) => a.x2 - b.x2),
-        Y2: (array) => array.sort((a, b) => a.y2 - b.y2),
-      },
+  useEffect(() => {
+    if (typeof indeterminate === "boolean") {
+      ref.current.indeterminate = !rest.checked && indeterminate;
     }
+  }, [ref, indeterminate, rest.checked]);
+
+  return (
+    <input
+      type="checkbox"
+      ref={ref}
+      className={className + " cursor-pointer"}
+      {...rest}
+    />
   );
+}
 
-  function onSortChange(action, state) {
-    console.log(action, state);
-  }
+export default function Table({ selectedCamera }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [sorting, setSorting] = useState([]);
+  const [filtering, setFiltering] = useState("");
+  const [rowSelection, setRowSelection] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState(null);
 
-  const COLUMNS = [
+  useEffect(() => {
+    setLoading(true);
+    Axios.get(
+      `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+    )
+      .then((response) => {
+        setData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, [selectedCamera]);
+
+  const handleRowSelectionChange = (row) => {
+    setSelectedRowId(row.original.RectangleID);
+  };
+
+  const handleDeleteSelectedRow = () => {
+    if (selectedRowId) {
+      console.log(selectedRowId);
+      Axios.delete(
+        `http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`
+      )
+        .then((response) => {
+          console.log(response);
+          setData((prevData) =>
+            prevData.filter((row) => row.RectangleID !== selectedRowId)
+          );
+          setSelectedRowId(null); // Clear selected row ID after deletion
+        })
+        .catch((error) => {
+          console.error(`Error deleting rectangle ${selectedRowId}`, error);
+        });
+    }
+  };
+
+  const columns = [
     {
-      label: "Rectangle ID",
-      renderCell: (item) => item.rectangleId,
-      sort: { sortKey: "RECTANGLE_ID" },
-      resize: true,
+      id: "select",
+      cell: ({ row }) => (
+        <IndeterminateCheckbox
+          checked={selectedRowId === row.original.RectangleID}
+          onChange={() => handleRowSelectionChange(row)}
+        />
+      ),
     },
     {
-      label: "X1",
-      renderCell: (item) => item.x1,
-      sort: { sortKey: "X1" },
-      resize: true,
+      header: "Rectangle ID",
+      accessorKey: "RectangleID",
     },
     {
-      label: "Y1",
-      renderCell: (item) => item.y1,
-      sort: { sortKey: "Y1" },
-      resize: true,
+      header: "X1",
+      accessorKey: "x1",
     },
     {
-      label: "X2",
-      renderCell: (item) => item.x2,
-      sort: { sortKey: "X2" },
-      resize: true,
+      header: "Y1",
+      accessorKey: "y1",
     },
     {
-      label: "Y2",
-      renderCell: (item) => item.y2,
-      sort: { sortKey: "Y2" },
-      resize: true,
+      header: "X2",
+      accessorKey: "x2",
+    },
+    {
+      header: "Y2",
+      accessorKey: "y2",
+    },
+    {
+      header: "Status",
+      accessorKey: "Status",
     },
   ];
 
-  return (
-    <div>
-      {selectedArea && <div>Selected Area ID: {selectedArea}</div>}
-      {selectedCamera && <div>Selected Camera ID: {selectedCamera}</div>}
-      <label htmlFor="search" className="p-3">
-        Search by Rectangle:&nbsp;
-        <input
-          id="search"
-          type="text"
-          className="border border-gray-400 rounded-md"
-          value={search}
-          onChange={handleSearch}
-        />
-      </label>
-      <button className="px-2 py-1 text-sm bg-blue-500 text-white rounded-md">
-        Save
-      </button>
-      <div className="m-2">
-        <CompactTable
-          columns={COLUMNS}
-          data={data}
-          theme={theme}
-          sort={sort}
-          pagination={pagination}
-        />
-        <br />
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Total Pages: {pagination.state.getTotalPages(data.nodes)}</span>
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting: sorting,
+      globalFilter: filtering,
+      rowSelection,
+    },
+    onSortingChange: setSorting,
+    onFilteringChange: setFiltering,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
+  });
 
-          <span>
-            Page:{" "}
-            {pagination.state.getPages(data.nodes).map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                className="mx-1 px-1 hover:bg-gray-200 rounded-md"
-                style={{
-                  fontWeight:
-                    pagination.state.page === index ? "bold" : "normal",
-                  color: pagination.state.page === index ? "white" : "black",
-                  backgroundColor:
-                    pagination.state.page === index ? "blueviolet" : "white",
-                }}
-                onClick={() => pagination.fns.onSetPage(index)}
-              >
-                {index + 1}
-              </button>
+  return (
+    <div className="w3-container">
+      <label htmlFor="filter">Search: </label>
+      <input
+        id="filter"
+        type="text"
+        className="border"
+        value={filtering}
+        onChange={(e) => setFiltering(e.target.value)}
+      />
+      {loading ? (
+        <div>Loading ...</div>
+      ) : (
+        <table className="w3-table-all">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                    {
+                      {
+                        asc: "▲",
+                        desc: "▼",
+                      }[header.column.getIsSorted() ?? null]
+                    }
+                  </th>
+                ))}
+              </tr>
             ))}
-          </span>
-        </div>
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <div className="flex justify-between">
+        <button onClick={handleDeleteSelectedRow}>Delete Selected</button>
+      </div>
+      <div className="flex justify-between">
+        <button onClick={() => table.setPageIndex(0)}>First Page</button>
+        <button
+          disabled={!table.getCanPreviousPage()}
+          onClick={() => table.previousPage()}
+        >
+          Previous Page
+        </button>
+        <button
+          disabled={!table.getCanNextPage()}
+          onClick={() => table.nextPage()}
+        >
+          Next Page
+        </button>
+        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>
+          Last Page
+        </button>
       </div>
     </div>
   );
