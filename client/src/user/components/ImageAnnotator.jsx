@@ -1,188 +1,253 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import image from "../assets/images/labs/lab12.jpg";
+import image from "../assets/images/labs/lab5.jpg";
 
 const MINIMUM_SHAPE_SIZE = 10;
 
-function ImageAnnotator({ onBoxCreated, pcData, readOnly }) {
-	const [annotations, setAnnotations] = useState([]);
-	const [drawing, setDrawing] = useState(false);
-	const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-	const [currentAnnotation, setCurrentAnnotation] = useState({
-		x: 0,
-		y: 0,
-		width: 0,
-		height: 0,
-		editing: false,
-	});
-	const wrapperRef = useRef(null);
-	const canvasRef = useRef(null);
+function ImageAnnotator({ onBoxCreated, pcData }) {
+  const [annotations, setAnnotations] = useState([]);
+  const [selectedAnnotation, setSelectedAnnotation] = useState(null);
+  const [drawing, setDrawing] = useState(false);
+  const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
+  const [currentAnnotation, setCurrentAnnotation] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const wrapperRef = useRef(null);
+  const canvasRef = useRef(null);
 
-  const drawRectangle = useCallback((ctx, annotation, index) => {
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.rect(annotation.x, annotation.y, annotation.width, annotation.height);
-    ctx.stroke();
+//   const drawRectangle = useCallback((ctx, annotation) => {
+//     ctx.strokeStyle = "red";
+//     ctx.lineWidth = 2;
+//     ctx.beginPath();
+//     ctx.rect(annotation.x, annotation.y, annotation.width, annotation.height);
+//     ctx.stroke();
+//   }, []);
 
-    // Display label for each switch
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "yellow";
-    const label = `s${index + 1}`;
-    const labelX = annotation.x + annotation.width / 2 - ctx.measureText(label).width / 2;
-    const labelY = annotation.y - 6; // Adjusted label position above the rectangle
-    ctx.fillText(label, labelX, labelY);
+  const isPointInsideRectangle = useCallback((point, rectangle) => {
+    return (
+      point.x >= rectangle.x &&
+      point.x <= rectangle.x + rectangle.width &&
+      point.y >= rectangle.y &&
+      point.y <= rectangle.y + rectangle.height
+    );
   }, []);
 
-	const isPointInsideRectangle = useCallback((point, rectangle) => {
-		return (
-			point.x >= rectangle.x &&
-			point.x <= rectangle.x + rectangle.width &&
-			point.y >= rectangle.y &&
-			point.y <= rectangle.y + rectangle.height
-		);
-	}, []);
+//   const handleMouseDown = useCallback(
+//     (e) => {
+//       const wrapper = wrapperRef.current;
+//       const rect = wrapper.getBoundingClientRect();
+//       const x = e.clientX - rect.left;
+//       const y = e.clientY - rect.top;
 
-	const handleMouseDown = useCallback(
-		(e) => {
-			const wrapper = wrapperRef.current;
-			const rect = wrapper.getBoundingClientRect();
-			const x = e.clientX - rect.left;
-			const y = e.clientY - rect.top;
+//       const clickedAnnotation = annotations.find((annotation) =>
+//         isPointInsideRectangle({ x, y }, annotation)
+//       );
 
-			const clickedAnnotation = annotations.find((annotation) =>
-				isPointInsideRectangle({ x, y }, annotation)
-			);
+//       if (clickedAnnotation) {
+//         // Select the clicked annotation for editing
+//         setSelectedAnnotation(clickedAnnotation);
+//         setStartPoint({ x, y });
+//       } else {
+//         // Start drawing a new annotation
+//         setStartPoint({ x, y });
+//         setDrawing(true);
+//         setCurrentAnnotation({
+//           x,
+//           y,
+//           width: 0,
+//           height: 0,
+//         });
+//       }
+//     },
+//     [annotations, isPointInsideRectangle]
+//   );
 
-			if (clickedAnnotation) {
-				setCurrentAnnotation({ ...clickedAnnotation, editing: true });
-			} else {
-				setStartPoint({ x, y });
-				setDrawing(true);
-				setCurrentAnnotation({
-					x,
-					y,
-					width: 0,
-					height: 0,
-					editing: false,
-				});
-			}
-		},
-		[annotations, isPointInsideRectangle]
-	);
+//   const handleMouseMove = useCallback(
+//     (e) => {
+//       if (drawing) {
+//         const wrapper = wrapperRef.current;
+//         const rect = wrapper.getBoundingClientRect();
+//         const x = e.clientX - rect.left;
+//         const y = e.clientY - rect.top;
 
-	const handleMouseMove = useCallback(
-		(e) => {
-			if (drawing) {
-				const wrapper = wrapperRef.current;
-				const rect = wrapper.getBoundingClientRect();
-				const x = e.clientX - rect.left;
-				const y = e.clientY - rect.top;
+//         const width = x - startPoint.x;
+//         const height = y - startPoint.y;
 
-				const width = x - startPoint.x;
-				const height = y - startPoint.y;
+//         if (width >= MINIMUM_SHAPE_SIZE && height >= MINIMUM_SHAPE_SIZE) {
+//           setCurrentAnnotation({
+//             ...currentAnnotation,
+//             width,
+//             height,
+//           });
 
-				if (width >= MINIMUM_SHAPE_SIZE && height >= MINIMUM_SHAPE_SIZE) {
-					setCurrentAnnotation({
-						...currentAnnotation,
-						width,
-						height,
-					});
-				}
-			}
-		},
-		[drawing, startPoint, currentAnnotation]
-	);
+//           setAnnotations((prevAnnotations) =>
+//             prevAnnotations.map((annotation) =>
+//               annotation === selectedAnnotation
+//                 ? { ...annotation, ...currentAnnotation }
+//                 : annotation
+//             )
+//           );
+//         }
+//       } else if (selectedAnnotation) {
+//         // Move the selected annotation
+//         const wrapper = wrapperRef.current;
+//         const rect = wrapper.getBoundingClientRect();
+//         const x = e.clientX - rect.left;
+//         const y = e.clientY - rect.top;
 
-	const handleMouseUp = useCallback(() => {
-		if (drawing) {
-			setDrawing(false);
+//         const deltaX = x - selectedAnnotation.x - selectedAnnotation.width / 2;
+//         const deltaY = y - selectedAnnotation.y - selectedAnnotation.height / 2;
 
-			if (
-				currentAnnotation.width >= MINIMUM_SHAPE_SIZE &&
-				currentAnnotation.height >= MINIMUM_SHAPE_SIZE
-			) {
-				const topLeft = { x: currentAnnotation.x, y: currentAnnotation.y };
-				const bottomRight = {
-					x: currentAnnotation.x + currentAnnotation.width,
-					y: currentAnnotation.y + currentAnnotation.height,
-				};
+//         const updatedAnnotation = {
+//           ...selectedAnnotation,
+//           x: selectedAnnotation.x + deltaX,
+//           y: selectedAnnotation.y + deltaY,
+//         };
 
-				onBoxCreated({ topLeft, bottomRight });
-				setAnnotations([...annotations, currentAnnotation]);
-			}
+//         setAnnotations((prevAnnotations) =>
+//           prevAnnotations.map((annotation) =>
+//             annotation === selectedAnnotation ? updatedAnnotation : annotation
+//           )
+//         );
+//         setSelectedAnnotation(updatedAnnotation);
 
-			setCurrentAnnotation({
-				x: 0,
-				y: 0,
-				width: 0,
-				height: 0,
-				editing: false,
-			});
-		}
-	}, [drawing, currentAnnotation, annotations, onBoxCreated]);
+//         onBoxCreated({
+//           topLeft: { x: updatedAnnotation.x, y: updatedAnnotation.y },
+//           bottomRight: {
+//             x: updatedAnnotation.x + updatedAnnotation.width,
+//             y: updatedAnnotation.y + updatedAnnotation.height,
+//           },
+//         });
+//       }
+//     },
+//     [
+//       drawing,
+//       selectedAnnotation,
+//       startPoint.x,
+//       startPoint.y,
+//       currentAnnotation,
+//       onBoxCreated,
+//     ]
+//   );
 
-	useEffect(() => {
-		const wrapper = wrapperRef.current;
-		const canvas = canvasRef.current;
-		const ctx = canvas.getContext("2d");
+//   const handleMouseUp = useCallback(() => {
+//     if (drawing) {
+//       setDrawing(false);
 
-		const img = new Image();
-		img.src = image;
-		img.onload = () => {
-			canvas.width = img.width * 2;
-			canvas.height = img.height * 2;
+//       if (
+//         currentAnnotation.width >= MINIMUM_SHAPE_SIZE &&
+//         currentAnnotation.height >= MINIMUM_SHAPE_SIZE
+//       ) {
+//         const topLeft = { x: currentAnnotation.x, y: currentAnnotation.y };
+//         const bottomRight = {
+//           x: currentAnnotation.x + currentAnnotation.width,
+//           y: currentAnnotation.y + currentAnnotation.height,
+//         };
 
-			const drawLoop = () => {
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
+//         onBoxCreated({ topLeft, bottomRight });
+//         setAnnotations([...annotations, currentAnnotation]);
+//       }
 
-				pcData.forEach((coordinates) => {
-					const annotation = {
-						x: coordinates.x1,
-						y: coordinates.y1,
-						width: coordinates.x2 - coordinates.x1,
-						height: coordinates.y2 - coordinates.y1,
-					};
-					drawRectangle(ctx, annotation);
-				});
-				if (drawing) {
-					drawRectangle(ctx, currentAnnotation);
-				}
-			};
-			requestAnimationFrame(drawLoop);
-		};
+//       setCurrentAnnotation({
+//         x: 0,
+//         y: 0,
+//         width: 0,
+//         height: 0,
+//       });
+//     } else if (selectedAnnotation) {
+//       setAnnotations([...annotations, selectedAnnotation]);
+//       setSelectedAnnotation(null);
+//     }
+//   }, [
+//     drawing,
+//     selectedAnnotation,
+//     currentAnnotation,
+//     onBoxCreated,
+//     annotations,
+//   ]);
 
-		return () => {
-			wrapper.removeEventListener("mousedown", handleMouseDown);
-			wrapper.removeEventListener("mousemove", handleMouseMove);
-			wrapper.removeEventListener("mouseup", handleMouseUp);
-		};
-	}, [
-		annotations,
-		drawing,
-		currentAnnotation,
-		drawRectangle,
-		handleMouseDown,
-		handleMouseMove,
-		handleMouseUp,
-		pcData,
-	]);
+//   const handleClearChanges = () => {
+//     setAnnotations([]);
+//   };
 
-	return (
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.src = image;
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+
+    //   const drawLoop = () => {
+    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    //     if (Array.isArray(pcData)) {
+    //       pcData.forEach((coordinates) => {
+    //         const annotation = {
+    //           x: coordinates.x1,
+    //           y: coordinates.y1,
+    //           width: coordinates.x2 - coordinates.x1,
+    //           height: coordinates.y2 - coordinates.y1,
+    //         };
+    //         // drawRectangle(ctx, annotation);
+    //       });
+    //     };
+        
+    //     annotations.forEach((annotation) => {
+    //       drawRectangle(ctx, annotation);
+    //     });
+    //     if (drawing) {
+    //       drawRectangle(ctx, currentAnnotation);
+    //     }
+    //   };
+    //   requestAnimationFrame(drawLoop);
+    };
+
+    return () => {
+    //   wrapper.removeEventListener("mousedown", handleMouseDown);
+    //   wrapper.removeEventListener("mousemove", handleMouseMove);
+    //   wrapper.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [
+    annotations,
+    drawing,
+    currentAnnotation,
+    // drawRectangle,
+    // handleMouseDown,
+    // handleMouseMove,
+    // handleMouseUp,
+    pcData,
+  ], [annotations]);
+
+  return (
     <div style={{ position: "relative" }} ref={wrapperRef}>
-    <canvas
-      ref={canvasRef}
-      style={{
-        border: "1px solid #ccc",
-        display: "block",
-        background: `url(${image})`,
-        backgroundSize: "100% 100%",
-      }}
-      onMouseDown={readOnly ? null : handleMouseDown}
-      onMouseMove={readOnly ? null : handleMouseMove}
-      onMouseUp={readOnly ? null : handleMouseUp}
-    />
-  </div>
-	);
+      <canvas
+        ref={canvasRef}
+        style={{
+          border: "1px solid #ccc",
+          display: "block",
+          background: `url(${image})`,
+          backgroundSize: "100% 100%",
+        }}
+        // onMouseDown={handleMouseDown}
+        // onMouseMove={handleMouseMove}
+        // onMouseUp={handleMouseUp}
+      />
+      <div className="hidden sm:block m-2">
+        {/* <button
+          className="bg-red-500 text-white p-2 rounded"
+          onClick={handleClearChanges}
+        >
+          Clear Changes
+        </button> */}
+      </div>
+    </div>
+  );
 }
 
 export default ImageAnnotator;

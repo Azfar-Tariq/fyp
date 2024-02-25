@@ -1,120 +1,196 @@
-/* eslint-disable no-unused-vars */
+// /* eslint-disable no-unused-vars */
+// import { useEffect, useState } from "react";
+// import Axios from "axios";
+// import { ToastContainer, toast } from "react-toastify";
+// import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
+// import { PulseLoader } from "react-spinners";
+// import { io } from "socket.io-client";
+// import ImageAnnotator from "./ImageAnnotator";
+// import MannualRequestButtons from "./MannualRequestButtons";
+
+// // const socket = io("http://localhost:3001"); // Connect to the backend Socket.IO server
+
+// const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
+//   try {
+//     const response = await Axios.get(
+//       `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
+//     );
+//     setPcData(response.data);
+//   } catch (err) {
+//     console.error("Failed to get PC Data:", err);
+//   }
+// };
+
+// export default function UserPcs({
+//   parentBuildingId,
+//   parentBuildingName,
+//   parentLabId,
+//   parentLabName,
+//   backToLabs,
+//   backToBuildings,
+// }) {
+//   const [pcData, setPcData] = useState([]);
+
+//   const [requestSent, setRequestSent] = useState(false);
+
+//   const handleManualRequest = async () => {
+//     try {
+//       const loggedInEmail = localStorage.getItem("email");
+//       if (!loggedInEmail) {
+//         console.error("No logged-in email found.");
+//         return;
+//       }
+
+//       await Axios.post("http://localhost:3001/request-manual-control", {
+//         teacherEmail: loggedInEmail,
+//         labId: parentLabId,
+//         buildingId: parentBuildingId,
+//       });
+
+//       setRequestSent(true);
+//       toast.success("Request sent successfully!");
+//     } catch (error) {
+//       console.error("Error sending manual control request:", error);
+//       toast.error("Failed to send request. Please try again.");
+//     }
+//   };
+
+//   useEffect(() => {
+//     // Subscribe to manual control notifications
+//     // socket.on("manualControlNotification", (data) => {
+//     //   // if (data.email === localStorage.getItem("email")) {
+//     //   // Check if the notification is intended for the logged-in user
+
+//     //   if (data.status === "Granted") {
+//     //     toast.success("Manual control request granted!");
+//     //   } else if (data.status === "Denied") {
+//     //     toast.error("Manual control request denied!");
+//     //   }
+//     //   // }
+//     //   console.log(data.email, data.status);
+//     // });
+
+//     // Fetch PC data
+//     // fetchPcData(parentBuildingId, parentLabId, setPcData);
+
+//     // return () => {
+//     //   // Clean up event listeners
+//     //   socket.off("manualControlNotification");
+//     // };
+//   }, [parentBuildingId, parentLabId]);
+
+//   return (
+//     <div className="bg-gray-100 p-4 rounded shadow">
+//       <div className="flex items-center gap-2 mb-2">
+//         <p
+//           className="text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold"
+//           onClick={backToBuildings}
+//         >
+//           {parentBuildingName}
+//         </p>
+//         <MaterialSymbolsArrowForwardIosRounded />
+//         <p
+//           className="text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold"
+//           onClick={backToLabs}
+//         >
+//           {parentLabName}
+//         </p>
+//       </div>
+
+//       <ImageAnnotator pcData={pcData} readOnly={true} />
+
+//       <div className="mt-4">
+//         {requestSent ? (
+//           <div className="text-green-600">Request Sent</div>
+//         ) : (
+//           <button
+//             className="bg-blue-500 text-white px-2 py-1 rounded"
+//             onClick={handleManualRequest}
+//           >
+//             Request Manual Control
+//           </button>
+//         )}
+//       </div>
+
+//       {/*<div className="mt-4">
+//         <MannualRequestButtons />
+//         </div>*/}
+//     </div>
+//   );
+// }
+
+
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
-import { io } from "socket.io-client";
 import ImageAnnotator from "./ImageAnnotator";
-import MannualRequestButtons from "./MannualRequestButtons";
 
-// const socket = io("http://localhost:3001"); // Connect to the backend Socket.IO server
-
-const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
+const fetchRectangleData = async (cameraId, setRectangleData) => {
   try {
     const response = await Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
+      `http://localhost:3001/readCamera/${cameraId}/readBoundedRectangles`
     );
-    setPcData(response.data);
+    setRectangleData(response.data);
   } catch (err) {
-    console.error("Failed to get PC Data:", err);
+    console.error("Failed to get Rectangle Data:", err);
   }
 };
 
-export default function UserPcs({
-  parentBuildingId,
-  parentBuildingName,
-  parentLabId,
-  parentLabName,
-  backToLabs,
-  backToBuildings,
+export default function Pcs({
+  cameraId,
+  backToCameras,
 }) {
-  const [pcData, setPcData] = useState([]);
+  const [rectangleData, setRectangleData] = useState([]);
+  const [drawnRectangles, setDrawnRectangles] = useState([]);
 
-  const [requestSent, setRequestSent] = useState(false);
-
-  const handleManualRequest = async () => {
-    try {
-      const loggedInEmail = localStorage.getItem("email");
-      if (!loggedInEmail) {
-        console.error("No logged-in email found.");
-        return;
-      }
-
-      await Axios.post("http://localhost:3001/request-manual-control", {
-        teacherEmail: loggedInEmail,
-        labId: parentLabId,
-        buildingId: parentBuildingId,
-      });
-
-      setRequestSent(true);
-      toast.success("Request sent successfully!");
-    } catch (error) {
-      console.error("Error sending manual control request:", error);
-      toast.error("Failed to send request. Please try again.");
-    }
+  const updateRectangleData = () => {
+    fetchRectangleData(cameraId, setRectangleData);
   };
 
   useEffect(() => {
-    // Subscribe to manual control notifications
-    // socket.on("manualControlNotification", (data) => {
-    //   // if (data.email === localStorage.getItem("email")) {
-    //   // Check if the notification is intended for the logged-in user
+    Axios.get(
+      `http://localhost:3001/readCamera/${cameraId}/readBoundedRectangles`
+    )
+      .then((response) => {
+        setRectangleData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Failed to get rectangles:", error);
+      });
+  }, [cameraId]);
 
-    //   if (data.status === "Granted") {
-    //     toast.success("Manual control request granted!");
-    //   } else if (data.status === "Denied") {
-    //     toast.error("Manual control request denied!");
-    //   }
-    //   // }
-    //   console.log(data.email, data.status);
-    // });
+  const handleBoxCreated = async (boxCoordinates) => {
+    setDrawnRectangles((prevCoordinates) => [
+      ...prevCoordinates,
+      boxCoordinates,
+    ]);
+  };
 
-    // Fetch PC data
-    // fetchPcData(parentBuildingId, parentLabId, setPcData);
-
-    // return () => {
-    //   // Clean up event listeners
-    //   socket.off("manualControlNotification");
-    // };
-  }, [parentBuildingId, parentLabId]);
 
   return (
-    <div className="bg-gray-100 p-4 rounded shadow">
+    <div className="overflow-x-hidden">
       <div className="flex items-center gap-2 mb-2">
         <p
-          className="text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold"
-          onClick={backToBuildings}
+          className="text-2xl sm:text-lg text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 px-2 rounded-lg cursor-pointer font-semibold"
+          onClick={backToCameras}
         >
-          {parentBuildingName}
-        </p>
-        <MaterialSymbolsArrowForwardIosRounded />
-        <p
-          className="text-gray-700 hover:bg-blue-500 hover:text-white hover:transition hover:ease-in-out hover:delay-200 pl-2 pr-2 rounded-lg cursor-pointer text-lg font-semibold"
-          onClick={backToLabs}
-        >
-          {parentLabName}
+          {cameraId}
         </p>
       </div>
-
-      <ImageAnnotator pcData={pcData} readOnly={true} />
-
-      <div className="mt-4">
-        {requestSent ? (
-          <div className="text-green-600">Request Sent</div>
-        ) : (
-          <button
-            className="bg-blue-500 text-white px-2 py-1 rounded"
-            onClick={handleManualRequest}
-          >
-            Request Manual Control
-          </button>
-        )}
+      <div className="flex sm:hidden">
+        <p className="m-2">To edit, please use a desktop browser</p>
+        <span className="bg-blue-700 p-1 m-2 text-lg rounded-lg text-white text-center">
+          View-only mode
+        </span>
       </div>
-
-      {/*<div className="mt-4">
-        <MannualRequestButtons />
-        </div>*/}
+      <div className="overflow-x-auto">
+        <ImageAnnotator onBoxCreated={handleBoxCreated} rectangleData={rectangleData} />
+      </div>
+      <div className="hidden sm:block m-2">
+      </div>
     </div>
   );
 }

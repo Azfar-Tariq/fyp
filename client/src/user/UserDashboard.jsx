@@ -1,8 +1,8 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import UserSideBar from "./components/UserSideBar"; // Import UserSidebar
-import DashboardUser from "./pages/DashboardUser"; // Import UserDashboardPage
 import UserProfile from "./pages/UserProfile"; // Import UserProfilePage
 import ErrorPage from "./pages/ErrorPage"; // Import UserErrorPage
+import Area from "./pages/Area";
 
 function UserDashboard() {
   return (
@@ -11,7 +11,7 @@ function UserDashboard() {
       <div className="col-span-4">
         <Routes>
           <Route path="/" element={<Outlet />}>
-            <Route index element={<DashboardUser />} />
+            <Route index element={<Area />} />
             <Route path="profile" element={<UserProfile />} />
             <Route path="*" element={<ErrorPage />} />
           </Route>
