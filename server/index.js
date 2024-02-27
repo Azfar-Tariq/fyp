@@ -54,7 +54,7 @@ poolConnect
 
           if (result.recordset.length > 0) {
             const user = result.recordset[0];
-            const responsePayload = { email: user.email, role: user.role };
+            const responsePayload = { email: user.email, role: user.role , name: user.name};
 
             // Send the response with the payload
             res.status(200).json(responsePayload);
@@ -91,7 +91,7 @@ poolConnect
         res.status(200).json({ message: "Successfully logged out." });
       } catch (error) {
         console.error("Error during logout:", error);
-        res.status(500).json({ message: "Internal server error." });
+        res.status(500).json({ message: "Intern al server error." });
       }
     });
 

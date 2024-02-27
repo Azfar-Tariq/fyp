@@ -14,9 +14,8 @@ export default function Admin() {
       <div className="col-span-4">
         <Routes>
           <Route path="/" element={<Outlet />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Analytics />} />
             <Route path="configuration" element={<Configuration />} />
-            <Route path="analytics" element={<Analytics />} />
             <Route path="users" element={<Users />} />
             <Route path="profile" element={<Profile />} />
             <Route path="*" element={<ErrorPage />} />
