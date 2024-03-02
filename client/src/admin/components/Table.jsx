@@ -30,7 +30,7 @@ function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   );
 }
 
-export default function Table({ selectedCamera }) {
+export default function Table({ selectedCamera, onSelectedRectangleChange }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sorting, setSorting] = useState([]);
@@ -55,6 +55,7 @@ export default function Table({ selectedCamera }) {
 
   const handleRowSelectionChange = (row) => {
     setSelectedRowId(row.original.RectangleID);
+    onSelectedRectangleChange(row.original.RectangleID);
   };
 
   const handleDeleteSelectedRow = () => {

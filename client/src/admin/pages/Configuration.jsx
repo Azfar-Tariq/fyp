@@ -12,12 +12,17 @@ export default function Configuration() {
   const [drawnRectangles, setDrawnRectangles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
+  const [selectedRectangle, setSelectedRectangle] = useState(null);
 
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
   };
   const handleCameraChange = (cameraId) => {
     setSelectedCamera(cameraId);
+  };
+
+  const handleSelectedRectangleChange = (rectangleId) => {
+    setSelectedRectangle(rectangleId);
   };
 
   useEffect(() => {
@@ -97,7 +102,11 @@ export default function Configuration() {
             Configuration
             {selectedArea && selectedCamera && (
               <div>
-                <ImageAnnotator onBoxCreated={handleBoxCreated} data={data} />
+                <ImageAnnotator
+                  onBoxCreated={handleBoxCreated}
+                  data={data}
+                  selectedRectangle={selectedRectangle}
+                />
                 <div className="hidden sm:block m-2">
                   <button
                     className="bg-blue-500 text-white p-2 rounded"
@@ -121,7 +130,11 @@ export default function Configuration() {
       </div>
       {selectedCamera && (
         <div className="mt-4">
-          <Table key={tableKey} selectedCamera={selectedCamera} />
+          <Table
+            key={tableKey}
+            selectedCamera={selectedCamera}
+            onSelectedRectangleChange={handleSelectedRectangleChange}
+          />
         </div>
       )}
     </div>
