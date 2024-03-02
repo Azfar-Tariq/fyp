@@ -152,7 +152,7 @@ export default function SideBar() {
   };
 
   return (
-    <div className="bg-neutral-900 w-60 p-3 flex flex-col">
+    <div className="bg-neutral-900 w-60 p-3 flex flex-col min-h-screen">
       <div className="flex items-center gap-2 px-1 py-3">
       <span className="text-neutral-200 text-lg">{user.name}</span>
       </div>

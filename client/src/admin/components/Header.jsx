@@ -28,9 +28,8 @@
 
 import React, { Fragment } from 'react'
 import { useState, useEffect } from "react";
-import { Menu, Popover, Transition } from '@headlessui/react'
-import { HiOutlineBell, HiOutlineSearch, HiOutlineChatAlt } from 'react-icons/hi'
-import { useNavigate } from 'react-router-dom'
+import { Popover, Transition } from '@headlessui/react'
+import { HiOutlineBell, HiOutlineSearch } from 'react-icons/hi'
 import classNames from 'classnames'
 
 export default function Header() {
@@ -59,7 +58,6 @@ export default function Header() {
       }
 
       const data = await response.json();
-      console.log(data)
       setUser(data);
     } catch (error) {
       console.error("Error fetching user details:", error);
@@ -72,13 +70,16 @@ export default function Header() {
 
 	return (
 		<div className="bg-white h-16 px-4 flex items-center border-b border-gray-200 justify-between">
-			<div className="relative">
-				<HiOutlineSearch fontSize={20} className="text-gray-400 absolute top-1/2 left-3 -translate-y-1/2" />
-				<input
-					type="text"
-					placeholder="Search..."
-					className="text-sm focus:outline-none active:outline-none border border-gray-300 w-[24rem] h-10 pl-11 pr-4 rounded-sm"
-				/>
+      <h1 className="text-xl text-gray-900 font-medium leading-8 mx-auto text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 ">IoT Based Electricity Conservation System</h1>
+      <div className="flex items-center gap-2">
+        {/* <div className="relative">
+          <HiOutlineSearch fontSize={20} className="text-gray-400 absolute top-1/2 left-3 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="text-sm focus:outline-none active:outline-none border border-gray-300 w-[24rem] h-10 pl-11 pr-4 rounded-sm"
+          />
+        </div> */}
 			</div>
 			<div className="flex items-center gap-2 mr-2">
 

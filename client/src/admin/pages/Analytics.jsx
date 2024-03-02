@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import Header from "../components/Header";
 import Axios from "axios";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
@@ -8,13 +7,13 @@ import { PulseLoader } from "react-spinners";
 import Chart from "react-apexcharts";
 
 export default function Analytics() {
-  const [buildingList, setBuildingList] = useState([]);
-  const [labList, setLabList] = useState([]);
-  const [pcList, setPcList] = useState([]);
-  const [selectedBuildingId, setSelectedBuildingId] = useState(null);
-  const [selectedLabId, setSelectedLabId] = useState(null);
-  const [selectedBuildingName, setSelectedBuildingName] = useState("");
-  const [selectedLabName, setSelectedLabName] = useState("");
+  const [areaList, setAreaList] = useState([]);
+  const [cameraList, setCameraList] = useState([]);
+  const [boundedRectangleList, setBoundedRectangleList] = useState([]);
+  const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const [selectedCameraId, setSelectedCameraId] = useState(null);
+  const [selectedAreaName, setSelectedAreaName] = useState("");
+  const [selectedCameraName, setSelectedCameraName] = useState("");
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState({
     options: {
@@ -45,68 +44,74 @@ export default function Analytics() {
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/readBuilding")
+    Axios.get("http://localhost:3001/readArea")
       .then((res) => {
-        setBuildingList(res.data);
+        setAreaList(res.data);
         console.log(res.data);
         setLoading(false);
+        // console.log("Selected Area ID in useeffwct= ", selectedAreaId);
       })
       .catch((err) => {
-        console.error("Failed to get buildings:", err);
+        console.error("Failed to get Areas:", err);
         setLoading(false);
       });
   }, []);
 
-  const fetchLabData = (buildingId, buildingName) => {
-    Axios.get(`http://localhost:3001/readBuilding/${buildingId}/readLab`)
+  const fetchCameraData = (areaId, areaName) => {
+    Axios.get(`http://localhost:3001/readArea/${areaId}/readCamera`)
       .then((res) => {
-        setLabList(res.data);
-        setSelectedBuildingId(buildingId);
-        setSelectedLabId(null);
-        setSelectedBuildingName(buildingName);
-        setSelectedLabName("");
+        setCameraList(res.data);
+        setSelectedAreaId(areaId);
+        setSelectedCameraId(null);
+        setSelectedAreaName(areaName);
+        setSelectedCameraName("");
+        // console.log("Area ID = ", areaId)
+        // console.log("Selected Area ID = ", selectedAreaId)
+
+        
       })
       .catch((err) => {
-        console.error("Failed to get labs:", err);
+        console.error("Failed to get Cameras:", err);
       });
   };
 
-  const fetchPcData = (labId, labName) => {
+  const fetchPcData = (cameraId, cameraName) => {
     Axios.get(
-      `http://localhost:3001/readBuilding/${selectedBuildingId}/readLab/${labId}/readCoordinates`
+      `http://localhost:3001/readArea/${selectedAreaId}/readCamera/${cameraId}/BoundedRectangles`
     )
       .then((res) => {
-        setPcList(res.data);
-        setSelectedLabId(labId);
-        setSelectedLabName(labName);
+        setBoundedRectangleList(res.data);
+        setSelectedCameraId(cameraId);
+        setSelectedCameraName(cameraName);
       })
       .catch((err) => {
         console.error("Failed to get PCs:", err);
       });
   };
 
-  const handleBuildingClick = (buildingId, buildingName) => {
-    if (buildingId === selectedBuildingId) {
-      setSelectedBuildingId(null);
-      setSelectedLabId(null);
-      setSelectedLabName("");
+  const handleAreaClick = (areaId, areaName) => {
+    if (areaId === selectedAreaId) {
+      setSelectedAreaId(null);
+      setSelectedCameraId(null);
+      setSelectedCameraName("");
+
       // setSelectedPcStatus("");
     } else {
-      fetchLabData(buildingId, buildingName);
+      fetchCameraData(areaId, areaName);
     }
   };
 
-  const handleLabClick = (labId, labName) => {
-    if (labId === selectedLabId) {
-      setSelectedLabId(null);
+  const handleCameraClick = (cameraId, cameraName) => {
+    if (cameraId === selectedCameraId) {
+      setSelectedCameraId(null);
     } else {
-      fetchPcData(labId, labName);
+      fetchPcData(cameraId, cameraName);
+      console.log("Selected camera Id: " + cameraId);
     }
   };
 
   return (
     <div className="col-span-4 px-6 py-4 h-screen">
-      <Header title="Analytics" />
       <div className="block sm:flex">
         <div className="flex flex-col w-72">
           {loading && (
@@ -115,30 +120,34 @@ export default function Analytics() {
             </div>
           )}
           <ul>
-            {buildingList.map((building, buildingIndex) => (
-              <li key={buildingIndex} className="bg-gray-800 p-2">
-                <a
-                  className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                  onClick={() =>
-                    handleBuildingClick(building.id, building.buildingName)
-                  }
+            {areaList.map((area, areaIndex) => (
+  <li key={areaIndex} className="bg-gray-800 p-2">
+    {/* {console.log(area)} */}
+    <a
+      className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
+      onClick={() => {
+        handleAreaClick(area.areaId, area.areaName);
+      }}
                 >
-                  {building.id === selectedBuildingId ? (
+                  {area.areaId === selectedAreaId ? (
                     <IcOutlineKeyboardArrowDown />
                   ) : (
                     <MaterialSymbolsArrowForwardIosRounded />
                   )}
-                  <span>{building.buildingName}</span>
+                  <span>{area.areaName}
+                  {console.log("Selected area ID in with selectedareaid return: "+ selectedAreaId + ' ID in return'+area.areaId)}
+                  {/* {console.log("Selected area ID in return: ", )} */}
+                  </span>
                 </a>
-                {building.id === selectedBuildingId && (
+                {area.id === selectedAreaId && (
                   <ul className="ml-4">
-                    {labList.map((lab, labIndex) => (
-                      <li key={labIndex} className="p-2 ml-3">
+                    {cameraList.map((camera, cameraIndex) => (
+                      <li key={cameraIndex} className="p-2 ml-3">
                         <a
                           className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                          onClick={() => handleLabClick(lab.id, lab.labName)}
+                          onClick={() => handleCameraClick(camera.cameraId, camera.cameraName)}
                         >
-                          <span>{lab.labName}</span>
+                          <span>{camera.cameraName}</span>
                         </a>
                       </li>
                     ))}
@@ -149,15 +158,17 @@ export default function Analytics() {
           </ul>
         </div>
         <div className="p-4">
-          {selectedBuildingName && (
+          {selectedAreaName && (
             <div>
-              <strong>Selected Building: </strong> {selectedBuildingName}
+              <strong>Selected Area: </strong> {selectedAreaName}
             </div>
           )}
-          {selectedLabName && (
+          {selectedCameraName && (
+            
             <div>
+              {console.log("Selected Camera Name: ", selectedCameraName)}
               <div>
-                <strong>Selected Lab: </strong> {selectedLabName}
+                <strong>Selected Camera: </strong> {selectedCameraName}
               </div>
               <div className="overflow-x-auto">
                 <Chart

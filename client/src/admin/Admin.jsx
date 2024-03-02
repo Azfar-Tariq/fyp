@@ -1,4 +1,5 @@
 import { Routes, Route, Outlet } from "react-router-dom";
+import Header from "./components/Header";
 import SideBar from "./components/SideBar";
 import Dashboard from "./pages/Dashboard";
 import Configuration from "./pages/Configuration";
@@ -9,18 +10,21 @@ import ErrorPage from "./pages/ErrorPage";
 
 export default function Admin() {
   return (
-    <div className="block sm:grid grid-cols-5">
-      <SideBar />
-      <div className="col-span-4">
-        <Routes>
-          <Route path="/" element={<Outlet />}>
-            <Route path="/" element={<Analytics />} />
-            <Route path="configuration" element={<Configuration />} />
-            <Route path="users" element={<Users />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="*" element={<ErrorPage />} />
-          </Route>
-        </Routes>
+    <div className="flex h-screen">
+      <SideBar className="h-full" />
+      <div className="flex flex-col w-full">
+        <Header />
+        <div className="overflow-auto">
+          <Routes>
+            <Route path="/" element={<Outlet />}>
+              <Route path="/" element={<Analytics />} />
+              <Route path="configuration" element={<Configuration />} />
+              <Route path="users" element={<Users />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="*" element={<ErrorPage />} />
+            </Route>
+          </Routes>
+        </div>
       </div>
     </div>
   );
