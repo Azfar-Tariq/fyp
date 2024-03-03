@@ -3,6 +3,11 @@ import { useState } from "react";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { useEffect } from "react";
 import Axios from "axios";
+import { MaterialSymbolsAddRounded } from "../assets/icons/add";
+import Add from "./Add";
+import ModalOverlay from "./ModalOverlay";
+import Dialog from "./Dialog";
+import { toast } from "react-toastify";
 
 export default function Select({
   selectedArea,
@@ -13,6 +18,42 @@ export default function Select({
   const [areas, setAreas] = useState([]);
   const [cameras, setCameras] = useState([]);
   const [showCameras, setShowCameras] = useState(false);
+  const [isAreaDialogOpen, setIsAreaDialogOpen] = useState(false);
+  const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
+  const [areaName, setAreaName] = useState("");
+  const [cameraName, setCameraName] = useState("");
+
+  const handleAreaSubmitDialog = () => {
+    Axios.post("http://localhost:3001/insertArea", {
+      areaName: areaName,
+    })
+      .then((response) => {
+        console.log(response.data);
+        toast.success("Building added successfully");
+      })
+      .catch((error) => {
+        console.error("Failed to save building:", error);
+      });
+    setIsAreaDialogOpen(false);
+    setIsCameraDialogOpen(false);
+    setAreaName("");
+  };
+
+  const handleCameraSubmitDialog = () => {
+    Axios.post(`http://localhost:3001/readArea/${selectedArea}/addCamera`, {
+      cameraName: cameraName,
+    })
+      .then((response) => {
+        console.log(response.data);
+        toast.success("Lab added successfully");
+      })
+      .catch((err) => {
+        console.error("Failed to save lab:", err);
+      });
+    setIsAreaDialogOpen(false);
+    setIsCameraDialogOpen(false);
+    setCameraName("");
+  };
 
   useEffect(() => {
     Axios.get("http://localhost:3001/readArea")
@@ -35,6 +76,14 @@ export default function Select({
         });
     }
   }, [selectedArea]);
+
+  const toggleCameraDialog = () => {
+    setIsCameraDialogOpen(!isCameraDialogOpen);
+  };
+
+  const toggleAreaDialog = () => {
+    setIsAreaDialogOpen(!isAreaDialogOpen);
+  };
 
   const handleAreaClick = (areaId) => {
     if (selectedCamera) {
@@ -76,6 +125,19 @@ export default function Select({
                   </option>
                 ))}
               </select>
+              <Add toggleDialog={toggleAreaDialog} text="Area" />
+              {isAreaDialogOpen && (
+                <ModalOverlay isOpen={isAreaDialogOpen}>
+                  <Dialog
+                    text="Add Area"
+                    text2="Area"
+                    name={areaName}
+                    setName={setAreaName}
+                    onClose={toggleAreaDialog}
+                    onSubmit={handleAreaSubmitDialog}
+                  />
+                </ModalOverlay>
+              )}
             </div>
             {selectedArea && (
               <div>
@@ -98,6 +160,19 @@ export default function Select({
                     </option>
                   ))}
                 </select>
+                <Add toggleDialog={toggleCameraDialog} text="Camera" />
+                {isCameraDialogOpen && (
+                  <ModalOverlay isOpen={isCameraDialogOpen}>
+                    <Dialog
+                      text="Add Camera"
+                      text2="Camera"
+                      name={cameraName}
+                      setName={setCameraName}
+                      onClose={toggleCameraDialog}
+                      onSubmit={handleCameraSubmitDialog}
+                    />
+                  </ModalOverlay>
+                )}
               </div>
             )}
           </div>
