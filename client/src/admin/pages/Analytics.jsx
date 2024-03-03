@@ -212,7 +212,7 @@ export default function Analytics() {
                   options={chartData.options}
                   series={chartData.series}
                   type="bar"
-                  width={450}
+                  width={420}
                   height={320}
                 />
                 <PieChart className="w-1/4 h-1/4" data={chartData.series[0].data} />

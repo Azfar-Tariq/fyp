@@ -25,7 +25,7 @@ export default function PieChart({ data }) {
 
   return (
     <div>
-      <Chart options={chartData.options} series={chartData.series} type="donut" width="350" />
+      <Chart options={chartData.options} series={chartData.series} type="donut" width="320" />
     </div>
   );
 }
