@@ -5,13 +5,14 @@ import { useEffect } from "react";
 import Axios from "axios";
 
 export default function Select({
-  selectedArea,
-  selectedCamera,
+  selectedArea = "",
+  selectedCamera = "",
   onAreaChange,
   onCameraChange,
 }) {
   const [areas, setAreas] = useState([]);
   const [cameras, setCameras] = useState([]);
+  const [showCameras, setShowCameras] = useState(false);
 
   useEffect(() => {
     Axios.get("http://localhost:3001/readArea")
@@ -36,7 +37,11 @@ export default function Select({
   }, [selectedArea]);
 
   const handleAreaClick = (areaId) => {
+    if (selectedCamera) {
+      onCameraChange("");
+    }
     onAreaChange(areaId);
+    setShowCameras(true);
   };
 
   const handleCameraClick = (cameraId) => {
@@ -46,34 +51,36 @@ export default function Select({
   return (
     <div className="flex flex-col">
       <h2 className="text-lg font-semibold">Areas</h2>
-      <ul>
+      <select
+        className="cursor-pointer"
+        value={selectedArea || ""}
+        onChange={(e) => handleAreaClick(e.target.value)}
+      >
+        <option value="">Select Area</option>
         {areas.map((area) => (
-          <div key={area.areaId}>
-            <div
-              className="flex cursor-pointer"
-              onClick={() => handleAreaClick(area.areaId)}
-            >
-              <IcOutlineKeyboardArrowDown />
-              <li>{area.areaName}</li>
-            </div>
-            {selectedArea === area.areaId && (
-              <ul className="pl-4">
-                {cameras.map((camera) => (
-                  <div key={camera.CameraID}>
-                    <div
-                      className="flex cursor-pointer"
-                      onClick={() => handleCameraClick(camera.CameraID)}
-                    >
-                      <IcOutlineKeyboardArrowDown />
-                      <li className="font-semibold">{camera.CameraName}</li>
-                    </div>
-                  </div>
-                ))}
-              </ul>
-            )}
-          </div>
+          <option key={area.areaId} value={area.areaId}>
+            {area.areaName}
+          </option>
         ))}
-      </ul>
+      </select>
+
+      {selectedArea && (
+        <div className="mt-2">
+          <h2 className="text-lg font-semibold">Cameras</h2>
+          <select
+            className="cursor-pointer"
+            value={selectedCamera || ""}
+            onChange={(e) => handleCameraClick(e.target.value)}
+          >
+            <option value="">Select Camera</option>
+            {cameras.map((camera) => (
+              <option key={camera.CameraID} value={camera.CameraID}>
+                {camera.CameraName}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }
