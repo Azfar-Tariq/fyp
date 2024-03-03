@@ -69,7 +69,7 @@ export default function Table({ selectedCamera, onSelectedRectangleChange }) {
           setData((prevData) =>
             prevData.filter((row) => row.RectangleID !== selectedRowId)
           );
-          setSelectedRowId(null); // Clear selected row ID after deletion
+          setSelectedRowId(null);
         })
         .catch((error) => {
           console.error(`Error deleting rectangle ${selectedRowId}`, error);

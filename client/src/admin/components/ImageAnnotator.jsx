@@ -236,7 +236,10 @@ function ImageAnnotator({ onBoxCreated, data, selectedRectangle }) {
   ]);
 
   return (
-    <div style={{ position: "relative" }} ref={wrapperRef}>
+    <div
+      style={{ position: "relative", width: "fit-content" }}
+      ref={wrapperRef}
+    >
       <canvas
         ref={canvasRef}
         style={{

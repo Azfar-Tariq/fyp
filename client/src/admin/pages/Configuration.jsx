@@ -97,8 +97,8 @@ export default function Configuration() {
   return (
     <div className="py-6 px-4 flex flex-col h-full overflow-y-auto">
       <div className="flex-1">
-        <div className="grid grid-cols-4">
-          <div className="col-span-3">
+        <div className="flex gap-8">
+          <div>
             Configuration
             {selectedArea && selectedCamera && (
               <div>
@@ -118,7 +118,7 @@ export default function Configuration() {
               </div>
             )}
           </div>
-          <div className="col-span-1">
+          <div>
             <Select
               selectedArea={selectedArea}
               selectedCamera={selectedCamera}

@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import Axios from "axios";
 
 export default function Select({
-  selectedArea = "",
-  selectedCamera = "",
+  selectedArea,
+  selectedCamera,
   onAreaChange,
   onCameraChange,
 }) {
@@ -49,38 +49,60 @@ export default function Select({
   };
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-lg font-semibold">Areas</h2>
-      <select
-        className="cursor-pointer"
-        value={selectedArea || ""}
-        onChange={(e) => handleAreaClick(e.target.value)}
-      >
-        <option value="">Select Area</option>
-        {areas.map((area) => (
-          <option key={area.areaId} value={area.areaId}>
-            {area.areaName}
-          </option>
-        ))}
-      </select>
-
-      {selectedArea && (
-        <div className="mt-2">
-          <h2 className="text-lg font-semibold">Cameras</h2>
-          <select
-            className="cursor-pointer"
-            value={selectedCamera || ""}
-            onChange={(e) => handleCameraClick(e.target.value)}
-          >
-            <option value="">Select Camera</option>
-            {cameras.map((camera) => (
-              <option key={camera.CameraID} value={camera.CameraID}>
-                {camera.CameraName}
-              </option>
-            ))}
-          </select>
+    <div className="container mx-auto py-4">
+      <div className="max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="p-4">
+          <h2 className="text-xl font-semibold mb-4">
+            Select an Area and Camera
+          </h2>
+          <div className="flex flex-col space-y-4">
+            <div>
+              <label
+                htmlFor="area"
+                className="text-gray-700 font-semibold mb-2 block"
+              >
+                Select Area:
+              </label>
+              <select
+                id="area"
+                className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={selectedArea || ""}
+                onChange={(e) => handleAreaClick(e.target.value)}
+              >
+                <option value="">Select Area</option>
+                {areas.map((area) => (
+                  <option key={area.areaId} value={area.areaId}>
+                    {area.areaName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedArea && (
+              <div>
+                <label
+                  htmlFor="camera"
+                  className="text-gray-700 font-semibold mb-2 block"
+                >
+                  Select Camera:
+                </label>
+                <select
+                  id="camera"
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={selectedCamera || ""}
+                  onChange={(e) => handleCameraClick(e.target.value)}
+                >
+                  <option value="">Select Camera</option>
+                  {cameras.map((camera) => (
+                    <option key={camera.CameraID} value={camera.CameraID}>
+                      {camera.CameraName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
