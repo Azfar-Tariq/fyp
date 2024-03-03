@@ -1,4 +1,3 @@
-import Header from "../components/Global/Header";
 import { useEffect, useState } from "react";
 import ManualRequestCard from "../components/ManualRequestCard";
 import { toast } from "react-toastify";
@@ -65,14 +64,13 @@ const Users = () => {
 
   return (
     <div className="col-span-4 p-6">
-      <Header title="Users" />
 
       <section className="text-gray-600 body-font">
         <div className="container px-5 py-5 mx-auto">
           <div className="flex flex-wrap -m-2">
             {users.map((user, index) => (
               <div key={index} className="p-2 lg:w-1/3 md:w-1/2 w-full">
-                <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg shadow">
+                <div className="h-full flex bg-white items-center border-gray-200 border p-4 rounded-lg shadow">
                   <img
                     className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
                     src="https://dummyimage.com/80x80"
@@ -93,8 +91,8 @@ const Users = () => {
                 </div>
               </div>
             ))}
-            <div className="p-2 lg:w-1/3 md:w-1/2 w-full">
-              <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg shadow hover:bg-gray-100">
+            <div className=" p-2 lg:w-1/3 md:w-1/2 w-full">
+              <div className=" bg-white h-full flex items-center border-gray-200 border p-4 rounded-lg shadow hover:bg-gray-100">
                 <div className="mr-4">
                   <MaterialSymbolsAddRounded />
                 </div>
