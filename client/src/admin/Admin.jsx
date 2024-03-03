@@ -1,6 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
-import Header from "./components/Header";
-import SideBar from "./components/SideBar";
+import Header from "./components/Global/Header";
+import SideBar from "./components/Global/SideBar";
 import Dashboard from "./pages/Dashboard";
 import Configuration from "./pages/Configuration";
 import Analytics from "./pages/Analytics";
@@ -10,10 +10,10 @@ import ErrorPage from "./pages/ErrorPage";
 
 export default function Admin() {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-200">
       <SideBar className="h-full" />
       <div className="flex flex-col w-full">
-        <Header />
+        <Header className="mb2.5"/>
         <div className="overflow-auto">
           <Routes>
             <Route path="/" element={<Outlet />}>

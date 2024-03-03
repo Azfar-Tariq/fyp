@@ -1,4 +1,4 @@
-import Header from "../components/Header";
+import Header from "../components/Global/Header";
 import { useEffect, useState } from "react";
 import ManualRequestCard from "../components/ManualRequestCard";
 import { toast } from "react-toastify";

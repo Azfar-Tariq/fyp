@@ -473,6 +473,21 @@ poolConnect
       }
     });
 
+    //Read All Cameras for Stats
+    app.get("/readAllCameras", async (req, res) => {
+      try {
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT CameraID, CameraName, Description FROM Camera`
+        );
+        res.status(200).json(result.recordset);
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to get cameras from the database");
+      }
+    });
+    
+
     // -------- Bounded Rectangle Data Endpoints --------
     // send data to database
     app.post("/readCamera/:cameraId/addBoundedRectangle", async (req, res) => {

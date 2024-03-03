@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Add from "../components/Add";
 import Card from "../components/Card";
-import Header from "../components/Header";
+import Header from "../components/Global/Header";
 import Dialog from "../components/Dialog";
 import Axios from "axios";
 import Labs from "../components/Labs";

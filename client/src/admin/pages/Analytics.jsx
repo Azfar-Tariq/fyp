@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Axios from "axios";
+import { getCameraData } from "../components/Analytics/AnalyticsData";
+import DashboardStatsGrid from "../components/Analytics/DashboardStatsGrid";
+import PieChart from "../components/Analytics/PieChart";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
@@ -15,6 +18,8 @@ export default function Analytics() {
   const [selectedAreaName, setSelectedAreaName] = useState("");
   const [selectedCameraName, setSelectedCameraName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [maxUsageTime, setMaxUsageTime] = useState("");
+
   const [chartData, setChartData] = useState({
     options: {
       chart: {
@@ -47,7 +52,7 @@ export default function Analytics() {
     Axios.get("http://localhost:3001/readArea")
       .then((res) => {
         setAreaList(res.data);
-        console.log(res.data);
+        // console.log(res.data);
         setLoading(false);
         // console.log("Selected Area ID in useeffwct= ", selectedAreaId);
       })
@@ -61,6 +66,7 @@ export default function Analytics() {
     Axios.get(`http://localhost:3001/readArea/${areaId}/readCamera`)
       .then((res) => {
         setCameraList(res.data);
+        // console.log(res.data);
         setSelectedAreaId(areaId);
         setSelectedCameraId(null);
         setSelectedAreaName(areaName);
@@ -75,14 +81,42 @@ export default function Analytics() {
       });
   };
 
-  const fetchPcData = (cameraId, cameraName) => {
+  const fetchPcData = ( cameraId, cameraName) => {
     Axios.get(
-      `http://localhost:3001/readArea/${selectedAreaId}/readCamera/${cameraId}/BoundedRectangles`
+      `http://localhost:3001/readCamera/${cameraId}/readBoundedRectangles`
     )
       .then((res) => {
         setBoundedRectangleList(res.data);
+        console.log(cameraId);
+        console.log(cameraName)
         setSelectedCameraId(cameraId);
         setSelectedCameraName(cameraName);
+        console.log(res.data);
+        setChartData({
+          ...chartData,
+          series: [
+            {
+              name: "Usage",
+              data: getCameraData(cameraId),
+            },
+          ],
+        });
+        // Gets the usage data for the selected camera
+      const usageData = getCameraData(cameraId);
+      // Sets the chart data for the selected camera
+      setChartData({
+        ...chartData,
+        series: [
+          {
+            name: "Usage",
+            data: usageData,
+          },
+        ],
+      });
+      // Finds the index of the maximum usage
+      const maxUsageIndex = usageData.indexOf(Math.max(...usageData));
+      // Sets the time of the highest usage
+      setMaxUsageTime(chartData.options.xaxis.categories[maxUsageIndex]);
       })
       .catch((err) => {
         console.error("Failed to get PCs:", err);
@@ -106,11 +140,13 @@ export default function Analytics() {
       setSelectedCameraId(null);
     } else {
       fetchPcData(cameraId, cameraName);
-      console.log("Selected camera Id: " + cameraId);
+      // console.log("Selected camera Id: " + cameraId);
     }
   };
 
   return (
+    <div>
+      <DashboardStatsGrid className="mt-5" />
     <div className="col-span-4 px-6 py-4 h-screen">
       <div className="block sm:flex">
         <div className="flex flex-col w-72">
@@ -135,19 +171,20 @@ export default function Analytics() {
                     <MaterialSymbolsArrowForwardIosRounded />
                   )}
                   <span>{area.areaName}
-                  {console.log("Selected area ID in with selectedareaid return: "+ selectedAreaId + ' ID in return'+area.areaId)}
+                  {/* {console.log("Selected area ID in with selectedareaid return: "+ selectedAreaId + ' ID in return'+area.areaId)} */}
                   {/* {console.log("Selected area ID in return: ", )} */}
                   </span>
                 </a>
-                {area.id === selectedAreaId && (
+                {area.areaId === selectedAreaId && (
                   <ul className="ml-4">
                     {cameraList.map((camera, cameraIndex) => (
                       <li key={cameraIndex} className="p-2 ml-3">
+                        {/* {console.log(camera)} */}
                         <a
                           className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                          onClick={() => handleCameraClick(camera.cameraId, camera.cameraName)}
+                          onClick={() => handleCameraClick(camera.CameraID, camera.CameraName)}
                         >
-                          <span>{camera.cameraName}</span>
+                          <span>{camera.CameraName}</span>
                         </a>
                       </li>
                     ))}
@@ -170,23 +207,25 @@ export default function Analytics() {
               <div>
                 <strong>Selected Camera: </strong> {selectedCameraName}
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto flex justify-around items-center mr-4">
                 <Chart
                   options={chartData.options}
                   series={chartData.series}
                   type="bar"
-                  width={500}
+                  width={450}
                   height={320}
                 />
+                <PieChart className="w-1/4 h-1/4" data={chartData.series[0].data} />
               </div>
               <div>
                 <p className="font-semibold text-lg">Statistics:</p>
-                <p className="font-normal text-sm">Highest Usage is at 11:00</p>
+                <p className="font-normal text-sm">Highest Usage is at {maxUsageTime}</p>
               </div>
             </div>
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
