@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import Axios from "axios";
 import ImageAnnotator from "../components/ImageAnnotator";
 
+const placeholderImage = "https://via.placeholder.com/600x350";
+
 export default function Configuration() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedCamera, setSelectedCamera] = useState(null);
@@ -13,6 +15,7 @@ export default function Configuration() {
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
@@ -23,6 +26,20 @@ export default function Configuration() {
 
   const handleSelectedRectangleChange = (rectangleId) => {
     setSelectedRectangle(rectangleId);
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await Axios.get(
+        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+      );
+      setData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -99,7 +116,10 @@ export default function Configuration() {
       <div className="flex-1">
         <div className="flex gap-8">
           <div>
-            Configuration
+            <p className="text-3xl font-bold mb-4">Configuration</p>
+            {!selectedCamera && (
+              <img src={placeholderImage} className="rounded-md" />
+            )}
             {selectedArea && selectedCamera && (
               <div>
                 <ImageAnnotator
@@ -134,6 +154,7 @@ export default function Configuration() {
             key={tableKey}
             selectedCamera={selectedCamera}
             onSelectedRectangleChange={handleSelectedRectangleChange}
+            onDeleteRectangle={fetchData}
           />
         </div>
       )}

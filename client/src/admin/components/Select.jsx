@@ -98,7 +98,7 @@ export default function Select({
   };
 
   return (
-    <div className="container mx-auto py-4">
+    <div className="container mx-auto pt-12">
       <div className="max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden">
         <div className="p-4">
           <h2 className="text-xl font-semibold mb-4">
