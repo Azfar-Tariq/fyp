@@ -16,12 +16,17 @@ export default function Select({
   onCameraChange,
 }) {
   const [areas, setAreas] = useState([]);
+  const [updatedAreas, setUpdatedAreas] = useState([]);
   const [cameras, setCameras] = useState([]);
   const [showCameras, setShowCameras] = useState(false);
   const [isAreaDialogOpen, setIsAreaDialogOpen] = useState(false);
   const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
   const [areaName, setAreaName] = useState("");
   const [cameraName, setCameraName] = useState("");
+  const [isEditAreaDialogOpen, setIsEditAreaDialogOpen] = useState(false);
+  const [editAreaName, setEditAreaName] = useState("");
+  const [isEditCameraDialogOpen, setIsEditCameraDialogOpen] = useState(false);
+  const [editCameraName, setEditCameraName] = useState("");
 
   const handleAreaSubmitDialog = () => {
     Axios.post("http://localhost:3001/insertArea", {
@@ -97,6 +102,38 @@ export default function Select({
     onCameraChange(cameraId);
   };
 
+  const deleteArea = (id) => {
+    Axios.delete(`http://localhost:3001/deleteArea/${selectedArea}`)
+      .then((res) => {
+        console.log(res.data);
+        updatedAreas();
+        toast.success("Building deleted successfully");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const openEditDialog = () => {
+    // setEditAreaName(val.buildingName);
+    setIsEditAreaDialogOpen(true);
+  };
+
+  const handleSubmitDialog = () => {
+    Axios.put(`http://localhost:3001/updateArea/${selectedArea}`, {
+      newAreaName: editAreaName,
+    })
+      .then((res) => {
+        console.log(res.data);
+        updatedAreas();
+        toast.success("Building updated successfully");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setIsEditAreaDialogOpen(false);
+  };
+
   return (
     <div className="container mx-auto pt-12">
       <div className="max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden">
@@ -125,19 +162,49 @@ export default function Select({
                   </option>
                 ))}
               </select>
-              <Add toggleDialog={toggleAreaDialog} text="Area" />
-              {isAreaDialogOpen && (
-                <ModalOverlay isOpen={isAreaDialogOpen}>
-                  <Dialog
-                    text="Add Area"
-                    text2="Area"
-                    name={areaName}
-                    setName={setAreaName}
-                    onClose={toggleAreaDialog}
-                    onSubmit={handleAreaSubmitDialog}
-                  />
-                </ModalOverlay>
-              )}
+              <div className="flex justify-between gap-2">
+                <Add toggleDialog={toggleAreaDialog} text="Area" />
+                {selectedArea && (
+                  <div
+                    className="p-2 mt-3 rounded-md text-center bg-blue-400"
+                    onClick={openEditDialog}
+                  >
+                    Edit
+                  </div>
+                )}
+                {isEditAreaDialogOpen && (
+                  <ModalOverlay isOpen={isEditAreaDialogOpen}>
+                    <Dialog
+                      text="Edit Area"
+                      text2="Area"
+                      name={editAreaName}
+                      setName={setEditAreaName}
+                      onClose={() => setIsEditAreaDialogOpen(false)}
+                      onSubmit={handleSubmitDialog}
+                    />
+                  </ModalOverlay>
+                )}
+                {selectedArea && (
+                  <div
+                    className="p-2 mt-3 rounded-md text-center bg-red-400"
+                    onClick={deleteArea}
+                  >
+                    Delete
+                  </div>
+                )}
+                {isAreaDialogOpen && (
+                  <ModalOverlay isOpen={isAreaDialogOpen}>
+                    <Dialog
+                      text="Add Area"
+                      text2="Area"
+                      name={areaName}
+                      setName={setAreaName}
+                      onClose={toggleAreaDialog}
+                      onSubmit={handleAreaSubmitDialog}
+                    />
+                  </ModalOverlay>
+                )}
+              </div>
             </div>
             {selectedArea && (
               <div>
@@ -160,19 +227,49 @@ export default function Select({
                     </option>
                   ))}
                 </select>
-                <Add toggleDialog={toggleCameraDialog} text="Camera" />
-                {isCameraDialogOpen && (
-                  <ModalOverlay isOpen={isCameraDialogOpen}>
-                    <Dialog
-                      text="Add Camera"
-                      text2="Camera"
-                      name={cameraName}
-                      setName={setCameraName}
-                      onClose={toggleCameraDialog}
-                      onSubmit={handleCameraSubmitDialog}
-                    />
-                  </ModalOverlay>
-                )}
+                <div className="flex justify-between gap-2">
+                  <Add toggleDialog={toggleAreaDialog} text="Area" />
+                  {selectedArea && (
+                    <div
+                      className="p-2 mt-3 rounded-md text-center bg-blue-400"
+                      onClick={openEditDialog}
+                    >
+                      Edit
+                    </div>
+                  )}
+                  {isEditAreaDialogOpen && (
+                    <ModalOverlay isOpen={isEditAreaDialogOpen}>
+                      <Dialog
+                        text="Edit Area"
+                        text2="Area"
+                        name={editAreaName}
+                        setName={setEditAreaName}
+                        onClose={() => setIsEditAreaDialogOpen(false)}
+                        onSubmit={handleSubmitDialog}
+                      />
+                    </ModalOverlay>
+                  )}
+                  {selectedArea && (
+                    <div
+                      className="p-2 mt-3 rounded-md text-center bg-red-400"
+                      onClick={deleteArea}
+                    >
+                      Delete
+                    </div>
+                  )}
+                  {isAreaDialogOpen && (
+                    <ModalOverlay isOpen={isAreaDialogOpen}>
+                      <Dialog
+                        text="Add Area"
+                        text2="Area"
+                        name={areaName}
+                        setName={setAreaName}
+                        onClose={toggleAreaDialog}
+                        onSubmit={handleAreaSubmitDialog}
+                      />
+                    </ModalOverlay>
+                  )}
+                </div>
               </div>
             )}
           </div>

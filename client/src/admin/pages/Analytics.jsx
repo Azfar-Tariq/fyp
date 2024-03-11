@@ -147,56 +147,66 @@ export default function Analytics() {
       <DashboardStatsGrid className="mt-5" />
       <div className="col-span-4 px-6 py-4 h-screen">
         <div className="block sm:flex">
-          <div className="flex flex-col w-72">
-            {loading && (
+          <div className="p-4 bg-white shadow-md rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">
+              Select an Area and Camera
+            </h2>
+            <div className="flex flex-col space-y-4">
               <div>
-                <PulseLoader />
-              </div>
-            )}
-            <ul>
-              {areaList.map((area, areaIndex) => (
-                <li key={areaIndex} className="bg-gray-800 p-2">
-                  {/* {console.log(area)} */}
-                  <a
-                    className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                    onClick={() => {
-                      handleAreaClick(area.areaId, area.areaName);
-                    }}
-                  >
-                    {area.areaId === selectedAreaId ? (
-                      <IcOutlineKeyboardArrowDown />
-                    ) : (
-                      <MaterialSymbolsArrowForwardIosRounded />
-                    )}
-                    <span>
+                <label
+                  htmlFor="area"
+                  className="text-gray-700 font-semibold mb-2 block"
+                >
+                  Select Area:
+                </label>
+                <select
+                  id="area"
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={selectedAreaId || ""}
+                  onChange={(e) =>
+                    handleAreaClick(
+                      e.target.value,
+                      e.target.options[e.target.selectedIndex].text
+                    )
+                  }
+                >
+                  <option value="">Select Area</option>
+                  {areaList.map((area) => (
+                    <option key={area.areaId} value={area.areaId}>
                       {area.areaName}
-                      {/* {console.log("Selected area ID in with selectedareaid return: "+ selectedAreaId + ' ID in return'+area.areaId)} */}
-                      {/* {console.log("Selected area ID in return: ", )} */}
-                    </span>
-                  </a>
-                  {area.areaId === selectedAreaId && (
-                    <ul className="ml-4">
-                      {cameraList.map((camera, cameraIndex) => (
-                        <li key={cameraIndex} className="p-2 ml-3">
-                          {/* {console.log(camera)} */}
-                          <a
-                            className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                            onClick={() =>
-                              handleCameraClick(
-                                camera.CameraID,
-                                camera.CameraName
-                              )
-                            }
-                          >
-                            <span>{camera.CameraName}</span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedAreaId && (
+                <div>
+                  <label
+                    htmlFor="camera"
+                    className="text-gray-700 font-semibold mb-2 block"
+                  >
+                    Select Camera:
+                  </label>
+                  <select
+                    id="camera"
+                    className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={selectedCameraId || ""}
+                    onChange={(e) =>
+                      handleCameraClick(
+                        e.target.value,
+                        e.target.options[e.target.selectedIndex].text
+                      )
+                    }
+                  >
+                    <option value="">Select Camera</option>
+                    {cameraList.map((camera) => (
+                      <option key={camera.CameraID} value={camera.CameraID}>
+                        {camera.CameraName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
           <div className="p-4">
             {selectedAreaName && (
