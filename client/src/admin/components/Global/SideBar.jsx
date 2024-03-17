@@ -5,7 +5,6 @@ import { MaterialSymbolsAccountCircle } from "../../assets/icons/profile";
 import { PhUsersBold } from "../../assets/icons/users";
 
 export default function SideBar() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState({ name: "", email: "" });
 
   const get = async () => {
@@ -41,25 +40,24 @@ export default function SideBar() {
     get();
   }, []);
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
   return (
-    <div className="bg-neutral-900 w-60 p-3 flex flex-col min-h-screen">
-      <div className="flex items-center gap-2 px-1 py-3">
-        <span className="text-neutral-200 text-lg">{user.name}</span>
+    <div className="p-3 bg-purple-50 border border-gray-200 flex flex-col h-[600px] m-4 rounded-lg">
+      <div className="flex justify-center items-center gap-2 px-1 py-3">
+        <span className="text-black text-lg">LOGO</span>
       </div>
-      <div className="py-8 flex flex-1 flex-col gap-0.5">
+      <div className="flex flex-col gap-2">
         {sidebarItems.map((item, index) => (
           <a
             key={index}
             href={item.dest}
-            onClick={() => setSelectedTab(index)}
-            className={`flex items-center text-xl p-2  gap-4 text-white hover:bg-gray-700 border-b border-gray-500`}
+            className="border border-purple-400 hover:border-purple-700 flex flex-col items-center m-2 py-4 rounded-xl hover:scale-105 group transition duration-300 ease-in-out"
           >
-            {item.img}
-            <span>{item.name}</span>
+            <p className="m-2 text-black group-hover:text-purple-700">
+              {item.img}
+            </p>
+            <span className="text-black text-base group-hover:text-purple-700">
+              {item.name}
+            </span>
           </a>
         ))}
       </div>

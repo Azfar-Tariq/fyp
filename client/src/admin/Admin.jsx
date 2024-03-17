@@ -9,9 +9,11 @@ import ErrorPage from "./pages/ErrorPage";
 
 export default function Admin() {
   return (
-    <div className="flex h-screen bg-gray-200">
-      <SideBar className="h-full" />
-      <div className="flex flex-col w-full">
+    <div className="flex">
+      <div className="w-[14%] fixed">
+        <SideBar />
+      </div>
+      <div className="flex flex-col w-[86%]" style={{ marginLeft: "14%" }}>
         <Header className="mb2.5" />
         <div className="overflow-auto">
           <Routes>

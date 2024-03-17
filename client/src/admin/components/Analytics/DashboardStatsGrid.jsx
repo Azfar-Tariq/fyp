@@ -80,7 +80,7 @@ export default function DashboardStatsGrid() {
 
 function BoxWrapper({ children }) {
   return (
-    <div className="bg-white rounded-sm p-4 flex-1 border border-gray-300 shadow-lg transform transition-transform duration-200 hover:scale-105 flex items-center">
+    <div className="bg-purple-50 rounded-md p-4 flex-1 border border-gray-300 shadow-md transform transition-transform duration-200 hover:scale-105 flex items-center">
       {children}
     </div>
   );

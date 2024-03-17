@@ -145,9 +145,9 @@ export default function Analytics() {
   return (
     <div>
       <DashboardStatsGrid className="mt-5" />
-      <div className="col-span-4 px-6 py-4 h-screen">
+      <div className="col-span-4 px-6 py-4">
         <div className="block sm:flex">
-          <div className="p-4 bg-white shadow-md rounded-lg">
+          <div className="p-4 bg-purple-50 border border-gray-300 shadow-md rounded-lg">
             <h2 className="text-xl font-semibold mb-4">
               Select an Area and Camera
             </h2>
@@ -161,7 +161,7 @@ export default function Analytics() {
                 </label>
                 <select
                   id="area"
-                  className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full py-2 px-3 bg-purple-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
                   value={selectedAreaId || ""}
                   onChange={(e) =>
                     handleAreaClick(
@@ -188,7 +188,7 @@ export default function Analytics() {
                   </label>
                   <select
                     id="camera"
-                    className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full py-2 px-3 bg-purple-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
                     value={selectedCameraId || ""}
                     onChange={(e) =>
                       handleCameraClick(
