@@ -41,7 +41,7 @@ export default function Header() {
 
   return (
     <div className="bg-white h-16 px-4 flex items-center border-b border-gray-300 justify-between">
-      <h1 className="text-xl text-gray-900 font-medium leading-8 mx-auto text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 ">
+      <h1 className="text-2xl text-gray-900 font-bold leading-8 mx-auto text-transparent bg-clip-text bg-purple-500">
         IoT Based Electricity Conservation System
       </h1>
       <div className="flex items-center gap-2">
@@ -60,11 +60,11 @@ export default function Header() {
             <>
               <Popover.Button
                 className={classNames(
-                  open && "bg-gray-100",
-                  "group inline-flex items-center rounded-sm p-1.5 text-gray-700 hover:text-opacity-100 focus:outline-none active:bg-gray-100"
+                  open && "bg-purple-100",
+                  "group inline-flex items-center rounded-lg hover:bg-purple-100 transition ease-in-out duration-300 p-1.5 text-gray-700 hover:text-opacity-100 focus:outline-none active:bg-gray-100"
                 )}
               >
-                <HiOutlineBell fontSize={24} />
+                <HiOutlineBell className="text-purple-500" fontSize={24} />
               </Popover.Button>
               <Transition
                 as={Fragment}
@@ -89,7 +89,7 @@ export default function Header() {
             </>
           )}
         </Popover>
-        <h3 className="text-center text-xl text-gray-900 font-medium leading-8">
+        <h3 className="text-center text-xl text-purple-600 font-medium leading-8">
           {user ? user.name : "Loading..."}
         </h3>
       </div>

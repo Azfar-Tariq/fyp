@@ -153,7 +153,7 @@ export default function Table({
           <input
             id="filter"
             type="text"
-            className="border py-2 px-4 rounded focus:outline-none focus:border-blue-500"
+            className="bg-purple-50 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
             placeholder="Search..."
             value={filtering}
             onChange={(e) => setFiltering(e.target.value)}
@@ -161,7 +161,7 @@ export default function Table({
         </div>
         <button
           onClick={handleDeleteSelectedRow}
-          className="bg-red-500 p-2 rounded-full hover:bg-red-600 focus:outline-none"
+          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
         >
           <MaterialSymbolsDelete />
         </button>

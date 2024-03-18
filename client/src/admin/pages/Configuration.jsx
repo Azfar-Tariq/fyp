@@ -117,10 +117,7 @@ export default function Configuration() {
         <div className="flex gap-8">
           <div>
             <p className="text-3xl font-bold mb-4">Configuration</p>
-            {!selectedCamera && (
-              <img src={placeholderImage} className="rounded-md" />
-            )}
-            {selectedArea && selectedCamera && (
+            {selectedCamera ? (
               <div>
                 <ImageAnnotator
                   onBoxCreated={handleBoxCreated}
@@ -136,6 +133,8 @@ export default function Configuration() {
                   </button>
                 </div>
               </div>
+            ) : (
+              <img src={placeholderImage} className="rounded-md" />
             )}
           </div>
           <div>
