@@ -116,6 +116,82 @@ poolConnect
       }
     });
 
+    // Add a new user
+app.post("/addUser", async (req, res) => {
+  const { email, password, name, role} = req.body;
+
+  try {
+    const pool = await sql.connect(config);
+    const request = pool.request();
+    await request
+      .input("email", sql.NVarChar(255), email)
+      .input("password", sql.NVarChar(255), password)
+      .input("name", sql.NVarChar(255), name)
+      .input("role", sql.NVarChar(50), role)
+      .query(
+        "INSERT INTO users (email, password, name, role VALUES (@email, @password, @name, @role)"
+      );
+    res.status(200).send("User added successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to add user");
+  }
+});
+
+// Edit an existing user
+app.put("/editUser/:id", async (req, res) => {
+  const { email, password, name, role} = req.body;
+  const id = req.params.id;
+
+  try {
+    const pool = await sql.connect(config);
+    const request = pool.request();
+    const result = await request.query(`SELECT * FROM users WHERE id = ${id}`);
+    const user = result.recordset[0];
+
+    if (!user) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    await request
+      .input("email", sql.NVarChar(255), email)
+      .input("password", sql.NVarChar(255), password)
+      .input("name", sql.NVarChar(255), name)
+      .input("role", sql.NVarChar(50), role)
+      .query(
+        `UPDATE users SET email = @email, password = @password, name = @name, role = @role WHERE id = ${id}`
+      );
+    res.status(200).send("User updated successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to update user");
+  }
+});
+
+// Remove an existing user
+app.delete("/removeUser/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const pool = await sql.connect(config);
+    const request = pool.request();
+    const result = await request.query(`SELECT * FROM users WHERE id = ${id}`);
+    const user = result.recordset[0];
+
+    if (!user) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    await request.query(`DELETE FROM users WHERE id = ${id}`);
+    res.status(200).send("User removed successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to remove user");
+  }
+});
+
     // ----------Get Users for Users.js in Admin Dashboard endpoint-------------
     app.get("/users", async (req, res) => {
       try {
