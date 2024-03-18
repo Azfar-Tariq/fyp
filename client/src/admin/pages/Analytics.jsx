@@ -1,21 +1,25 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import Header from "../components/Header";
 import Axios from "axios";
+import { getCameraData } from "../components/Analytics/AnalyticsData";
+import DashboardStatsGrid from "../components/Analytics/DashboardStatsGrid";
+import PieChart from "../components/Analytics/PieChart";
 import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
 import Chart from "react-apexcharts";
 
 export default function Analytics() {
-  const [buildingList, setBuildingList] = useState([]);
-  const [labList, setLabList] = useState([]);
-  const [pcList, setPcList] = useState([]);
-  const [selectedBuildingId, setSelectedBuildingId] = useState(null);
-  const [selectedLabId, setSelectedLabId] = useState(null);
-  const [selectedBuildingName, setSelectedBuildingName] = useState("");
-  const [selectedLabName, setSelectedLabName] = useState("");
+  const [areaList, setAreaList] = useState([]);
+  const [cameraList, setCameraList] = useState([]);
+  const [boundedRectangleList, setBoundedRectangleList] = useState([]);
+  const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const [selectedCameraId, setSelectedCameraId] = useState(null);
+  const [selectedAreaName, setSelectedAreaName] = useState("");
+  const [selectedCameraName, setSelectedCameraName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [maxUsageTime, setMaxUsageTime] = useState("");
+
   const [chartData, setChartData] = useState({
     options: {
       chart: {
@@ -45,135 +49,199 @@ export default function Analytics() {
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/readBuilding")
+    Axios.get("http://localhost:3001/readArea")
       .then((res) => {
-        setBuildingList(res.data);
-        console.log(res.data);
+        setAreaList(res.data);
+        // console.log(res.data);
         setLoading(false);
+        // console.log("Selected Area ID in useeffwct= ", selectedAreaId);
       })
       .catch((err) => {
-        console.error("Failed to get buildings:", err);
+        console.error("Failed to get Areas:", err);
         setLoading(false);
       });
   }, []);
 
-  const fetchLabData = (buildingId, buildingName) => {
-    Axios.get(`http://localhost:3001/readBuilding/${buildingId}/readLab`)
+  const fetchCameraData = (areaId, areaName) => {
+    Axios.get(`http://localhost:3001/readArea/${areaId}/readCamera`)
       .then((res) => {
-        setLabList(res.data);
-        setSelectedBuildingId(buildingId);
-        setSelectedLabId(null);
-        setSelectedBuildingName(buildingName);
-        setSelectedLabName("");
+        setCameraList(res.data);
+        // console.log(res.data);
+        setSelectedAreaId(areaId);
+        setSelectedCameraId(null);
+        setSelectedAreaName(areaName);
+        setSelectedCameraName("");
+        // console.log("Area ID = ", areaId)
+        // console.log("Selected Area ID = ", selectedAreaId)
       })
       .catch((err) => {
-        console.error("Failed to get labs:", err);
+        console.error("Failed to get Cameras:", err);
       });
   };
 
-  const fetchPcData = (labId, labName) => {
+  const fetchPcData = (cameraId, cameraName) => {
     Axios.get(
-      `http://localhost:3001/readBuilding/${selectedBuildingId}/readLab/${labId}/readCoordinates`
+      `http://localhost:3001/readCamera/${cameraId}/readBoundedRectangles`
     )
       .then((res) => {
-        setPcList(res.data);
-        setSelectedLabId(labId);
-        setSelectedLabName(labName);
+        setBoundedRectangleList(res.data);
+        console.log(cameraId);
+        console.log(cameraName);
+        setSelectedCameraId(cameraId);
+        setSelectedCameraName(cameraName);
+        console.log(res.data);
+        setChartData({
+          ...chartData,
+          series: [
+            {
+              name: "Usage",
+              data: getCameraData(cameraId),
+            },
+          ],
+        });
+        // Gets the usage data for the selected camera
+        const usageData = getCameraData(cameraId);
+        // Sets the chart data for the selected camera
+        setChartData({
+          ...chartData,
+          series: [
+            {
+              name: "Usage",
+              data: usageData,
+            },
+          ],
+        });
+        // Finds the index of the maximum usage
+        const maxUsageIndex = usageData.indexOf(Math.max(...usageData));
+        // Sets the time of the highest usage
+        setMaxUsageTime(chartData.options.xaxis.categories[maxUsageIndex]);
       })
       .catch((err) => {
         console.error("Failed to get PCs:", err);
       });
   };
 
-  const handleBuildingClick = (buildingId, buildingName) => {
-    if (buildingId === selectedBuildingId) {
-      setSelectedBuildingId(null);
-      setSelectedLabId(null);
-      setSelectedLabName("");
+  const handleAreaClick = (areaId, areaName) => {
+    if (areaId === selectedAreaId) {
+      setSelectedAreaId(null);
+      setSelectedCameraId(null);
+      setSelectedCameraName("");
+
       // setSelectedPcStatus("");
     } else {
-      fetchLabData(buildingId, buildingName);
+      fetchCameraData(areaId, areaName);
     }
   };
 
-  const handleLabClick = (labId, labName) => {
-    if (labId === selectedLabId) {
-      setSelectedLabId(null);
+  const handleCameraClick = (cameraId, cameraName) => {
+    if (cameraId === selectedCameraId) {
+      setSelectedCameraId(null);
     } else {
-      fetchPcData(labId, labName);
+      fetchPcData(cameraId, cameraName);
+      // console.log("Selected camera Id: " + cameraId);
     }
   };
 
   return (
-    <div className="col-span-4 px-6 py-4 h-screen">
-      <Header title="Analytics" />
-      <div className="block sm:flex">
-        <div className="flex flex-col w-72">
-          {loading && (
-            <div>
-              <PulseLoader />
-            </div>
-          )}
-          <ul>
-            {buildingList.map((building, buildingIndex) => (
-              <li key={buildingIndex} className="bg-gray-800 p-2">
-                <a
-                  className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                  onClick={() =>
-                    handleBuildingClick(building.id, building.buildingName)
+    <div>
+      <DashboardStatsGrid className="mt-5" />
+      <div className="col-span-4 px-6 py-4">
+        <div className="block sm:flex">
+          <div className="p-4 bg-purple-50 border border-gray-300 shadow-md rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">
+              Select an Area and Camera
+            </h2>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <label
+                  htmlFor="area"
+                  className="text-gray-700 font-semibold mb-2 block"
+                >
+                  Select Area:
+                </label>
+                <select
+                  id="area"
+                  className="w-full py-2 px-3 bg-purple-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  value={selectedAreaId || ""}
+                  onChange={(e) =>
+                    handleAreaClick(
+                      e.target.value,
+                      e.target.options[e.target.selectedIndex].text
+                    )
                   }
                 >
-                  {building.id === selectedBuildingId ? (
-                    <IcOutlineKeyboardArrowDown />
-                  ) : (
-                    <MaterialSymbolsArrowForwardIosRounded />
-                  )}
-                  <span>{building.buildingName}</span>
-                </a>
-                {building.id === selectedBuildingId && (
-                  <ul className="ml-4">
-                    {labList.map((lab, labIndex) => (
-                      <li key={labIndex} className="p-2 ml-3">
-                        <a
-                          className="flex items-center text-xl p-2 gap-4 text-white border border-gray-800 cursor-pointer hover:bg-gray-700 rounded-lg"
-                          onClick={() => handleLabClick(lab.id, lab.labName)}
-                        >
-                          <span>{lab.labName}</span>
-                        </a>
-                      </li>
+                  <option value="">Select Area</option>
+                  {areaList.map((area) => (
+                    <option key={area.areaId} value={area.areaId}>
+                      {area.areaName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedAreaId && (
+                <div>
+                  <label
+                    htmlFor="camera"
+                    className="text-gray-700 font-semibold mb-2 block"
+                  >
+                    Select Camera:
+                  </label>
+                  <select
+                    id="camera"
+                    className="w-full py-2 px-3 bg-purple-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    value={selectedCameraId || ""}
+                    onChange={(e) =>
+                      handleCameraClick(
+                        e.target.value,
+                        e.target.options[e.target.selectedIndex].text
+                      )
+                    }
+                  >
+                    <option value="">Select Camera</option>
+                    {cameraList.map((camera) => (
+                      <option key={camera.CameraID} value={camera.CameraID}>
+                        {camera.CameraName}
+                      </option>
                     ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="p-4">
-          {selectedBuildingName && (
-            <div>
-              <strong>Selected Building: </strong> {selectedBuildingName}
+                  </select>
+                </div>
+              )}
             </div>
-          )}
-          {selectedLabName && (
-            <div>
+          </div>
+          <div className="p-4">
+            {selectedAreaName && (
               <div>
-                <strong>Selected Lab: </strong> {selectedLabName}
+                <strong>Selected Area: </strong> {selectedAreaName}
               </div>
-              <div className="overflow-x-auto">
-                <Chart
-                  options={chartData.options}
-                  series={chartData.series}
-                  type="bar"
-                  width={500}
-                  height={320}
-                />
-              </div>
+            )}
+            {selectedCameraName && (
               <div>
-                <p className="font-semibold text-lg">Statistics:</p>
-                <p className="font-normal text-sm">Highest Usage is at 11:00</p>
+                {console.log("Selected Camera Name: ", selectedCameraName)}
+                <div>
+                  <strong>Selected Camera: </strong> {selectedCameraName}
+                </div>
+                <div className="overflow-x-auto flex justify-around items-center mr-4">
+                  <Chart
+                    options={chartData.options}
+                    series={chartData.series}
+                    type="bar"
+                    width={420}
+                    height={320}
+                  />
+                  <PieChart
+                    className="w-1/4 h-1/4"
+                    data={chartData.series[0].data}
+                  />
+                </div>
+                <div>
+                  <p className="font-semibold text-lg">Statistics:</p>
+                  <p className="font-normal text-sm">
+                    Highest Usage is at {maxUsageTime}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

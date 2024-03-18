@@ -8,8 +8,8 @@ import {
 } from "@tanstack/react-table";
 import Axios from "axios";
 import { useRef } from "react";
-// import mData from "./MOCK_DATA.json";
 import { useEffect, useState } from "react";
+import { MaterialSymbolsDelete } from "./../assets/icons/delete";
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
@@ -30,7 +30,11 @@ function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   );
 }
 
-export default function Table({ selectedCamera }) {
+export default function Table({
+  selectedCamera,
+  onSelectedRectangleChange,
+  onDeleteRectangle,
+}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sorting, setSorting] = useState([]);
@@ -54,7 +58,15 @@ export default function Table({ selectedCamera }) {
   }, [selectedCamera]);
 
   const handleRowSelectionChange = (row) => {
-    setSelectedRowId(row.original.RectangleID);
+    // setSelectedRowId(row.original.RectangleID);
+    // onSelectedRectangleChange(row.original.RectangleID);
+    const newSelectedRowId = row.original.RectangleID;
+    setSelectedRowId((prevSelectedRowId) =>
+      prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
+    );
+    onSelectedRectangleChange(
+      selectedRowId === newSelectedRowId ? null : newSelectedRowId
+    );
   };
 
   const handleDeleteSelectedRow = () => {
@@ -68,7 +80,8 @@ export default function Table({ selectedCamera }) {
           setData((prevData) =>
             prevData.filter((row) => row.RectangleID !== selectedRowId)
           );
-          setSelectedRowId(null); // Clear selected row ID after deletion
+          setSelectedRowId(null);
+          onDeleteRectangle();
         })
         .catch((error) => {
           console.error(`Error deleting rectangle ${selectedRowId}`, error);
@@ -132,14 +145,27 @@ export default function Table({ selectedCamera }) {
 
   return (
     <div className="w3-container">
-      <label htmlFor="filter">Search: </label>
-      <input
-        id="filter"
-        type="text"
-        className="border"
-        value={filtering}
-        onChange={(e) => setFiltering(e.target.value)}
-      />
+      <div className="flex gap-6 items-center mb-2">
+        <div className="relative">
+          <label htmlFor="filter" className="sr-only">
+            Search:
+          </label>
+          <input
+            id="filter"
+            type="text"
+            className="bg-purple-50 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
+            placeholder="Search..."
+            value={filtering}
+            onChange={(e) => setFiltering(e.target.value)}
+          />
+        </div>
+        <button
+          onClick={handleDeleteSelectedRow}
+          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
+        >
+          <MaterialSymbolsDelete />
+        </button>
+      </div>
       {loading ? (
         <div>Loading ...</div>
       ) : (
@@ -180,24 +206,31 @@ export default function Table({ selectedCamera }) {
           </tbody>
         </table>
       )}
-      <div className="flex justify-between">
-        <button onClick={handleDeleteSelectedRow}>Delete Selected</button>
-      </div>
-      <div className="flex justify-between">
-        <button onClick={() => table.setPageIndex(0)}>First Page</button>
+      <div className="flex justify-center items-center gap-4 mt-2">
+        <button
+          onClick={() => table.setPageIndex(0)}
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        >
+          First Page
+        </button>
         <button
           disabled={!table.getCanPreviousPage()}
           onClick={() => table.previousPage()}
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Previous Page
         </button>
         <button
           disabled={!table.getCanNextPage()}
           onClick={() => table.nextPage()}
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Next Page
         </button>
-        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>
+        <button
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        >
           Last Page
         </button>
       </div>

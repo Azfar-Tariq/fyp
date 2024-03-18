@@ -2,8 +2,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import image from "../assets/images/labs/lab8.jpg";
 
 const MINIMUM_SHAPE_SIZE = 10;
+const DEFAULT_RECTANGLE_COLOR = "red";
+const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
 
-function ImageAnnotator({ onBoxCreated, data }) {
+function ImageAnnotator({ onBoxCreated, data, selectedRectangle }) {
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -14,11 +16,12 @@ function ImageAnnotator({ onBoxCreated, data }) {
     width: 0,
     height: 0,
   });
+  const [selectedRectangleId, setSelectedRectangleId] = useState(null);
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const drawRectangle = useCallback((ctx, annotation) => {
-    ctx.strokeStyle = "red";
+  const drawRectangle = useCallback((ctx, annotation, color) => {
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.rect(annotation.x, annotation.y, annotation.width, annotation.height);
@@ -173,6 +176,10 @@ function ImageAnnotator({ onBoxCreated, data }) {
   };
 
   useEffect(() => {
+    setSelectedRectangleId(selectedRectangle);
+  }, [selectedRectangle]);
+
+  useEffect(() => {
     const wrapper = wrapperRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -188,12 +195,17 @@ function ImageAnnotator({ onBoxCreated, data }) {
 
         data.forEach((coordinates) => {
           const annotation = {
+            id: coordinates.RectangleID,
             x: coordinates.x1,
             y: coordinates.y1,
             width: coordinates.x2 - coordinates.x1,
             height: coordinates.y2 - coordinates.y1,
           };
-          drawRectangle(ctx, annotation);
+          const color =
+            annotation.id === selectedRectangleId
+              ? HIGHLIGHTED_RECTANGLE_COLOR
+              : DEFAULT_RECTANGLE_COLOR;
+          drawRectangle(ctx, annotation, color);
         });
         annotations.forEach((annotation) => {
           drawRectangle(ctx, annotation);
@@ -219,10 +231,15 @@ function ImageAnnotator({ onBoxCreated, data }) {
     handleMouseMove,
     handleMouseUp,
     data,
+    selectedRectangle,
+    selectedRectangleId,
   ]);
 
   return (
-    <div style={{ position: "relative" }} ref={wrapperRef}>
+    <div
+      style={{ position: "relative", width: "fit-content" }}
+      ref={wrapperRef}
+    >
       <canvas
         ref={canvasRef}
         style={{

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import Axios from "axios";
 import ImageAnnotator from "../components/ImageAnnotator";
 
+const placeholderImage = "https://via.placeholder.com/600x350";
+
 export default function Configuration() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedCamera, setSelectedCamera] = useState(null);
@@ -12,12 +14,32 @@ export default function Configuration() {
   const [drawnRectangles, setDrawnRectangles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
+  const [selectedRectangle, setSelectedRectangle] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
   };
   const handleCameraChange = (cameraId) => {
     setSelectedCamera(cameraId);
+  };
+
+  const handleSelectedRectangleChange = (rectangleId) => {
+    setSelectedRectangle(rectangleId);
+  };
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await Axios.get(
+        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+      );
+      setData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -92,12 +114,16 @@ export default function Configuration() {
   return (
     <div className="py-6 px-4 flex flex-col h-full overflow-y-auto">
       <div className="flex-1">
-        <div className="grid grid-cols-4">
-          <div className="col-span-3">
-            Configuration
-            {selectedArea && selectedCamera && (
+        <div className="flex gap-8">
+          <div>
+            <p className="text-3xl font-bold mb-4">Configuration</p>
+            {selectedCamera ? (
               <div>
-                <ImageAnnotator onBoxCreated={handleBoxCreated} data={data} />
+                <ImageAnnotator
+                  onBoxCreated={handleBoxCreated}
+                  data={data}
+                  selectedRectangle={selectedRectangle}
+                />
                 <div className="hidden sm:block m-2">
                   <button
                     className="bg-blue-500 text-white p-2 rounded"
@@ -107,9 +133,11 @@ export default function Configuration() {
                   </button>
                 </div>
               </div>
+            ) : (
+              <img src={placeholderImage} className="rounded-md" />
             )}
           </div>
-          <div className="col-span-1">
+          <div>
             <Select
               selectedArea={selectedArea}
               selectedCamera={selectedCamera}
@@ -121,7 +149,12 @@ export default function Configuration() {
       </div>
       {selectedCamera && (
         <div className="mt-4">
-          <Table key={tableKey} selectedCamera={selectedCamera} />
+          <Table
+            key={tableKey}
+            selectedCamera={selectedCamera}
+            onSelectedRectangleChange={handleSelectedRectangleChange}
+            onDeleteRectangle={fetchData}
+          />
         </div>
       )}
     </div>
