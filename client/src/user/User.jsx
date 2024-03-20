@@ -1,21 +1,27 @@
 import { Routes, Route, Outlet } from "react-router-dom";
-import SideBar from "./components/SideBar";
-import Dashboard from "./pages/Dashboard";
+import SideBar from "./components/Global/SideBar";
+import Header from "../admin/components/Global/Header";
+import ManualControl from "./pages/ManualControl";
 import Profile from "./pages/Profile";
 import ErrorPage from "./pages/ErrorPage";
 
 export default function User() {
   return (
-    <div className="block sm:grid grid-cols-5">
-      <SideBar />
-      <div className="col-span-4">
-        <Routes>
-          <Route path="/" element={<Outlet />}>
-            <Route index element={<Dashboard />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="*" element={<ErrorPage />} />
-          </Route>
-        </Routes>
+    <div className="flex">
+      <div className="w-[14%] fixed">
+        <SideBar />
+      </div>
+      <div className="flex flex-col w-[86%]" style={{ marginLeft: "14%" }}>
+        <Header className="mb2.5" />
+        <div className="overflow-auto">
+          <Routes>
+            <Route path="/" element={<Outlet />}>
+              <Route path="/" element={<Profile />} />
+              <Route path="manual-Control" element={<ManualControl/>} />
+              <Route path="*" element={<ErrorPage />} />
+            </Route>
+          </Routes>
+        </div>
       </div>
     </div>
   );

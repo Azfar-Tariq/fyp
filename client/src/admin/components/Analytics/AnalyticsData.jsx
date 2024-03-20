@@ -4,9 +4,9 @@ export const cameraData = {
   3: [100, 140, 120, 170, 110, 130, 90, 120, 150],
 };
 
-export const getCameraData = (cameraId) => {
-  if (cameraData[cameraId]) {
-    return cameraData[cameraId];
+export const getAreaData = (areaId) => {
+  if (cameraData[areaId]) {
+    return cameraData[areaId];
   } else {
     return Array.from(
       { length: 9 },
