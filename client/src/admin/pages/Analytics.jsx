@@ -2,11 +2,7 @@
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import { getAreaData } from "../components/Analytics/AnalyticsData";
-import DashboardStatsGrid from "../components/Analytics/DashboardStatsGrid";
 import PieChart from "../components/Analytics/PieChart";
-import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
-import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
-import { PulseLoader } from "react-spinners";
 import Chart from "react-apexcharts";
 
 export default function Analytics() {
@@ -92,7 +88,6 @@ export default function Analytics() {
   };
   return (
     <div>
-      <DashboardStatsGrid className="mt-5" />
       <div className="col-span-4 px-6 py-4"> 
         <div className="block sm:flex">
           <div className="p-4 bg-purple-50 border border-gray-300 shadow-md rounded-lg">

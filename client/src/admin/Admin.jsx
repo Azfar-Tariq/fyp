@@ -3,9 +3,11 @@ import Header from "./components/Global/Header";
 import SideBar from "./components/Global/SideBar";
 import Configuration from "./pages/Configuration";
 import Analytics from "./pages/Analytics";
+import Areas from "./pages/Areas";
 import Users from "./pages/Users";
 import Profile from "./pages/Profile";
 import ErrorPage from "./pages/ErrorPage";
+import Dashboard from "./pages/Dashboard";
 
 export default function Admin() {
   return (
@@ -18,7 +20,9 @@ export default function Admin() {
         <div className="overflow-auto">
           <Routes>
             <Route path="/" element={<Outlet />}>
-              <Route path="/" element={<Analytics />} />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/areas" element={<Areas />} />
               <Route path="configuration" element={<Configuration />} />
               <Route path="users" element={<Users />} />
               <Route path="profile" element={<Profile />} />

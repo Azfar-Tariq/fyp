@@ -415,6 +415,19 @@ app.delete("/removeUser/:id", async (req, res) => {
       }
     });
 
+    app.get("/readArea/:id", async (req, res) => {
+      try {
+        const request = pool.request();
+        const result = await request.query(
+          "SELECT areaId, areaName, description FROM Area"
+        );
+        res.status(200).json(result.recordset);
+      } catch (error) {
+        console.error("Failed to get areas from SQL Server:", error);
+        res.status(500).send(error);
+      }
+    });
+
     // edit data from database
     app.put("/updateArea/:id", async (req, res) => {
       const { newAreaName, newDescription } = req.body;

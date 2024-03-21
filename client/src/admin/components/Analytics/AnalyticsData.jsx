@@ -5,6 +5,7 @@ export const cameraData = {
 };
 
 export const getAreaData = (areaId) => {
+  console.log(areaId)
   if (cameraData[areaId]) {
     return cameraData[areaId];
   } else {
@@ -12,5 +13,7 @@ export const getAreaData = (areaId) => {
       { length: 9 },
       () => Math.floor(Math.random() * 150) + 50
     );
+   
   }
+  
 };

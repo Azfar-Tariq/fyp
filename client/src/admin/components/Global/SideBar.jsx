@@ -41,7 +41,7 @@ export default function SideBar() {
   }, []);
 
   return (
-    <div className="p-3 bg-purple-50 border border-gray-200 flex flex-col h-[600px] m-4 rounded-lg">
+    <div className="p-3 bg-purple-50 border border-gray-200 flex flex-col h-[600px] m-4 rounded-lg overflow-y-auto">
       <div className="flex justify-center items-center gap-2 px-1 py-3">
         <span className="text-black text-lg">LOGO</span>
       </div>
@@ -63,6 +63,7 @@ export default function SideBar() {
       </div>
     </div>
   );
+  
 }
 
 const sidebarItems = [
@@ -75,6 +76,21 @@ const sidebarItems = [
     name: "Configuration",
     img: <IconParkOutlineSettingConfig />,
     dest: "/admin/configuration",
+  },
+  {
+    name: "Analytics",
+    img: <MajesticonsAnalytics />,
+    dest: "/admin/analytics",
+  },
+  {
+    name: "Areas",
+    img: <MajesticonsAnalytics />,
+    dest: "/admin/areas",
+  },
+  {
+    name: "Cameras",
+    img: <MajesticonsAnalytics />,
+    dest: "/admin/cameras",
   },
   {
     name: "Users",
