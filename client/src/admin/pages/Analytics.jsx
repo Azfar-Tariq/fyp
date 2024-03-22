@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Axios from "axios";
+import AnalyticsCard from "../components/Analytics/AnalyticsCard";
 import { getAreaData } from "../components/Analytics/AnalyticsData";
 import PieChart from "../components/Analytics/PieChart";
 import Chart from "react-apexcharts";
@@ -90,33 +91,21 @@ export default function Analytics() {
     <div>
       <div className="col-span-4 px-6 py-4"> 
         <div className="block sm:flex">
-          <div className="p-4 bg-purple-50 border border-gray-300 shadow-md rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">
-              Select an Area
-            </h2>
             <div className="flex flex-col space-y-4">
               <div>
-                <label htmlFor="area" className="text-gray-700 font-semibold mb-2 block">
-                  Select Area:
-                </label>
-                <select
-                  id="area"
-                  className="w-full py-2 px-3 bg-purple-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  value={selectedAreaId || ""}
-                  onChange={(e) =>
-                    handleAreaClick(e.target.value, e.target.options[e.target.selectedIndex].text)
-                  }
-                >
-                  <option value="">Select Area</option>
-                  {areaList.map((area) => (
-                    <option key={area.areaId} value={area.areaId}>
-                      {area.areaName}
-                    </option>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {areaList.map((val, index) => (
+                    <div key={index} className="relative">
+                      <AnalyticsCard
+                        val={val}
+                        onClick={() => handleAreaClick(val.areaId, val.areaName)}
+                      />
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
             </div>
-          </div>
+          
           <div className="p-4">
             {selectedAreaName && (
               <div>
