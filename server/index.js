@@ -117,80 +117,84 @@ poolConnect
     });
 
     // Add a new user
-app.post("/addUser", async (req, res) => {
-  const { email, password, name, role} = req.body;
+    app.post("/addUser", async (req, res) => {
+      const { email, password, name, role } = req.body;
 
-  try {
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    await request
-      .input("email", sql.NVarChar(255), email)
-      .input("password", sql.NVarChar(255), password)
-      .input("name", sql.NVarChar(255), name)
-      .input("role", sql.NVarChar(50), role)
-      .query(
-        "INSERT INTO users (email, password, name, role VALUES (@email, @password, @name, @role)"
-      );
-    res.status(200).send("User added successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to add user");
-  }
-});
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        await request
+          .input("email", sql.NVarChar(255), email)
+          .input("password", sql.NVarChar(255), password)
+          .input("name", sql.NVarChar(255), name)
+          .input("role", sql.NVarChar(50), role)
+          .query(
+            "INSERT INTO users (email, password, name, role VALUES (@email, @password, @name, @role)"
+          );
+        res.status(200).send("User added successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to add user");
+      }
+    });
 
-// Edit an existing user
-app.put("/editUser/:id", async (req, res) => {
-  const { email, password, name, role} = req.body;
-  const id = req.params.id;
+    // Edit an existing user
+    app.put("/editUser/:id", async (req, res) => {
+      const { email, password, name, role } = req.body;
+      const id = req.params.id;
 
-  try {
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    const result = await request.query(`SELECT * FROM users WHERE id = ${id}`);
-    const user = result.recordset[0];
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT * FROM users WHERE id = ${id}`
+        );
+        const user = result.recordset[0];
 
-    if (!user) {
-      res.status(404).send("User not found");
-      return;
-    }
+        if (!user) {
+          res.status(404).send("User not found");
+          return;
+        }
 
-    await request
-      .input("email", sql.NVarChar(255), email)
-      .input("password", sql.NVarChar(255), password)
-      .input("name", sql.NVarChar(255), name)
-      .input("role", sql.NVarChar(50), role)
-      .query(
-        `UPDATE users SET email = @email, password = @password, name = @name, role = @role WHERE id = ${id}`
-      );
-    res.status(200).send("User updated successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to update user");
-  }
-});
+        await request
+          .input("email", sql.NVarChar(255), email)
+          .input("password", sql.NVarChar(255), password)
+          .input("name", sql.NVarChar(255), name)
+          .input("role", sql.NVarChar(50), role)
+          .query(
+            `UPDATE users SET email = @email, password = @password, name = @name, role = @role WHERE id = ${id}`
+          );
+        res.status(200).send("User updated successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to update user");
+      }
+    });
 
-// Remove an existing user
-app.delete("/removeUser/:id", async (req, res) => {
-  const id = req.params.id;
+    // Remove an existing user
+    app.delete("/removeUser/:id", async (req, res) => {
+      const id = req.params.id;
 
-  try {
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    const result = await request.query(`SELECT * FROM users WHERE id = ${id}`);
-    const user = result.recordset[0];
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT * FROM users WHERE id = ${id}`
+        );
+        const user = result.recordset[0];
 
-    if (!user) {
-      res.status(404).send("User not found");
-      return;
-    }
+        if (!user) {
+          res.status(404).send("User not found");
+          return;
+        }
 
-    await request.query(`DELETE FROM users WHERE id = ${id}`);
-    res.status(200).send("User removed successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to remove user");
-  }
-});
+        await request.query(`DELETE FROM users WHERE id = ${id}`);
+        res.status(200).send("User removed successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to remove user");
+      }
+    });
 
     // ----------Get Users for Users.js in Admin Dashboard endpoint-------------
     app.get("/users", async (req, res) => {
@@ -379,7 +383,7 @@ app.delete("/removeUser/:id", async (req, res) => {
     // -------- Area Data Endpoints --------
     // send data to database
     app.post("/insertArea", async (req, res) => {
-      const { areaName, description } = req.body;
+      const { areaName, description, address, focalPerson, contact } = req.body;
 
       try {
         if (!areaName) {
@@ -391,8 +395,11 @@ app.delete("/removeUser/:id", async (req, res) => {
         await request
           .input("areaName", sql.NVarChar, areaName)
           .input("description", sql.NVarChar, description)
+          .input("description", sql.NVarChar, address)
+          .input("description", sql.NVarChar, focalPerson)
+          .input("description", sql.NVarChar, contact)
           .query(
-            "INSERT INTO Area (areaName, description) VALUES (@areaName, @description)"
+            "INSERT INTO Area (areaName, description, address, focalPerson, contact ) VALUES (@areaName, @description,  @address, @focalPerson, @contact)"
           );
         res.status(200).send("Area saved to database");
       } catch (err) {
@@ -406,7 +413,7 @@ app.delete("/removeUser/:id", async (req, res) => {
       try {
         const request = pool.request();
         const result = await request.query(
-          "SELECT areaId, areaName, description FROM Area"
+          "SELECT areaId, areaName, description, address, focalPerson, contact FROM Area"
         );
         res.status(200).json(result.recordset);
       } catch (error) {
@@ -419,7 +426,7 @@ app.delete("/removeUser/:id", async (req, res) => {
       try {
         const request = pool.request();
         const result = await request.query(
-          "SELECT areaId, areaName, description FROM Area"
+          "SELECT areaId, areaName, description, address, focalPerson, contact FROM Area"
         );
         res.status(200).json(result.recordset);
       } catch (error) {

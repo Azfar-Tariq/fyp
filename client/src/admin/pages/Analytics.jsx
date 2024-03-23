@@ -58,7 +58,6 @@ export default function Analytics() {
       .then((res) => {
         console.log(res.data);
         setChartData({
-         
           ...chartData,
           series: [
             {
@@ -89,34 +88,45 @@ export default function Analytics() {
   };
   return (
     <div>
-      <div className="col-span-4 px-6 py-4"> 
+      <div className="col-span-4 px-6 py-4">
         <div className="block sm:flex">
-            <div className="flex flex-col space-y-4">
-              <div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {areaList.map((val, index) => (
-                    <div key={index} className="relative">
-                      <AnalyticsCard
-                        val={val}
-                        onClick={() => handleAreaClick(val.areaId, val.areaName)}
-                      />
-                    </div>
-                  ))}
-                </div>
+          <div className="flex flex-col space-y-4">
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {areaList.map((val, index) => (
+                  <div key={index} className="relative">
+                    <AnalyticsCard
+                      val={val}
+                      onClick={() => handleAreaClick(val.areaId, val.areaName)}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-          
+          </div>
+
           <div className="p-4">
             {selectedAreaName && (
               <div>
                 <strong>Selected Area: </strong> {selectedAreaName}
                 <div className="overflow-x-auto flex justify-around items-center mr-4">
-                  <Chart options={chartData.options} series={chartData.series} type="bar" width={420} height={320} />
-                  <PieChart className="w-1/4 h-1/4" data={chartData.series[0].data} />
+                  <Chart
+                    options={chartData.options}
+                    series={chartData.series}
+                    type="bar"
+                    width={420}
+                    height={320}
+                  />
+                  <PieChart
+                    className="w-1/4 h-1/4"
+                    data={chartData.series[0].data}
+                  />
                 </div>
                 <div>
                   <p className="font-semibold text-lg">Statistics:</p>
-                  <p className="font-normal text-sm">Highest Usage is at {maxUsageTime}</p>
+                  <p className="font-normal text-sm">
+                    Highest Usage is at {maxUsageTime}
+                  </p>
                 </div>
               </div>
             )}
@@ -125,4 +135,4 @@ export default function Analytics() {
       </div>
     </div>
   );
-            }  
+}
