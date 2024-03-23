@@ -186,8 +186,12 @@ export default function Areas() {
     setSelectedRowId((prevSelectedRowId) =>
       prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
+    
+    const selectedRow = data.find((rowData) => rowData.areaId === newSelectedRowId);
+    // console.log(selectedRow.areaId);
+    setSelectedArea(selectedRow.areaId);
   };
-
+  
   const handleAdd = () => {
     setShowAddForm(true);
   };
@@ -206,16 +210,21 @@ export default function Areas() {
         console.error("Error creating area", error);
       });
   };
-
+  console.log("selected Area",selectedArea)
+  console.log("selected  Row",selectedRowId)
   const handleEditArea = () => {
     const selectedRow = data.find((row) => row.id === selectedRowId);
+    // setSelectedArea(selectedRowId);
+
     if (selectedRow) {
-      setSelectedArea(selectedRow);
+      
       setShowEditForm(true);
     }
   };
   const handleEditAreaSave = (updatedArea) => {
     Axios.put(`http://localhost:3001/updateArea/${selectedRowId}`, updatedArea)
+    console.log(updatedArea)
+
       .then((response) => {
         setData((prevData) =>
           prevData.map(() =>
@@ -370,13 +379,16 @@ export default function Areas() {
       {showAddForm && (
         <AddAreaForm onSave={handleAddFormSave} onClose={handleAddFormClose} />
       )}
-      {showEditForm && (
+      {showEditForm && selectedArea && (
   <EditAreaForm
     onSave={handleEditAreaSave}
     onClose={() => setShowEditForm(false)}
     defaultValues={selectedArea}
+    title="Edit Area"
   />
 )}
+
+
       <div className="flex justify-center items-center gap-4 mt-2">
         <button
           onClick={() => table.setPageIndex(0)}
