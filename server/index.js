@@ -395,9 +395,9 @@ poolConnect
         await request
           .input("areaName", sql.NVarChar, areaName)
           .input("description", sql.NVarChar, description)
-          .input("description", sql.NVarChar, address)
-          .input("description", sql.NVarChar, focalPerson)
-          .input("description", sql.NVarChar, contact)
+          .input("address", sql.NVarChar, address)
+          .input("focalPerson", sql.NVarChar, focalPerson)
+          .input("contact", sql.NVarChar, contact)
           .query(
             "INSERT INTO Area (areaName, description, address, focalPerson, contact ) VALUES (@areaName, @description,  @address, @focalPerson, @contact)"
           );
@@ -437,7 +437,7 @@ poolConnect
 
     // edit data from database
     app.put("/updateArea/:id", async (req, res) => {
-      const { newAreaName, newDescription } = req.body;
+      const { newAreaName, newDescription, newAddress, newFocalPerson, newNumber } = req.body;
       const id = req.params.id;
 
       try {
@@ -452,9 +452,9 @@ poolConnect
           return;
         }
 
-        if (newAreaName || newDescription) {
+        if (newAreaName || newDescription || newAddress || newFocalPerson || newNumber) {
           await request.query(
-            `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}' WHERE areaId = ${id}`
+            `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}', address ='${newAddress}', focalPerson = '${newFocalPerson}', number = '${newNumber}'   WHERE areaId = ${id}`
           );
         }
         res.status(200).send("Area updated successfully");

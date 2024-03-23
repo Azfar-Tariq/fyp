@@ -1,5 +1,133 @@
+// /* eslint-disable no-unused-vars */
+// import { useEffect, useState } from "react";
+// import Add from "../components/Add";
+// import Card from "../components/Area_Components/Card";
+// import Dialog from "../components/Dialog";
+// import Axios from "axios";
+// import { ToastContainer, toast } from "react-toastify";
+// import ModalOverlay from "../components/ModalOverlay";
+// import { PulseLoader } from "react-spinners";
+
+// const fetchData = async (setAreaList) => {
+//   try {
+//     const response = await Axios.get("http://localhost:3001/readArea");
+//     setAreaList(response.data);
+//   } catch (err) {
+//     console.error("Failed to get Areas:", err);
+//   }
+// };
+
+// export default function Dashboard() {
+//   const [isDialogOpen, setIsDialogOpen] = useState(false);
+//   const [areaName, setAreaName] = useState("");
+//   const [areaList, setAreaList] = useState([]);
+//   const updatedAreaData = () => {
+//     fetchData(setAreaList);
+//   };
+
+//   useEffect(() => {
+//     Axios.get("http://localhost:3001/readArea")
+//       .then((response) => {
+//         setAreaList(response.data);
+//       }, [])
+//       .catch((err) => {
+//         console.error("Failed to get Areas:", err);
+//       });
+//   }, []);
+
+//   const toggleDialog = () => {
+//     setIsDialogOpen(!isDialogOpen);
+//   };
+//   const deleteArea = (id) => {
+//     Axios.delete(`http://localhost:3001/deletearea/${id}`)
+//       .then((res) => {
+//         console.log(res.data);
+//         updatedAreaData();
+//         toast.success("Area deleted successfully");
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   };
+
+//   const openEditDialog = (area) => {
+//     setEditAreaName(area.areaName);
+//     setIsEditDialogOpen(true);
+//   };
+
+
+
+//   const handleSubmitDialog = (area) => {
+//     Axios.post("http://localhost:3001/insertArea", {
+//       areaName: areaName,
+//     })
+//       .then((response) => {
+//         console.log(response.data);
+//         updatedAreaData();
+//         toast.success("Area added successfully");
+//       })
+//       .catch((error) => {
+//         console.error("Failed to save Area:", error);
+//       });
+//     setIsDialogOpen(false);
+//     setAreaName("");
+//     Axios.put(`http://localhost:3001/updateArea/${area.id}`, {
+//       newAreaName: editAreaName,
+//     })
+//       .then((res) => {
+//         console.log(res.data);
+//         updatedAreaData();
+//         toast.success("Area updated successfully");
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//     setIsEditDialogOpen(false);
+//   };
+
+//   return (
+//     <div className="col-span-4 px-6 py-4 h-screen block sm:flex flex-col">
+//       <ToastContainer className="w-11/12 m-4 sm:block sm:w-80 sm:m-0" />
+//       <div className="overflow-y-auto">
+//         <div>
+//           {areaList.length === 0 ? (
+//             <p>No Areas currently</p>
+//           ) : (
+//             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+//               {areaList.map((val, index) => (
+//                 <div key={index} className="relative">
+//                   <Card
+//                     val={val}
+//                     updatedAreaData={updatedAreaData}
+//                     onClick={() => openEditDialog(val)}
+//                     onDelete={() => deleteArea(val.id)}
+//                   />
+//                 </div>
+//               ))}
+//             </div>
+//           )}
+//           <Add toggleDialog={toggleDialog} text="Area" />
+//           {isDialogOpen && (
+//             <ModalOverlay isOpen={isDialogOpen}>
+//               <Dialog
+//                 text="Add Area"
+//                 text2="Area"
+//                 name={areaName}
+//                 setName={setAreaName}
+//                 onClose={() => setIsDialogOpen(false)}
+//                 onSubmit={handleSubmitDialog}
+//               />
+//             </ModalOverlay>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
+import AddAreaForm from "../components/Area_Components/AddAreaForm"
+import EditAreaForm from "../components/Area_Components/EditAreaForm"
 import {
   useReactTable,
   getCoreRowModel,
@@ -30,6 +158,10 @@ function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
 export default function Areas() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedArea, setSelectedArea] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [sorting, setSorting] = useState([]);
   const [filtering, setFiltering] = useState("");
   const [rowSelection, setRowSelection] = useState([]);
@@ -54,6 +186,51 @@ export default function Areas() {
     setSelectedRowId((prevSelectedRowId) =>
       prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
+  };
+
+  const handleAdd = () => {
+    setShowAddForm(true);
+  };
+
+  const handleAddFormClose = () => {
+    setShowAddForm(false);
+  };
+
+  const handleAddFormSave = (newArea) => {
+    Axios.post("http://localhost:3001/insertArea", newArea)
+      .then((response) => {
+        setData((prevData) => [...prevData, response.data]);
+        setShowAddForm(false);
+      })
+      .catch((error) => {
+        console.error("Error creating area", error);
+      });
+  };
+
+  const handleEditArea = () => {
+    const selectedRow = data.find((row) => row.id === selectedRowId);
+    if (selectedRow) {
+      setSelectedArea(selectedRow);
+      setShowEditForm(true);
+    }
+  };
+  const handleEditAreaSave = (updatedArea) => {
+    Axios.put(`http://localhost:3001/updateArea/${selectedRowId}`, updatedArea)
+      .then((response) => {
+        setData((prevData) =>
+          prevData.map(() =>
+             response.data 
+            
+          )
+          
+        );
+        console.log(response.data)
+        setShowEditForm(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError(error.message);
+      });
   };
 
   const handleDeleteSelectedRow = () => {
@@ -122,6 +299,9 @@ export default function Areas() {
     onFilteringChange: setFiltering,
     onRowSelectionChange: setRowSelection,
     enableRowSelection: true,
+    if (editing) {
+      return <AreaForm onSave={handleEditArea} initialValues={[editing]} />;
+    }
   });
 
   return (
@@ -140,6 +320,11 @@ export default function Areas() {
             onChange={(e) => setFiltering(e.target.value)}
           />
         </div>
+        <button className="w3-button" onClick={handleAdd}>
+        Add
+      </button>
+      
+      <button onClick={() => setShowEditForm(true)}>Edit</button>
         <button
           onClick={handleDeleteSelectedRow}
           className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
@@ -182,6 +367,16 @@ export default function Areas() {
           </tbody>
         </table>
       )}
+      {showAddForm && (
+        <AddAreaForm onSave={handleAddFormSave} onClose={handleAddFormClose} />
+      )}
+      {showEditForm && (
+  <EditAreaForm
+    onSave={handleEditAreaSave}
+    onClose={() => setShowEditForm(false)}
+    defaultValues={selectedArea}
+  />
+)}
       <div className="flex justify-center items-center gap-4 mt-2">
         <button
           onClick={() => table.setPageIndex(0)}

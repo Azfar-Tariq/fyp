@@ -1,67 +1,74 @@
 import React, { useState } from "react";
 
-const Form = ({ onSubmit, initialValues = {}, buttonText }) => {
-  const [values, setValues] = useState(initialValues);
+const AreaForm = ({ onSave, initialValues }) => {
+  const [formFields, setFormFields] = useState(initialValues);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
+  const handleInputChange = (e, index) => {
+    const newValues = [...formFields];
+    newValues[index][e.target.name] = e.target.value;
+    setFormFields(newValues);
+  };
+
+  const handleAddField = () => {
+    setFormFields([...formFields, { name: "", description: "", address: "", focalPerson: "", contact: "" }]);
+  };
+
+  const handleRemoveField = (index) => {
+    const newValues = [...formFields];
+    newValues.splice(index, 1);
+    setFormFields(newValues);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(values);
-    setValues(initialValues); // Reset form values after submission
+    onSave(formFields);
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="areaName"
-        value={values.areaName || ""}
-        onChange={handleChange}
-        placeholder="Area Name"
-        required
-      />
-      <input
-        type="text"
-        name="description"
-        value={values.description || ""}
-        onChange={handleChange}
-        placeholder="Area Description"
-        required
-      />
-      <input
-        type="text"
-        name="address"
-        value={values.address || ""}
-        onChange={handleChange}
-        placeholder="Area Address"
-        required
-      />
-      <input
-        type="text"
-        name="focalPerson"
-        value={values.focalPerson || ""}
-        onChange={handleChange}
-        placeholder="Focal Person"
-        required
-      />
-      <input
-        type="text"
-        name="contact"
-        value={values.contact || ""}
-        onChange={handleChange}
-        placeholder="Contact Number"
-        required
-      />
-      <button type="submit">{buttonText}</button>
+      {formFields.map((obj, index) => (
+        <div key={index}>
+          <input
+            name="name"
+            placeholder="Name"
+            value={obj.name}
+            onChange={(e) => handleInputChange(e, index)}
+          />
+          <input
+            name="description"
+            placeholder="Description"
+            value={obj.description}
+            onChange={(e) => handleInputChange(e, index)}
+          />
+          <input
+            name="address"
+            placeholder="Address"
+            value={obj.address}
+            onChange={(e) => handleInputChange(e, index)}
+          />
+          <input
+            name="focalPerson"
+            placeholder="Focal Person"
+            value={obj.focalPerson}
+            onChange={(e) => handleInputChange(e, index)}
+          />
+          <input
+            name="contact"
+            placeholder="Contact"
+            value={obj.contact}
+            onChange={(e) => handleInputChange(e, index)}
+          />
+          <button type="button" onClick={() => handleRemoveField(index)}>
+            Remove
+          </button>
+        </div>
+      ))}
+      <button type="button" onClick={handleAddField}>
+        Add
+      </button>
+      <button type="submit">Save</button>
     </form>
   );
 };
 
-export default Form;
+export default AreaForm;
