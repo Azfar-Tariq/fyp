@@ -18,43 +18,61 @@ function AddAreaForm({ onSave }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="name">Name:</label>
-      <input
-        type="text"
-        id="name"
-        value={areaName}
-        onChange={(e) => setAreaName(e.target.value)}
-      />
-      <label htmlFor="description">Description:</label>
-      <input
-        type="text"
-        id="description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <label htmlFor="address">Address:</label>
-      <input
-        type="text"
-        id="address"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-      />
-      <label htmlFor="focalPerson">Focal Person:</label>
-      <input
-        type="text"
-        id="focalPerson"
-        value={focalPerson}
-        onChange={(e) => setFocalPerson(e.target.value)}
-      />
-      <label htmlFor="contact">Contact:</label>
-      <input
-        type="text"
-        id="contact"
-        value={contact}
-        onChange={(e) => setContact(e.target.value)}
-      />
-      <button type="submit">Save</button>
+    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="name" className="text-sm font-medium">Area Name:</label>
+        <input
+          type="text"
+          id="name"
+          value={areaName}
+          onChange={(e) => setAreaName(e.target.value)}
+          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="description" className="text-sm font-medium">Description:</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 h-24 resize-none" // Adjust height as needed
+        />
+      </div>
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="address" className="text-sm font-medium">Address:</label>
+        <input
+          type="text"
+          id="address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="focalPerson" className="text-sm font-medium">Focal Person:</label>
+        <input
+          type="text"
+          id="focalPerson"
+          value={focalPerson}
+          onChange={(e) => setFocalPerson(e.target.value)}
+          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="contact" className="text-sm font-medium">Contact:</label>
+        <input
+          type="text"
+          id="contact"
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
+      <div className="flex space-x-2">
+        <button type="submit" className="px-4 py-2 bg-indigo-500 text-white rounded-md focus:outline-none hover:bg-indigo-700">
+          Save
+        </button>
+      </div>
     </form>
   );
 }

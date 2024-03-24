@@ -460,7 +460,16 @@ poolConnect
         const newContact = contact !== undefined ? `${contact}` : "Contact";
     
         await request.query(
-          `UPDATE Area SET AreaName = ${newAreaName}, Description = ${newDescription}, Address = ${newAddress}, FocalPerson = ${newFocalPerson}, Contact = ${newContact} WHERE AreaID = ${id}`
+          `UPDATE Area
+          SET
+          AreaName = ${newAreaName},
+          Description = ${newDescription},
+          Address = ${newAddress},
+          FocalPerson = ${newFocalPerson},
+          Contact = ${newContact},
+          AreaSize = ${BigInt(area.AreaSize)}
+      WHERE
+          AreaID = ${BigInt(area.AreaID)}`
         );
     
         res.status(200).send("Area updated successfully");
