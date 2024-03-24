@@ -314,8 +314,8 @@ export default function Areas() {
   });
 
   return (
-    <div className="w3-container">
-      <div className="flex gap-6 items-center mb-2">
+    <div className="w3-container mx-auto px-4 py-8">
+      <div className="flex flex-col gap-4 mb-4">
         <div className="relative">
           <label htmlFor="filter" className="sr-only">
             Search:
@@ -323,73 +323,74 @@ export default function Areas() {
           <input
             id="filter"
             type="text"
-            className="bg-purple-50 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
+            className="bg-gray-100 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
             placeholder="Search..."
             value={filtering}
             onChange={(e) => setFiltering(e.target.value)}
           />
         </div>
-        <button className="w3-button" onClick={handleAdd}>
-        Add
-      </button>
-      
-      <button onClick={() => setShowEditForm(true)}>Edit</button>
-        <button
-          onClick={handleDeleteSelectedRow}
-          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
-        >
-          Delete
-        </button>
-      </div>
-      {loading ? (
-        <div>Loading ...</div>
-      ) : (
-        <table className="w3-table-all">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                  >
-                    {header.column.columnDef.Header}
-                    {
+  
+        {loading ? (
+          <div>Loading ...</div>
+        ) : (
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className="py-2 px-4 text-left bg-gray-200 border-b border-gray-300 cursor-pointer"
+                    >
+                      {header.column.columnDef.Header}
                       {
-                        asc: "▲",
-                        desc: "▼",
-                      }[header.column.getIsSorted() ?? null]
-                    }
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>{cell.column.columnDef.cell(cell)}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                        {
+                          asc: "▲",
+                          desc: "▼",
+                        }[header.column.getIsSorted() ?? null]
+                      }
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className={`${
+                    selectedRowId === row.original.areaId ? "bg-gray-100" : ""
+                  } hover:bg-gray-50 cursor-pointer`}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="py-2 px-4 border-b border-gray-300"
+                    >
+                      {cell.column.columnDef.cell(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+  
       {showAddForm && (
         <AddAreaForm onSave={handleAddFormSave} onClose={handleAddFormClose} />
       )}
       {showEditForm && selectedArea && (
-  <EditAreaForm
-    onSave={handleEditAreaSave}
-    onClose={() => setShowEditForm(false)}
-    defaultValues={selectedArea}
-    title="Edit Area"
-  />
-)}
-
-
-      <div className="flex justify-center items-center gap-4 mt-2">
+        <EditAreaForm
+          onSave={handleEditAreaSave}
+          onClose={() => setShowEditForm(false)}
+          defaultValues={selectedArea}
+          title="Edit Area"
+        />
+      )}
+  
+  <div className="flex justify-center items-center gap-4 mt-2">
         <button
           onClick={() => table.setPageIndex(0)}
           className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
@@ -417,6 +418,28 @@ export default function Areas() {
           Last Page
         </button>
       </div>
+  
+      <div className="flex justify-center gap-4 mt-4">
+        <button
+          className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onClick={handleAdd}
+        >
+          Add
+        </button>
+        <button
+          className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-yellow-500 rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          onClick={() => setShowEditForm(true)}
+        >
+          Edit
+        </button>
+        <button
+          className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+          onClick={handleDeleteSelectedRow}
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
+  
 }

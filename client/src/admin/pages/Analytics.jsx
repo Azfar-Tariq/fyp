@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import AnalyticsCard from "../components/Analytics/AnalyticsCard";
@@ -86,53 +85,47 @@ export default function Analytics() {
       fetchAreaData(areaId, areaName);
     }
   };
+
   return (
-    <div>
-      <div className="col-span-4 px-6 py-4">
-        <div className="block sm:flex">
-          <div className="flex flex-col space-y-4">
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-8">Analytics</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {areaList.map((val, index) => (
+          <div key={index} className="relative">
+            <AnalyticsCard
+              val={val}
+              onClick={() => handleAreaClick(val.areaId, val.areaName)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {selectedAreaName && (
+        <div className="mt-8">
+          <strong>Selected Area: </strong> {selectedAreaName}
+          <div className="mt-6 flex justify-between">
             <div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {areaList.map((val, index) => (
-                  <div key={index} className="relative">
-                    <AnalyticsCard
-                      val={val}
-                      onClick={() => handleAreaClick(val.areaId, val.areaName)}
-                    />
-                  </div>
-                ))}
-              </div>
+              <Chart
+                options={chartData.options}
+                series={chartData.series}
+                type="bar"
+                width={420}
+                height={320}
+              />
+            </div>
+            <div>
+              <PieChart data={chartData.series[0].data} />
             </div>
           </div>
-
-          <div className="p-4">
-            {selectedAreaName && (
-              <div>
-                <strong>Selected Area: </strong> {selectedAreaName}
-                <div className="overflow-x-auto flex justify-around items-center mr-4">
-                  <Chart
-                    options={chartData.options}
-                    series={chartData.series}
-                    type="bar"
-                    width={420}
-                    height={320}
-                  />
-                  <PieChart
-                    className="w-1/4 h-1/4"
-                    data={chartData.series[0].data}
-                  />
-                </div>
-                <div>
-                  <p className="font-semibold text-lg">Statistics:</p>
-                  <p className="font-normal text-sm">
-                    Highest Usage is at {maxUsageTime}
-                  </p>
-                </div>
-              </div>
-            )}
+          <div className="mt-4">
+            <p className="font-semibold text-lg">Statistics:</p>
+            <p className="font-normal text-sm">
+              Highest Usage is at {maxUsageTime}
+            </p>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

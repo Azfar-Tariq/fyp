@@ -40,7 +40,7 @@ export default function PieChart({ data }) {
         options={chartData.options}
         series={chartData.series}
         type="donut"
-        width="320"
+        width="370"
       />
     </div>
   );
