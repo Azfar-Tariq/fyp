@@ -437,32 +437,39 @@ poolConnect
 
     // edit data from database
     app.put("/updateArea/:id", async (req, res) => {
-      const { newAreaName, newDescription, newAddress, newFocalPerson, newNumber } = req.body;
-      const id = req.params.id;
-
+      const { areaName, description, address, focalPerson, contact } = req.body;
+      const id = parseInt(req.params.id, 10);
+    
       try {
         const request = pool.request();
         const result = await request.query(
-          `SELECT * FROM Area WHERE areaId = ${id}`
+          `SELECT * FROM Area WHERE AreaID = ${id}`
         );
         const area = result.recordset[0];
-
+    
         if (!area) {
           res.status(404).send("Area not found");
           return;
         }
-
-        if (newAreaName || newDescription || newAddress || newFocalPerson || newNumber) {
-          await request.query(
-            `UPDATE Area SET areaName = '${newAreaName}', description = '${newDescription}', address ='${newAddress}', focalPerson = '${newFocalPerson}', number = '${newNumber}'   WHERE areaId = ${id}`
-          );
-        }
+    
+        // Update the fields regardless of whether they are truthy or not
+        const newAreaName = areaName !== undefined ? `'${areaName}'` : "AreaName";
+        const newDescription = description !== undefined ? `'${description}'` : "Description";
+        const newAddress = address !== undefined ? `'${address}'` : "Address";
+        const newFocalPerson = focalPerson !== undefined ? `'${focalPerson}'` : "FocalPerson";
+        const newContact = contact !== undefined ? `${contact}` : "Contact";
+    
+        await request.query(
+          `UPDATE Area SET AreaName = ${newAreaName}, Description = ${newDescription}, Address = ${newAddress}, FocalPerson = ${newFocalPerson}, Contact = ${newContact} WHERE AreaID = ${id}`
+        );
+    
         res.status(200).send("Area updated successfully");
       } catch (err) {
         console.log(err);
         res.status(500).send("Failed to update area in the database");
       }
     });
+    
 
     // delete data from database
     app.delete("/deleteArea/:id", async (req, res) => {
