@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { IoPeople, IoMap, IoCamera } from "react-icons/io5";
+import { Link } from "react-router-dom";
 import Axios from "axios";
 
 export default function DashboardStatsGrid() {
@@ -36,6 +37,7 @@ export default function DashboardStatsGrid() {
 
   return (
     <div className="flex gap-4 m-5">
+      <Link to="/admin/users"  className="w-full">
       <BoxWrapper>
         <div className="rounded-full h-12 w-12 flex items-center justify-center bg-blue-500">
           <IoPeople className="text-2xl text-white" />
@@ -49,6 +51,9 @@ export default function DashboardStatsGrid() {
           </div>
         </div>
       </BoxWrapper>
+      </Link>
+
+      <Link to="/admin/areas"  className="w-full">
       <BoxWrapper>
         <div className="rounded-full h-12 w-12 flex items-center justify-center bg-green-500">
           <IoMap className="text-2xl text-white" />
@@ -62,6 +67,9 @@ export default function DashboardStatsGrid() {
           </div>
         </div>
       </BoxWrapper>
+      </Link>
+
+      <Link to="/admin/areas"  className="w-full">
       <BoxWrapper>
         <div className="rounded-full h-12 w-12 flex items-center justify-center bg-green-500">
           <IoMap className="text-2xl text-white" />
@@ -75,6 +83,7 @@ export default function DashboardStatsGrid() {
           </div>
         </div>
       </BoxWrapper>
+      </Link>
     </div>
   );
 }

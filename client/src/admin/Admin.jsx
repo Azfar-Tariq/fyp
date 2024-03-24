@@ -12,10 +12,10 @@ import Dashboard from "./pages/Dashboard";
 export default function Admin() {
   return (
     <div className="flex">
-      <div className="w-[14%] fixed">
+      <div className="w-1/5 fixed">
         <SideBar />
       </div>
-      <div className="flex flex-col w-[86%]" style={{ marginLeft: "14%" }}>
+      <div className="flex flex-col w-4/5" style={{ marginLeft: "20%" }}>
         <Header className="mb2.5" />
         <div className="overflow-auto">
           <Routes>
