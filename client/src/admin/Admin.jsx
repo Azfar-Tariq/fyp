@@ -1,6 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import Header from "./components/Global/Header";
-import SideBar from "./components/Global/SideBar";
+import SideBar from "./components/Global/Sidebar/SideBar";
 import Configuration from "./pages/Configuration";
 import Analytics from "./pages/Analytics";
 import Areas from "./pages/Areas";
