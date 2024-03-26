@@ -407,6 +407,52 @@ poolConnect
         res.status(500).send("Failed to save area to database");
       }
     });
+       // edit data from database
+       app.put("/updateArea/:id", async (req, res) => {
+        const id = req.params.id;
+        const { areaName, description, address, focalPerson, contact } = req.body;
+      
+        try {
+          const request = pool.request();
+          const result = await request.query(
+            `SELECT * FROM Area WHERE AreaID = ${id}`
+          );
+          const area = result.recordset[0];
+      
+          if (!area) {
+            res.status(404).send("Area not found");
+            return;
+          }
+      
+          // Update the fields regardless of whether they are truthy or not
+          const newAreaName = areaName !== undefined ? `'${areaName}'` : "AreaName";
+          const newDescription = description !== undefined ? `'${description}'` : "Description";
+          const newAddress = address !== undefined ? `'${address}'` : "Address";
+          const newFocalPerson = focalPerson !== undefined ? `'${focalPerson}'` : "FocalPerson";
+          const newContact = contact !== undefined ? `${contact}` : "Contact";
+      
+          request.query(
+            `UPDATE Area
+            SET
+            AreaName = ${newAreaName},
+            Description = ${newDescription},
+            Address = ${newAddress},
+            FocalPerson = ${newFocalPerson},
+            Contact = ${newContact}
+            WHERE
+            AreaID = ${id}`
+            
+          ).then(() => {
+            res.status(200).send("Area updated successfully");
+          }).catch((err) => {
+            console.log(err);
+            res.status(500).send("Failed to update area in the database");
+          });
+        } catch (err) {
+          console.log(err);
+          res.status(500).send("Failed to update area in the database");
+        }
+      });
 
     // get data from database
     app.get("/readArea", async (req, res) => {
@@ -435,47 +481,31 @@ poolConnect
       }
     });
 
-    // edit data from database
-    app.put("/updateArea/:id", async (req, res) => {
+ 
+    
+    app.post("/insertArea", async (req, res) => {
       const { areaName, description, address, focalPerson, contact } = req.body;
-      const id = parseInt(req.params.id, 10);
     
       try {
-        const request = pool.request();
-        const result = await request.query(
-          `SELECT * FROM Area WHERE AreaID = ${id}`
-        );
-        const area = result.recordset[0];
-    
-        if (!area) {
-          res.status(404).send("Area not found");
-          return;
+        if (!areaName) {
+          // Return a 400 Bad Request status if 'areaName' is not provided
+          return res.status(400).send("Area name is required");
         }
     
-        // Update the fields regardless of whether they are truthy or not
-        const newAreaName = areaName !== undefined ? `'${areaName}'` : "AreaName";
-        const newDescription = description !== undefined ? `'${description}'` : "Description";
-        const newAddress = address !== undefined ? `'${address}'` : "Address";
-        const newFocalPerson = focalPerson !== undefined ? `'${focalPerson}'` : "FocalPerson";
-        const newContact = contact !== undefined ? `${contact}` : "Contact";
-    
-        await request.query(
-          `UPDATE Area
-          SET
-          AreaName = ${newAreaName},
-          Description = ${newDescription},
-          Address = ${newAddress},
-          FocalPerson = ${newFocalPerson},
-          Contact = ${newContact},
-          AreaSize = ${BigInt(area.AreaSize)}
-      WHERE
-          AreaID = ${BigInt(area.AreaID)}`
-        );
-    
-        res.status(200).send("Area updated successfully");
+        const request = pool.request();
+        await request
+          .input("areaName", sql.NVarChar, areaName)
+          .input("description", sql.NVarChar, description)
+          .input("address", sql.NVarChar, address)
+          .input("focalPerson", sql.NVarChar, focalPerson)
+          .input("contact", sql.NVarChar, contact)
+          .query(
+            "INSERT INTO Area (areaName, description, address, focalPerson, contact ) VALUES (@areaName, @description,  @address, @focalPerson, @contact)"
+          );
+        res.status(200).send("Area saved to database");
       } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to update area in the database");
+        console.error(err);
+        res.status(500).send("Failed to save area to database");
       }
     });
     
