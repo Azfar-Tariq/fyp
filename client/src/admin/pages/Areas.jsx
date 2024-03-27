@@ -215,6 +215,7 @@ export default function Areas() {
   const handleEditArea = () => {
     const selectedRow = data.find((row) => row.id === selectedRowId);
     // setSelectedArea(selectedRowId);
+<<<<<<< HEAD
 
     if (selectedRow) {
       
@@ -241,27 +242,33 @@ export default function Areas() {
         setError(error.message);
       });
   };
+=======
+>>>>>>> parent of 8e852f88 (Worked on Edit area Funnctionality)
 
-  // const handleEditArea = () => {
-  //   const selectedRow = data.find((row) => row.id === selectedRowId);
-  //   // setSelectedArea(selectedRowId);
-
-  //   if (selectedRow) {
+    if (selectedRow) {
       
-  //     setShowEditForm(true);
-  //   }
-  // };
-
-  const handleEditAreaSave = async (selectedRowId) => {
-    try {
-      const updatedArea = await updateArea(selectedRowId);
-      // Handle successful update
-      console.log("Area uppdated successfully")
-    } catch (error) {
-      // Handle error
-      console.error(error);
-        setError(error.message);
+      setShowEditForm(true);
     }
+  };
+  const handleEditAreaSave = (updatedArea) => {
+    Axios.put(`http://localhost:3001/updateArea/${selectedRowId}`, updatedArea)
+    console.log(updatedArea)
+
+      .then((response) => {
+        setData((prevData) =>
+          prevData.map(() =>
+             response.data 
+            
+          )
+          
+        );
+        console.log(response.data)
+        setShowEditForm(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError(error.message);
+      });
   };
 
   const handleDeleteSelectedRow = () => {
