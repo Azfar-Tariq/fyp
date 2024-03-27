@@ -519,6 +519,10 @@ poolConnect
         // Changed the query to select area by areaId
         const result = await request.query(
           `SELECT * FROM Area WHERE areaId = ${id}`
+
+        );
+        const updated_data = await request.query(
+          "SELECT areaId, areaName, description, address, focalPerson, contact FROM Area"
         );
         const deleteArea = result.recordset[0];
         if (deleteArea) {
@@ -526,7 +530,10 @@ poolConnect
 
           // Corrected the table name in the delete query
           await request.query(`DELETE FROM Area WHERE areaId = ${id}`);
-          res.status(200).send("Area Deleted Successfully");
+          res.status(200).json({
+            message: "Area deleted successfully",
+            updated_data: updated_data,
+          });
         } else {
           res.status(404).send("Area Not Found");
         }
