@@ -78,29 +78,42 @@ export default function Areas() {
   const handleAddFormSave = (newArea) => {
     Axios.post("http://localhost:3001/insertArea", newArea)
       .then((response) => {
-        setData((prevData) => [...prevData, newArea]);
+        setData((prevData) => [...prevData, response.data]);
         setShowAddForm(false);
-        console.log("iNSIDE ADD FORM ",newArea)
       })
-      
       .catch((error) => {
         console.error("Error creating area", error);
       });
   };
 
+  // const handleEditArea = () => {
+  //   const selectedRow = data.find((row) => row.id === selectedRowId);
+  //   // setSelectedArea(selectedRowId);
+
+  //   if (selectedRow) {
+      
+  //     setShowEditForm(true);
+  //   }
+  // };
+
+  const handleEditAreaSave = async (selectedRowId) => {
+    try {
+      const updatedArea = await updateArea(selectedRowId);
+      // Handle successful update
+      console.log("Area uppdated successfully")
+    } catch (error) {
+      // Handle error
+      console.error(error);
+        setError(error.message);
+    }
+  };
+
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(`http://localhost:3001/deleteArea/${selectedRowId}`)
+      Axios.delete(`http://localhost:3001/deletearea/${selectedRowId}`)
         .then((response) => {
-          
-          setData((prevData) =>{
-            let deleted_row = prevData.filter((row) => row.id !== selectedRowId)
-            console.log(deleted_row)
-            // console.log("Response:", response.updatedData)
-            return prevData.filter((row) => row.id !== selectedRowId)
-          }
-            
-            
+          setData((prevData) =>
+            prevData.filter((row) => row.id !== selectedRowId)
           );
           setSelectedRowId(null);
         })
