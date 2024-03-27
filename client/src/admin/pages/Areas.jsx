@@ -242,6 +242,28 @@ export default function Areas() {
       });
   };
 
+  // const handleEditArea = () => {
+  //   const selectedRow = data.find((row) => row.id === selectedRowId);
+  //   // setSelectedArea(selectedRowId);
+
+  //   if (selectedRow) {
+      
+  //     setShowEditForm(true);
+  //   }
+  // };
+
+  const handleEditAreaSave = async (selectedRowId) => {
+    try {
+      const updatedArea = await updateArea(selectedRowId);
+      // Handle successful update
+      console.log("Area uppdated successfully")
+    } catch (error) {
+      // Handle error
+      console.error(error);
+        setError(error.message);
+    }
+  };
+
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
       Axios.delete(`http://localhost:3001/deletearea/${selectedRowId}`)
