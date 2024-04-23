@@ -4,6 +4,7 @@ import SideBar from "./components/Global/Sidebar/SideBar";
 import Configuration from "./pages/Configuration";
 import Analytics from "./pages/Analytics";
 import Areas from "./pages/Areas";
+import Camera from "./pages/Cameras";
 import Users from "./pages/Users";
 import Profile from "./pages/Profile";
 import ErrorPage from "./pages/ErrorPage";
@@ -23,6 +24,7 @@ export default function Admin() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/areas" element={<Areas />} />
+              <Route path="/cameras" element={<Camera />} />
               <Route path="configuration" element={<Configuration />} />
               <Route path="users" element={<Users />} />
               <Route path="profile" element={<Profile />} />
