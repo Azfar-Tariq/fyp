@@ -80,3 +80,35 @@ const Login = () => {
 };
 
 export default Login;
+
+// <div className="h-screen flex items-center justify-center bg-gray-100">
+//       <div className="max-w-md p-4 bg-white rounded shadow-md">
+//         <img src="iot-image.png" className="w-48 mx-auto mb-4" />
+//         <form>
+//           <label className="block mb-2">
+//             <span className="text-gray-700">Username</span>
+//             <input
+//               type="text"
+//               className="block w-full p-2 pl-10 text-sm text-gray-700"
+//                value={email}
+//                 onChange={(e) => setEmail(e.target.value)}
+//               placeholder="Username"
+//             />
+//           </label>
+//           <label className="block mb-2">
+//             <span className="text-gray-700">Password</span>
+//             <input
+//               type="password"
+//               className="block w-full p-2 pl-10 text-sm text-gray-700"
+//               value={password}
+//               onChange={(e) => setPassword(e.target.value)}
+//               placeholder="Password"
+//             />
+//           </label>
+//           <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+//           onClick={handleLogin}>
+//             Login
+//           </button>
+//         </form>
+//       </div>
+//     </div>
