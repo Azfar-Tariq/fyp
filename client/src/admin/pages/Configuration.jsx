@@ -15,7 +15,6 @@ export default function Configuration() {
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
@@ -70,6 +69,7 @@ export default function Configuration() {
     try {
       // Iterate over drawnRectangles and send each rectangle's coordinates to the API
       const latestCoordinates = drawnRectangles[drawnRectangles.length - 1];
+      console.log("AAAAAAAAAA");
       if (latestCoordinates) {
         const { topLeft, bottomRight } = latestCoordinates;
         const { x: x1, y: y1 } = topLeft;
@@ -123,6 +123,7 @@ export default function Configuration() {
                   onBoxCreated={handleBoxCreated}
                   data={data}
                   selectedRectangle={selectedRectangle}
+                  selectedCamera={selectedCamera}
                 />
                 <div className="hidden sm:block m-2">
                   <button

@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import image from "../assets/images/labs/lab8.jpg";
+import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;
 const DEFAULT_RECTANGLE_COLOR = "red";
 const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
 
-function ImageAnnotator({ onBoxCreated, data, selectedRectangle }) {
+function ImageAnnotator({
+  onBoxCreated,
+  data,
+  selectedRectangle,
+  selectedCamera,
+}) {
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -179,6 +185,62 @@ function ImageAnnotator({ onBoxCreated, data, selectedRectangle }) {
     setSelectedRectangleId(selectedRectangle);
   }, [selectedRectangle]);
 
+  const callEditedRectangle = () => {
+    if (selectedRectangleId) {
+      Axios.get(
+        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+      )
+        .then((response) => {
+          const rectangleData = response.data[0];
+          setAnnotations((prevAnnotations) => [
+            ...prevAnnotations,
+            {
+              id: rectangleData.RectangleID,
+              x: rectangleData.x1,
+              y: rectangleData.y1,
+              width: rectangleData.x2 - rectangleData.x1,
+              height: rectangleData.y2 - rectangleData.y1,
+            },
+          ]);
+          drawEditedRectangle();
+        })
+        .catch((error) => {
+          console.error("Failed to get data:", error);
+        });
+    }
+  };
+
+  const drawEditedRectangle = () => {
+    console.log("Drawing edited rectangle");
+    console.log(annotations);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.src = image;
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+
+      const drawLoop = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const color =
+          annotations.id === selectedRectangleId
+            ? HIGHLIGHTED_RECTANGLE_COLOR
+            : DEFAULT_RECTANGLE_COLOR;
+        drawRectangle(ctx, annotations, color);
+        annotations
+          .filter((annotation) => annotation.id === selectedRectangleId)
+          .forEach((annotation) => {
+            drawRectangle(ctx, annotation, "green");
+          });
+        if (drawing) {
+          drawRectangle(ctx, currentAnnotation);
+        }
+      };
+      requestAnimationFrame(drawLoop);
+    };
+  };
+
   useEffect(() => {
     const wrapper = wrapperRef.current;
     const canvas = canvasRef.current;
@@ -258,6 +320,9 @@ function ImageAnnotator({ onBoxCreated, data, selectedRectangle }) {
           onClick={handleClearChanges}
         >
           Clear Changes
+        </button>
+        <button className="p-2 rounded" onClick={callEditedRectangle}>
+          Edit Changes
         </button>
       </div>
     </div>
