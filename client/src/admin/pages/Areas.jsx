@@ -472,6 +472,8 @@
 
       import { useEffect, useState, useRef } from "react";
       import Axios from "axios";
+      import { ToastContainer, toast } from "react-toastify";
+      import "react-toastify/dist/ReactToastify.css";
       import AddAreaForm from "../components/Area_Components/AddAreaForm";
       import EditAreaForm from "../components/Area_Components/EditAreaForm";
       import {
@@ -526,7 +528,15 @@
               setLoading(false);
             });
         }, []);
-      
+        
+        const fetchData = async (setAreaList) => {
+          try {
+            const response = await Axios.get("http://localhost:3001/readArea");
+            setAreaList(response.data);
+          } catch (err) {
+            console.error("Failed to get Areas:", err);
+          }
+        };
         const handleRowSelectionChange = (row) => {
           const newSelectedRowId = row.original.areaId;
           setSelectedRowId((prevSelectedRowId) =>
@@ -551,42 +561,48 @@
             .then((response) => {
               setData((prevData) => [...prevData, newArea]);
               setShowAddForm(false);
+              toast.success("Data has been saved");
             })
             .catch((error) => {
               console.error("Error creating area", error);
             });
         };
-      
+        
         const handleEditArea = () => {
           const selectedRow = data.find((row) => row.id === selectedRowId);
-          // setSelectedArea(selectedRowId);
-      
+        
           if (selectedRow) {
-            setShowEditForm(true);
+            setEditing(true);
+            setSelectedArea(selectedRow);
           }
         };
-      
+
         const handleEditAreaSave = (updatedArea) => {
           Axios.put(`http://localhost:3001/updateArea/${selectedRowId}`, updatedArea)
-            .then((response) => {
-              setData((prevData) =>
-                prevData.map((dataItem) => (dataItem.id === selectedRowId ? response.data : dataItem))
+          .then((response) => {
+              setData(
+                data.map((area) =>
+                  area.id === selectedRowId? updatedArea : area
+                )
               );
-              setShowEditForm(false);
+              setEditing(false);
+              toast.success("Data has been saved");
             })
-            .catch((error) => {
-              console.error(error);
+          .catch((error) => {
+              console.error("Error updating area", error);
             });
         };
-      
+        const handleEditAreaCancel = () => {
+          setEditing(false);
+        };
+
         const handleDeleteSelectedRow = () => {
           if (selectedRowId) {
             Axios.delete(`http://localhost:3001/deletearea/${selectedRowId}`)
               .then((response) => {
-                setData((prevData) =>
-                  prevData.filter((row) => row.id !== selectedRowId)
-                );
+                setData((prevData) => prevData.filter((row) => row.id !== selectedRowId));
                 setSelectedRowId(null);
+                fetchData(setData); // Fetch updated data from the server
               })
               .catch((error) => {
                 console.error(`Error deleting area ${selectedRowId}`, error);
@@ -722,9 +738,11 @@
               defaultValues={selectedArea}
               title="Edit Area"
             />
+            
           )}
       
       <div className="flex justify-center items-center gap-4 mt-2">
+      <ToastContainer />
             <button
               onClick={() => table.setPageIndex(0)}
               className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"

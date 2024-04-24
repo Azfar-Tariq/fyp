@@ -453,11 +453,11 @@ poolConnect
         }
     
         // Update the fields regardless of whether they are truthy or not
-        const newAreaName = areaName !== undefined ? `'${areaName}'` : "AreaName";
-        const newDescription = description !== undefined ? `'${description}'` : "Description";
-        const newAddress = address !== undefined ? `'${address}'` : "Address";
-        const newFocalPerson = focalPerson !== undefined ? `'${focalPerson}'` : "FocalPerson";
-        const newContact = contact !== undefined ? `${contact}` : "Contact";
+        const newAreaName = areaName!== undefined? `'${areaName}'` : area.AreaName;
+        const newDescription = description!== undefined? `'${description}'` : area.Description;
+        const newAddress = address!== undefined? `'${address}'` : area.Address;
+        const newFocalPerson = focalPerson!== undefined? `'${focalPerson}'` : area.FocalPerson;
+        const newContact = contact!== undefined? `${contact}` : area.Contact;
     
         await request.query(
           `UPDATE Area
@@ -466,10 +466,9 @@ poolConnect
           Description = ${newDescription},
           Address = ${newAddress},
           FocalPerson = ${newFocalPerson},
-          Contact = ${newContact},
-          AreaSize = ${BigInt(area.AreaSize)}
-      WHERE
-          AreaID = ${BigInt(area.AreaID)}`
+          Contact = ${newContact}
+          WHERE
+          AreaID = ${id}`
         );
     
         res.status(200).send("Area updated successfully");
@@ -478,7 +477,6 @@ poolConnect
         res.status(500).send("Failed to update area in the database");
       }
     });
-    
 
     // delete data from database
     app.delete("/deleteArea/:id", async (req, res) => {
