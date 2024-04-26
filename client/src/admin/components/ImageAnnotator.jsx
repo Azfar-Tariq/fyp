@@ -6,12 +6,8 @@ const MINIMUM_SHAPE_SIZE = 10;
 const DEFAULT_RECTANGLE_COLOR = "red";
 const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
 
-function ImageAnnotator({
-  onBoxCreated,
-  data,
-  selectedRectangle,
-  selectedCamera,
-}) {
+function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
+  const [data, setData] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -25,6 +21,21 @@ function ImageAnnotator({
   const [selectedRectangleId, setSelectedRectangleId] = useState(null);
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    fetchData();
+  });
+
+  const fetchData = async () => {
+    try {
+      const response = await Axios.get(
+        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    }
+  };
 
   const drawRectangle = useCallback((ctx, annotation, color) => {
     ctx.strokeStyle = color;
@@ -241,6 +252,33 @@ function ImageAnnotator({
     };
   };
 
+  const handleSaveChanges = async () => {
+    try {
+      if (selectedRectangleId) {
+        const selectedRectanlge = annotations.find(
+          (annotation) => annotation.id === selectedRectangleId
+        );
+        if (selectedRectangle) {
+          const { id, x, y, width, height } = selectedRectanlge;
+
+          await Axios.put(
+            `http://localhost:3001/updateBoundedRectangle/${id}`,
+            {
+              x1: x,
+              y1: y,
+              x2: x + width,
+              y2: y + height,
+            }
+          );
+          console.log("Updated rectangle");
+          setAnnotations([]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save changes:", error);
+    }
+  };
+
   useEffect(() => {
     const wrapper = wrapperRef.current;
     const canvas = canvasRef.current;
@@ -323,6 +361,9 @@ function ImageAnnotator({
         </button>
         <button className="p-2 rounded" onClick={callEditedRectangle}>
           Edit Changes
+        </button>
+        <button className="p-2 rounded" onClick={handleSaveChanges}>
+          Save Changes
         </button>
       </div>
     </div>
