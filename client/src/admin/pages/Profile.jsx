@@ -146,10 +146,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import backgroundImage from "./iot2.jpg";
+import { faEdit, faSignOutAlt, faEye, faEyeSlash, faIdBadge, faUser, faEnvelope, faPhone, faUserShield } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = () => {
-   const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const get = async () => {
     try {
@@ -179,7 +182,7 @@ const Profile = () => {
       console.error("Error fetching user details:", error);
     }
   };
-  const navigate = useNavigate();
+
   const handleLogout = async () => {
     const email = localStorage.getItem("email");
 
@@ -208,101 +211,100 @@ const Profile = () => {
   if (!user) {
     return <div>Loading...</div>;
   }
+
   return (
-    <div className="container mx-auto py-8 bg-white rounded-md shadow-md">
+    <div className="container mx-auto bg-white rounded-md shadow-md " >
+      {/* style={{ backgroundImage: `url(${backgroundImage})` }} */}
       {/* Header Section */}
-      <div className="flex items-center mb-8">
-        {/* Profile Picture (optional) */}
-        {user.profilePicture && (
-          <img
-            src={user.profilePicture}
-            alt="Profile Picture"
-            className="w-24 h-24 rounded-full mr-4"
-          />
-        )}
-        {/* Name (Displayed prominently) */}
-        <h1 className="text-3xl font-bold">{user.name}</h1>
-      </div>
+      {/* <div className="flex items-center justify-center border-b-2 border-black pb-4 mb-8">
+        <h1 className="text-3xl font-bold">User Profile</h1>
+      </div> */}
+
       {/* Personal Information Section */}
-      <div className="mb-8 bg-gray-100 rounded-md p-4">
-        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {/* Email */}
-          <div>
-            <label className="block text-gray-700">Email:</label>
-            <a href={`mailto:${user.email}`} className="text-blue-500">
-              {user.email}
-            </a>
-          </div>
-          {/* Phone Number */}
-          <div>
-          <label className="block text-gray-700">Phone Number:</label>
-          <a href={`tel:${user.contactNumber}`} className="text-blue-500">
-            {user.contactNumber}
-          </a>
-        </div>
+      <div className="mb-8 bg-gray-100 border border-gray-200 rounded-md m-14 p-12">
+        <h2 className="text-xl font-semibold border-b-2 border-gray-400 mb-4">Personal Information</h2>
         {/* Employee ID */}
-        <div>
-          <label className="block text-gray-700">Employee ID:</label>
-          <span>{user.employeeID}</span>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Employee ID</label>
+          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
+            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
+              <FontAwesomeIcon icon={faIdBadge} />
+            </div>
+            <span>{user.employeeID}</span>
+          </div>
+        </div>
+        {/* Name */}
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Name</label>
+          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
+            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
+              <FontAwesomeIcon icon={faUser} />
+            </div>
+            <span>{user.name}</span>
+          </div>
+        </div>
+        {/* Email */}
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Email</label>
+          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
+            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
+              <FontAwesomeIcon icon={faEnvelope} />
+            </div>
+            <span>{user.email}</span>
+          </div>
+        </div>
+        {/* Phone Number */}
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Phone Number</label>
+          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
+            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
+              <FontAwesomeIcon icon={faPhone} />
+            </div>
+            <a href={`tel:${user.contactNumber}`} className="text-blue-500">{user.contactNumber}</a>
+          </div>
         </div>
       </div>
-    </div>
-    {/* Security & Settings Section */}
-    <div className="mb-8 bg-gray-100 rounded-md p-4">
-      <h2 className="text-xl font-semibold mb-4">Security & Settings</h2>
-      <div className="grid grid-cols-2 gap-4">
+
+      {/* Security & Settings Section */}
+      <div className="mb-8 bg-gray-100 border border-gray-200 rounded-md m-14 p-12">
+        <h2 className="text-xl border-b-2 border-gray-400 font-semibold mb-4">Settings</h2>
         {/* Password */}
-        <div>
-          <label className="block text-gray-700">Password:</label>
-          <a href="#" className="text-blue-500">
-            Change Password
-          </a>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Password</label>
+          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
+            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
+              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} onClick={() => setShowPassword(!showPassword)} />
+            </div>
+            <input type={showPassword ? "text" : "password"} value="********" readOnly className="border-none focus:outline-none flex-grow" />
+          </div>
         </div>
         {/* Role */}
         <div>
-          <label className="block text-gray-700">Role:</label>
-          <span>{user.role}</span>
-        </div>
-        </div>
-    </div>
-    {/* Login & Activity Section */}
-    <div className="mb-8 bg-gray-100 rounded-md p-4">
-      <h2 className="text-xl font-semibold mb-4">Login & Activity</h2>
-      <div className="grid grid-cols-2 gap-4">
-        {/* Last Login Time */}
-        <div>
-          <label className="block text-gray-700">Last Login Time:</label>
-          {/* <span>{user.lastLoginTime}</span> */}
-        </div>
-        {/* Login History */}
-        <div className="col-span-2">
-          <label className="block text-gray-700">Login History:</label>
-          <ul>
-            {/* {user.loginHistory.map((login, index) => (
-              <li key={index}>{login}</li>
-            ))} */}
-          </ul>
+          <label className="block text-gray-700 mb-2">Role</label>
+          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
+            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
+              <FontAwesomeIcon icon={faUserShield} />
+            </div>
+            <span>{user.role}</span>
+          </div>
         </div>
       </div>
+
+      {/* Actions Section */}
+      <div className="flex justify-end m-8 p-8 mb-0">
+        {/* Edit Profile Button */}
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-4">
+          <FontAwesomeIcon icon={faEdit} className="mr-2" />
+          Edit Profile
+        </button>
+        {/* Logout Button */}
+        <button className="bg-red-500 text-white px-4 py-2 rounded-md" onClick={handleLogout}>
+          <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
+          Logout
+        </button>
+      </div>
     </div>
-    {/* Actions Section */}
-    <div className="flex justify-end mt-8">
-      {/* Edit Profile Button */}
-      <button className="bg-blue-500 text-white px-4 py-2 rounded-md mr-4">
-        <FontAwesomeIcon icon={faEdit} className="mr-2" />
-        Edit Profile
-      </button>
- {/* Logout Button */}
- <button className="bg-red-500 text-white px-4 py-2 rounded-md">
-        <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
-        Logout
-      </button>
-    </div>
-  </div>
-);
-  
+  );
 };
 
 export default Profile;
-

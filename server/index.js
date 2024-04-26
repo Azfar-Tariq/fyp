@@ -36,45 +36,46 @@ poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
 
-    //  ---------------login endpoint-----------------
-    app.post("/login", async (req, res) => {
-      const { email, password } = req.body;
+ // ---------------login endpoint-----------------
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
-      try {
-        const request = pool.request();
-        const updateResult = await request.query(
-          `UPDATE users SET logged_in = 1 WHERE email = '${email}'`
+  try {
+    const request = pool.request();
+    const updateResult = await request.query(
+      `UPDATE users SET logged_in = 1, lastLoginTime = GETDATE() WHERE email = '${email}'`
+    );
+
+    // Check if update was successful
+    if (updateResult.rowsAffected > 0) {
+      const result = await request.query(
+        `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`
+      );
+
+      if (result.recordset.length > 0) {
+        const user = result.recordset[0];
+        const responsePayload = { email: user.email, role: user.role };
+
+        // Send the response with the payload
+        res.status(200).json(responsePayload);
+      } else {
+        // Update failed, but user provided correct credentials. Log error and send a specific message.
+        console.error(
+          "User logged in successfully, but database update failed."
         );
-
-        // Check if update was successful
-        if (updateResult.rowsAffected > 0) {
-          const result = await request.query(
-            `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`
-          );
-
-          if (result.recordset.length > 0) {
-            const user = result.recordset[0];
-            const responsePayload = { email: user.email, role: user.role };
-
-            // Send the response with the payload
-            res.status(200).json(responsePayload);
-          } else {
-            // Update failed, but user provided correct credentials. Log error and send a specific message.
-            console.error(
-              "User logged in successfully, but database update failed."
-            );
-            res.status(500).json({ message: "Internal server error." });
-          }
-        } else {
-          // Update failed, user might have invalid credentials.
-          console.error("Login error:");
-          res.status(401).json({ message: "Invalid credentials." });
-        }
-      } catch (error) {
-        console.error("Login error:", error);
         res.status(500).json({ message: "Internal server error." });
       }
-    });
+    } else {
+      // Update failed, user might have invalid credentials.
+      console.error("Login error:");
+      res.status(401).json({ message: "Invalid credentials." });
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 
     //   --------------Logout endpoint-----------------
     app.post("/logout", async (req, res) => {
@@ -103,10 +104,12 @@ poolConnect
         const result = await request.query(
           `SELECT * FROM users WHERE email = '${email}'`
         );
-
+    
         if (result.recordset.length > 0) {
           const user = result.recordset[0];
-          res.status(200).json(user);
+          // Modify this line to include the loginHistory field in the response
+          const userWithLoginHistory = { ...user, loginHistory: user.lastLoginTime ? [user.lastLoginTime] : [] };
+          res.status(200).json(userWithLoginHistory);
         } else {
           res.status(404).json({ message: "User not found" });
         }
