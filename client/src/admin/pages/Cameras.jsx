@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AddAreaForm from "../components/Area_Components/AddAreaForm";
-import EditAreaForm from "../components/Area_Components/EditAreaForm";
+import InsertModel from "../components/Camera_Components/InsertModel"; // Import the InsertModel component
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,6 +10,7 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
+import { ChevronsRightLeft } from "lucide-react";
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
@@ -31,17 +31,16 @@ function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   );
 }
 
-export default function Creas() {
+export default function Cameras() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [sorting, setSorting] = useState([]);
   const [filtering, setFiltering] = useState("");
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  const [showInsertModel, setShowInsertModel] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -61,41 +60,33 @@ export default function Creas() {
     try {
       const response = await Axios.get("http://localhost:3001/Cameras");
       setCameraList(response.data);
+      // console.log(response.data);
     } catch (err) {
       console.error("Failed to get Cameras:", err);
     }
   };
   const handleRowSelectionChange = (row) => {
-    const newSelectedRowId = row.original.CameraId;
+    const newSelectedRowId = row.original.CameraID;
     setSelectedRowId((prevSelectedRowId) =>
       prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
+      
     );
+    // console.log(row.original.CameraID)
 
-    const selectedRow = data.find((rowData) => rowData.CameraId === newSelectedRowId);
-    // console.log(selectedRow.CameraId);
-    setSelectedCamera(selectedRow.CameraId);
+    const selectedRow = data.find((rowData) => rowData.CameraID === newSelectedRowId);
+    // console.log(selectedRow.CameraID);
+    setSelectedCamera(selectedRow.CameraID);
   };
 
-  const handleAdd = () => {
-    setShowAddForm(true);
-  };
+  //................................... Add Cameras...............................................
+    // Define event handler to toggle insert model visibility
+    const toggleInsertModel = () => {
+      setShowInsertModel(!showInsertModel);
+    };
 
-  const handleAddFormClose = () => {
-    setShowAddForm(false);
-  };
 
-  const handleAddFormSave = (newCamera) => {
-    Axios.post("http://localhost:3001/insertCamera", newCamera)
-      .then((response) => {
-        setData((prevData) => [...prevData, newCamera]);
-        setShowAddForm(false);
-        toast.success("Data has been saved");
-      })
-      .catch((error) => {
-        console.error("Error creating Camera", error);
-      });
-  };
-  
+
+  // .................................Edit Camera Data..........................................
   const handleEditCamera = () => {
     const selectedRow = data.find((row) => row.id === selectedRowId);
   
@@ -120,9 +111,9 @@ export default function Creas() {
         console.error("Error updating Camera", error);
       });
   };
-  const handleEditCameraCancel = () => {
-    setEditing(false);
-  };
+
+
+  //........................................Delete Selecte Camera.....................................
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
@@ -144,7 +135,7 @@ export default function Creas() {
       cell: ({ row }) => {
         return (
           <IndeterminateCheckbox
-            checked={selectedRowId === row.original.CameraId}
+            checked={selectedRowId === row.original.CameraID}
             onChange={() => handleRowSelectionChange(row)}
           />
         );
@@ -229,7 +220,7 @@ export default function Creas() {
               <tr
                 key={row.id}
                 className={`${
-                  selectedRowId === row.original.CameraId ? "bg-gray-100" : ""
+                  selectedRowId === row.original.CameraID ? "bg-gray-100" : ""
                 } hover:bg-gray-50 cursor-pointer`}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -246,19 +237,6 @@ export default function Creas() {
         </table>
       )}
     </div>
-
-    {showAddForm && (
-      <AddCameraForm onSave={handleAddFormSave} onClose={handleAddFormClose} />
-    )}
-    {showEditForm && selectedCamera && (
-      <EditCameraForm
-        onSave={handleEditCameraSave}
-        onClose={() => setShowEditForm(false)}
-        defaultValues={selectedCamera}
-        title="Edit Camera"
-      />
-      
-    )}
 
 <div className="flex justify-center items-center gap-4 mt-2">
 <ToastContainer />
@@ -293,7 +271,7 @@ export default function Creas() {
     <div className="flex justify-center gap-4 mt-4">
       <button
         className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        onClick={handleAdd}
+        onClick={toggleInsertModel}
       >
         Add
       </button>
@@ -309,6 +287,15 @@ export default function Creas() {
       >
         Delete
       </button>
+       {/* Insert Model */}
+       <InsertModel
+        isOpen={showInsertModel} // Pass state variable to manage visibility
+        onClose={toggleInsertModel} // Pass event handler to close the insert model
+        onSave={(newCamera) => {
+          // Handle save logic here if needed
+          console.log("New camera saved:", newCamera);
+        }}
+      />
     </div>
   </div>
   );

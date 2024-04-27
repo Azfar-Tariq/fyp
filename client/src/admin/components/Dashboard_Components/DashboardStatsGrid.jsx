@@ -69,7 +69,7 @@ export default function DashboardStatsGrid() {
       </BoxWrapper>
       </Link>
 
-      <Link to="/admin/areas"  className="w-full">
+      <Link to="/admin/cameras"  className="w-full">
       <BoxWrapper>
         <div className="rounded-full h-12 w-12 flex items-center justify-center bg-green-500">
           <IoMap className="text-2xl text-white" />

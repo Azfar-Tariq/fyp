@@ -552,6 +552,28 @@ app.post("/login", async (req, res) => {
         res.status(500).send("Failed to save camera to the database");
       }
     });
+    app.post("/insertCamera", async (req, res) => {
+      // const areaId = req.params.areaId;
+      const newCamera = req.body;
+      // console.log(req.params.areaId)
+      // console.log(req.body)
+
+      try {
+        const request = pool.request();
+        await request
+          .input("areaId", sql.Int, newCamera.areaId)
+          .input("cameraName", sql.NVarChar, newCamera.cameraName)
+          .input("description", sql.NVarChar, newCamera.description)
+          .query(
+            "INSERT INTO Camera (AreaID, CameraName, Description) VALUES (@areaId, @cameraName, @description)"
+          );
+
+        res.status(200).send("Camera saved to database");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to save camera to the database");
+      }
+    });
 
     // Get camera data from database
     app.get("/readArea/:areaId/readCamera", async (req, res) => {
@@ -601,6 +623,22 @@ app.post("/login", async (req, res) => {
         const request = pool.request();
         await request.query(
           `DELETE FROM Camera WHERE CameraID = ${cameraId} AND AreaID = ${areaId}`
+        );
+
+        res.status(200).send("Camera deleted successfully");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to delete camera from the database");
+      }
+    });
+    app.delete("/deleteCamera/:cameraId", async (req, res) => {
+      // const areaId = req.params.areaId;
+      const cameraId = req.params.cameraId;
+
+      try {
+        const request = pool.request();
+        await request.query(
+          `DELETE FROM Camera WHERE CameraID = ${cameraId}`
         );
 
         res.status(200).send("Camera deleted successfully");

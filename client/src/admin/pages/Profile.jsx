@@ -146,7 +146,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import backgroundImage from "./iot2.jpg";
 import { faEdit, faSignOutAlt, faEye, faEyeSlash, faIdBadge, faUser, faEnvelope, faPhone, faUserShield } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = () => {
