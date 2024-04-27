@@ -89,7 +89,7 @@
             .then((response) => {
               setData((prevData) => [...prevData, newArea]);
               setShowAddForm(false);
-              toast.success("Data has been saved");
+              toast.success("New Area Has been Added Successfully");
             })
             .catch((error) => {
               console.error("Error creating area", error);
@@ -114,7 +114,7 @@
                 )
               );
               setEditing(false);
-              toast.success("Data has been saved");
+              toast.success("Area Data has been Saved Successfully");
             })
           .catch((error) => {
               console.error("Error updating area", error);
@@ -131,6 +131,7 @@
                 setData((prevData) => prevData.filter((row) => row.id !== selectedRowId));
                 setSelectedRowId(null);
                 fetchData(setData); // Fetch updated data from the server
+                toast.success("Area has been Deleted Successfully");
               })
               .catch((error) => {
                 console.error(`Error deleting area ${selectedRowId}`, error);

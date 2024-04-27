@@ -613,6 +613,30 @@ app.post("/login", async (req, res) => {
         res.status(500).send("Failed to update camera in the database");
       }
     });
+    app.put("/updateCamera/:cameraId", async (req, res) => {
+      // const areaId = req.params.areaId;
+      const cameraId = req.params.cameraId;
+      const newCameraName = req.body.CameraName;
+      const newDescription = req.body.CameraDescription;
+      // console.log(req.params);
+      // console.log(req.body.CameraName);
+
+      try {
+        const request = pool.request();
+        await request
+          .input("newCameraName", sql.NVarChar, newCameraName)
+          .input("newDescription", sql.NVarChar, newDescription)
+          .query(
+            `UPDATE Camera SET CameraName = @newCameraName, Description = @newDescription WHERE CameraID = ${cameraId}`
+          );
+
+        res.status(200).send("Camera updated successfully");
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update camera in the database");
+      }
+    });
+
 
     // Delete camera data from database
     app.delete("/readArea/:areaId/deleteCamera/:cameraId", async (req, res) => {

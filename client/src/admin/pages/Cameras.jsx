@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import InsertModel from "../components/Camera_Components/InsertModel"; // Import the InsertModel component
+import InsertModel from "../components/Camera_Components/InsertModel";
+import EditModel from "../components/Camera_Components/EditModel";
 import {
   useReactTable,
   getCoreRowModel,
@@ -41,6 +42,7 @@ export default function Cameras() {
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [showInsertModel, setShowInsertModel] = useState(false);
+  const [showEditModel, setShowEditModel] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -88,26 +90,27 @@ export default function Cameras() {
 
   // .................................Edit Camera Data..........................................
   const handleEditCamera = () => {
-    const selectedRow = data.find((row) => row.id === selectedRowId);
-  
-    if (selectedRow) {
+    // const selectedRow = data.find((row) => row.id === selectedRowId);
+    if (selectedRowId) {
       setEditing(true);
-      setSelectedCamera(selectedRow);
+      setSelectedCamera(selectedRowId);
+      setShowEditModel(true); // Show the EditModel
     }
   };
 
   const handleEditCameraSave = (updatedCamera) => {
     Axios.put(`http://localhost:3001/updateCamera/${selectedRowId}`, updatedCamera)
-    .then((response) => {
+      .then((response) => {
         setData(
           data.map((Camera) =>
-            Camera.id === selectedRowId? updatedCamera : Camera
+            Camera.id === selectedRowId ? updatedCamera : Camera
           )
         );
         setEditing(false);
-        toast.success("Data has been saved");
+        toast.success("Camera Data updated Successfully");
+        setShowEditModel(false); // Close the EditModel after saving
       })
-    .catch((error) => {
+      .catch((error) => {
         console.error("Error updating Camera", error);
       });
   };
@@ -122,6 +125,7 @@ export default function Cameras() {
           setData((prevData) => prevData.filter((row) => row.id !== selectedRowId));
           setSelectedRowId(null);
           fetchData(setData); // Fetch updated data from the server
+          toast.success("Camera Deleted Successfully");
         })
         .catch((error) => {
           console.error(`Error deleting Camera ${selectedRowId}`, error);
@@ -277,7 +281,7 @@ export default function Cameras() {
       </button>
       <button
         className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-yellow-500 rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-        onClick={() => setShowEditForm(true)}
+        onClick={handleEditCamera}
       >
         Edit
       </button>
@@ -295,6 +299,14 @@ export default function Cameras() {
           // Handle save logic here if needed
           console.log("New camera saved:", newCamera);
         }}
+      />
+
+        {/* Edit Model */}
+        <EditModel
+        isOpen={showEditModel} // Pass state variable to manage visibility
+        onClose={() => setShowEditModel(false)} // Pass event handler to close the edit model
+        selectedCamera={selectedCamera} // Pass the selected camera data
+        onSave={handleEditCameraSave} // Pass event handler to save edited camera data
       />
     </div>
   </div>

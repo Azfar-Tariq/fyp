@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import { fetchData } from "../../pages/Cameras"; // Import the fetchData function
 
 const InsertModel = ({ isOpen, onClose }) => {
@@ -21,12 +23,17 @@ const InsertModel = ({ isOpen, onClose }) => {
   }, []);
 
   const handleSave = () => {
-    const newCamera = {
+    if (selectedArea === "") {
+      alert("Please select an area to add a new camera.");
+      return;
+    }
+      const newCamera = {
       areaId: selectedArea,
       cameraName: cameraName,
       description: cameraDescription,
     };
-    console.log(selectedArea);
+  
+    // console.log(selectedArea);
 
     // Call the API to add a new camera
     Axios.post("http://localhost:3001/insertCamera", newCamera)
@@ -38,6 +45,7 @@ const InsertModel = ({ isOpen, onClose }) => {
 
         // Close the modal after saving
         onClose(); 
+        toast.success("New Camera Added Successfully");
         // Fetch updated data from the server
         // fetchData(newData);
       })
@@ -53,6 +61,7 @@ const InsertModel = ({ isOpen, onClose }) => {
       }`}
     >
       <div className="bg-white rounded-lg p-4">
+      <ToastContainer />
         <h2 className="text-lg font-bold mb-2">Add Camera</h2>
         <form>
           <label className="block mb-2">
@@ -103,6 +112,7 @@ const InsertModel = ({ isOpen, onClose }) => {
           >
             Cancel
           </button>
+          
         </form>
       </div>
     </div>
