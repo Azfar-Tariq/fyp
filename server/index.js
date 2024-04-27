@@ -199,7 +199,7 @@ app.post("/login", async (req, res) => {
       }
     });
 
-    // ----------Get Users for Users.js in Admin Dashboard endpoint-------------
+    // ----------Get  All Users for Users.js in Admin Dashboard endpoint-------------
     app.get("/users", async (req, res) => {
       try {
         const request = pool.request();
