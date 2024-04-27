@@ -509,6 +509,29 @@ app.post("/login", async (req, res) => {
 
     //  -------------------Camera Endpoints--------------------
     // Send camera data to database
+    app.get('/cameras', async (req, res) => {
+      try {
+        // Connect to the database
+        await sql.connect(config);
+    
+        // Query to fetch all cameras with details
+        const result = await sql.query(`
+          SELECT c.CameraID, c.CameraName, c.description AS CameraDescription,a.AreaID, a.AreaName
+          FROM Camera c
+          INNER JOIN Area a ON c.AreaID = a.AreaID
+        `);
+    
+        // Send the response with fetched data
+        res.json(result.recordset);
+      } catch (error) {
+        // If an error occurs, send an error response
+        console.error('Error fetching cameras:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      } finally {
+        // Close the database connection
+        await sql.close();
+      }
+    });
     app.post("/readArea/:areaId/addCamera", async (req, res) => {
       const areaId = req.params.areaId;
       const newCamera = req.body;

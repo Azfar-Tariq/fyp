@@ -1,87 +1,315 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import AddAreaForm from "../components/Area_Components/AddAreaForm";
+import EditAreaForm from "../components/Area_Components/EditAreaForm";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+} from "@tanstack/react-table";
 
-const Cameras = () => {
-  const [areas, setAreas] = useState([]);
-  const [selectedArea, setSelectedArea] = useState(null);
-  const [cameraName, setCameraName] = useState("");
-  const [description, setDescription] = useState("");
-  const [error, setError] = useState(null);
+function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
+  const ref = useRef(null);
 
   useEffect(() => {
-    // Fetch areas from the server
-    Axios.get("http://localhost:3001/readArea")
-      .then((response) => {
-        setAreas(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching areas:", error);
-      });
-  }, []);
-
-  const handleAddCamera = () => {
-    if (!selectedArea || !cameraName || !description) {
-      setError("Please fill out all fields");
-      return;
+    if (typeof indeterminate === "boolean") {
+      ref.current.indeterminate = !rest.checked && indeterminate;
     }
-
-    // Send camera data to the server
-    Axios.post(`http://localhost:3001/readArea/${selectedArea}/addCamera`, {
-      cameraName,
-      description,
-    })
-      .then((response) => {
-        // Clear input fields and error message on success
-        setCameraName("");
-        setDescription("");
-        setError(null);
-        // Optionally, you can show a success message or update the UI
-      })
-      .catch((error) => {
-        console.error("Error adding camera:", error);
-        setError("Failed to add camera. Please try again later.");
-      });
-  };
+  }, [ref, indeterminate, rest.checked]);
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-semibold mb-4">Add New Camera</h1>
-      <div className="flex flex-col gap-4 max-w-md">
-        {error && <div className="text-red-500">{error}</div>}
-        <select
-          value={selectedArea}
-          onChange={(e) => setSelectedArea(e.target.value)}
-          className="border rounded px-4 py-2"
-        >
-          <option value="">Select Area</option>
-          {areas.map((area) => (
-            <option key={area.AreaID} value={area.AreaID}>
-              {area.AreaName}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          value={cameraName}
-          onChange={(e) => setCameraName(e.target.value)}
-          placeholder="Camera Name"
-          className="border rounded px-4 py-2"
-        />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Camera Description"
-          className="border rounded px-4 py-2"
-        ></textarea>
-        <button
-          onClick={handleAddCamera}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
-        >
-          Add Camera
-        </button>
-      </div>
-    </div>
+    <input
+      type="checkbox"
+      ref={ref}
+      className={className + " cursor-pointer"}
+      {...rest}
+    />
   );
-};
+}
 
-export default Cameras;
+export default function Creas() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedCamera, setSelectedCamera] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [sorting, setSorting] = useState([]);
+  const [filtering, setFiltering] = useState("");
+  const [rowSelection, setRowSelection] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    Axios.get("http://localhost:3001/Cameras")
+      .then((response) => {
+        setData(response.data);
+        setLoading(false);
+        // console.log(response.data)
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+  
+  const fetchData = async (setCameraList) => {
+    try {
+      const response = await Axios.get("http://localhost:3001/Cameras");
+      setCameraList(response.data);
+    } catch (err) {
+      console.error("Failed to get Cameras:", err);
+    }
+  };
+  const handleRowSelectionChange = (row) => {
+    const newSelectedRowId = row.original.CameraId;
+    setSelectedRowId((prevSelectedRowId) =>
+      prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
+    );
+
+    const selectedRow = data.find((rowData) => rowData.CameraId === newSelectedRowId);
+    // console.log(selectedRow.CameraId);
+    setSelectedCamera(selectedRow.CameraId);
+  };
+
+  const handleAdd = () => {
+    setShowAddForm(true);
+  };
+
+  const handleAddFormClose = () => {
+    setShowAddForm(false);
+  };
+
+  const handleAddFormSave = (newCamera) => {
+    Axios.post("http://localhost:3001/insertCamera", newCamera)
+      .then((response) => {
+        setData((prevData) => [...prevData, newCamera]);
+        setShowAddForm(false);
+        toast.success("Data has been saved");
+      })
+      .catch((error) => {
+        console.error("Error creating Camera", error);
+      });
+  };
+  
+  const handleEditCamera = () => {
+    const selectedRow = data.find((row) => row.id === selectedRowId);
+  
+    if (selectedRow) {
+      setEditing(true);
+      setSelectedCamera(selectedRow);
+    }
+  };
+
+  const handleEditCameraSave = (updatedCamera) => {
+    Axios.put(`http://localhost:3001/updateCamera/${selectedRowId}`, updatedCamera)
+    .then((response) => {
+        setData(
+          data.map((Camera) =>
+            Camera.id === selectedRowId? updatedCamera : Camera
+          )
+        );
+        setEditing(false);
+        toast.success("Data has been saved");
+      })
+    .catch((error) => {
+        console.error("Error updating Camera", error);
+      });
+  };
+  const handleEditCameraCancel = () => {
+    setEditing(false);
+  };
+
+  const handleDeleteSelectedRow = () => {
+    if (selectedRowId) {
+      Axios.delete(`http://localhost:3001/deleteCamera/${selectedRowId}`)
+        .then((response) => {
+          setData((prevData) => prevData.filter((row) => row.id !== selectedRowId));
+          setSelectedRowId(null);
+          fetchData(setData); // Fetch updated data from the server
+        })
+        .catch((error) => {
+          console.error(`Error deleting Camera ${selectedRowId}`, error);
+        });
+    }
+  };
+
+  const columns = [
+    {
+      id: "select",
+      cell: ({ row }) => {
+        return (
+          <IndeterminateCheckbox
+            checked={selectedRowId === row.original.CameraId}
+            onChange={() => handleRowSelectionChange(row)}
+          />
+        );
+      },
+    },
+    {
+      Header: "Camera Name",
+      accessorKey: "CameraName",
+    },
+    {
+      Header: "Description",
+      accessorKey: "CameraDescription",
+    },
+    {
+      Header: "Associated Area",
+      accessorKey: "AreaName",
+    }
+  ];
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting: sorting,
+      globalFilter: filtering,
+      rowSelection,
+    },
+    onSortingChange: setSorting,
+    onFilteringChange: setFiltering,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
+  });
+
+  return (
+    <div className="w3-container mx-auto px-4 py-8">
+    <div className="flex flex-col gap-4 mb-4">
+      <div className="relative">
+        <label htmlFor="filter" className="sr-only">
+          Search:
+        </label>
+        <input
+          id="filter"
+          type="text"
+          className="bg-gray-100 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
+          placeholder="Search..."
+          value={filtering}
+          onChange={(e) => setFiltering(e.target.value)}
+        />
+      </div>
+
+      {loading ? (
+        <div>Loading ...</div>
+      ) : (
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                    className="py-2 px-4 text-left bg-gray-200 border-b border-gray-300 cursor-pointer"
+                  >
+                    {header.column.columnDef.Header}
+                    {
+                      {
+                        asc: "▲",
+                        desc: "▼",
+                      }[header.column.getIsSorted() ?? null]
+                    }
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className={`${
+                  selectedRowId === row.original.CameraId ? "bg-gray-100" : ""
+                } hover:bg-gray-50 cursor-pointer`}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="py-2 px-4 border-b border-gray-300"
+                  >
+                    {cell.column.columnDef.cell(cell)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+
+    {showAddForm && (
+      <AddCameraForm onSave={handleAddFormSave} onClose={handleAddFormClose} />
+    )}
+    {showEditForm && selectedCamera && (
+      <EditCameraForm
+        onSave={handleEditCameraSave}
+        onClose={() => setShowEditForm(false)}
+        defaultValues={selectedCamera}
+        title="Edit Camera"
+      />
+      
+    )}
+
+<div className="flex justify-center items-center gap-4 mt-2">
+<ToastContainer />
+      <button
+        onClick={() => table.setPageIndex(0)}
+        className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+      >
+        First Page
+      </button>
+      <button
+        disabled={!table.getCanPreviousPage()}
+        onClick={() => table.previousPage()}
+        className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+      >
+        Previous Page
+      </button>
+      <button
+        disabled={!table.getCanNextPage()}
+        onClick={() => table.nextPage()}
+        className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+      >
+        Next Page
+      </button>
+      <button
+        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+        className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+      >
+        Last Page
+      </button>
+    </div>
+
+    <div className="flex justify-center gap-4 mt-4">
+      <button
+        className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onClick={handleAdd}
+      >
+        Add
+      </button>
+      <button
+        className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-yellow-500 rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        onClick={() => setShowEditForm(true)}
+      >
+        Edit
+      </button>
+      <button
+        className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+        onClick={handleDeleteSelectedRow}
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+  );
+}
