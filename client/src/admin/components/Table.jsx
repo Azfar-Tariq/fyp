@@ -41,6 +41,7 @@ export default function Table({
   const [filtering, setFiltering] = useState("");
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  const [editableData, setEditableData] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -49,6 +50,7 @@ export default function Table({
     )
       .then((response) => {
         setData(response.data);
+        setEditableData(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -71,7 +73,6 @@ export default function Table({
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      console.log(selectedRowId);
       Axios.delete(
         `http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`
       )
@@ -80,12 +81,49 @@ export default function Table({
           setData((prevData) =>
             prevData.filter((row) => row.RectangleID !== selectedRowId)
           );
+          setEditableData((prevData) =>
+            prevData.filter((row) => row.RectangleID !== selectedRowId)
+          );
           setSelectedRowId(null);
           onDeleteRectangle();
         })
         .catch((error) => {
           console.error(`Error deleting rectangle ${selectedRowId}`, error);
         });
+    }
+  };
+
+  const handleInputChange = (e, rowIdx, key) => {
+    const newData = [...editableData];
+    newData[rowIdx][key] = parseFloat(e.target.value);
+    setEditableData(newData);
+  };
+
+  const handleSaveChanges = () => {
+    console.log("Updated Data:", editableData);
+    if (selectedRowId) {
+      const selectedRectangle = data.find(
+        (rectangle) => rectangle.RectangleID === selectedRowId
+      );
+      if (selectedRectangle) {
+        const { RectangleID, x1, y1, x2, y2, status } = selectedRectangle;
+        Axios.put(
+          `http://localhost:3001/updateBoundedRectangle/${RectangleID}`,
+          {
+            x1: parseInt(x1),
+            y1: parseInt(y1),
+            x2: parseInt(x2),
+            y2: parseInt(y2),
+            status: status,
+          }
+        )
+          .then((response) => {
+            console.log(response.data);
+          })
+          .catch((error) => {
+            console.error("Failed to update rectangle:", error);
+          });
+      }
     }
   };
 
@@ -106,18 +144,58 @@ export default function Table({
     {
       header: "X1",
       accessorKey: "x1",
+      cell: ({ row }) => {
+        return (
+          <input
+            type="number"
+            value={row.original.x1}
+            onChange={(e) => handleInputChange(e, row.index, "x1")}
+            style={{ width: "50px" }}
+          />
+        );
+      },
     },
     {
       header: "Y1",
       accessorKey: "y1",
+      cell: ({ row }) => {
+        return (
+          <input
+            type="number"
+            value={row.original.y1}
+            onChange={(e) => handleInputChange(e, row.index, "y1")}
+            style={{ width: "50px" }}
+          />
+        );
+      },
     },
     {
       header: "X2",
       accessorKey: "x2",
+      cell: ({ row }) => {
+        return (
+          <input
+            type="number"
+            value={row.original.x2}
+            onChange={(e) => handleInputChange(e, row.index, "x2")}
+            style={{ width: "50px" }}
+          />
+        );
+      },
     },
     {
       header: "Y2",
       accessorKey: "y2",
+      cell: ({ row }) => {
+        return (
+          <input
+            type="number"
+            value={row.original.y2}
+            onChange={(e) => handleInputChange(e, row.index, "y2")}
+            style={{ width: "50px" }}
+          />
+        );
+      },
     },
     {
       header: "Status",
@@ -164,6 +242,12 @@ export default function Table({
           className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
         >
           <MaterialSymbolsDelete />
+        </button>
+        <button
+          onClick={handleSaveChanges}
+          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
+        >
+          Save Changes
         </button>
       </div>
       {loading ? (
