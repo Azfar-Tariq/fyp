@@ -45,7 +45,7 @@ app.post("/login", async (req, res) => {
   try {
     const request = pool.request();
     const updateResult = await request.query(
-      `UPDATE users SET logged_in = 1, WHERE email = '${email}'`
+      `UPDATE users SET logged_in = 1 WHERE email = '${email}'`
     );
 
     // Check if update was successful
