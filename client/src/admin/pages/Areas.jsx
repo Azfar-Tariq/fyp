@@ -213,47 +213,47 @@
               <div>Loading ...</div>
             ) : (
               <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <th
-                          key={header.id}
-                          onClick={header.column.getToggleSortingHandler()}
-                          className="py-2 px-4 text-left bg-gray-200 border-b border-gray-300 cursor-pointer"
-                        >
-                          {header.column.columnDef.Header}
-                          {
-                            {
-                              asc: "▲",
-                              desc: "▼",
-                            }[header.column.getIsSorted() ?? null]
-                          }
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className={`${
-                        selectedRowId === row.original.areaId ? "bg-gray-100" : ""
-                      } hover:bg-gray-50 cursor-pointer`}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="py-2 px-4 border-b border-gray-300"
-                        >
-                          {cell.column.columnDef.cell(cell)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <thead>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th
+              key={header.id}
+              onClick={header.column.getToggleSortingHandler()}
+              className="py-2 px-4 text-left bg-gray-200 border-b border-gray-300 cursor-pointer"
+            >
+              {header.column.columnDef.Header}
+              {
+                {
+                  asc: "▲",
+                  desc: "▼",
+                }[header.column.getIsSorted() ?? null]
+              }
+            </th>
+          ))}
+        </tr>
+      ))}
+    </thead>
+    <tbody>
+      {table.getRowModel().rows.map((row, rowIndex) => (
+        <tr
+          key={row.id}
+          className={`${
+            rowIndex % 2 === 0 ? "bg-white" : "bg-teal-50"
+          } hover:bg-gray-200 cursor-pointer`}
+        >
+          {row.getVisibleCells().map((cell) => (
+            <td
+              key={cell.id}
+              className="py-2 px-4 border-b border-gray-300"
+            >
+              {cell.column.columnDef.cell(cell)}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
             )}
           </div>
       
@@ -301,25 +301,26 @@
           </div>
       
           <div className="flex justify-center gap-4 mt-4">
-            <button
-              className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-blue-500 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              onClick={handleAdd}
-            >
-              Add
-            </button>
-            <button
-              className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-yellow-500 rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              onClick={() => setShowEditForm(true)}
-            >
-              Edit
-            </button>
-            <button
-              className="px-6 py-2 text-xs font-semibold text-gray-900 uppercase bg-red-500 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
-              onClick={handleDeleteSelectedRow}
-            >
-              Delete
-            </button>
-          </div>
+  <button
+    className="text-white w-28 h-12 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    onClick={handleAdd}
+  >
+    Add
+  </button>
+  <button
+    className="text-white w-28 h-12 bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800"
+    onClick={() => setShowEditForm(true)}
+  >
+    Edit
+  </button>
+  <button
+    className="text-white w-28 h-12 bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-900"
+    onClick={handleDeleteSelectedRow}
+  >
+    Delete
+  </button>
+</div>
+
         </div>
         );
       }
