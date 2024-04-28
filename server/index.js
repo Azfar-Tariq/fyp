@@ -36,6 +36,8 @@ poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
 
+//....................................User Login and Logout Endpoints................................
+
  // ---------------login endpoint-----------------
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -43,7 +45,7 @@ app.post("/login", async (req, res) => {
   try {
     const request = pool.request();
     const updateResult = await request.query(
-      `UPDATE users SET logged_in = 1, lastLoginTime = GETDATE() WHERE email = '${email}'`
+      `UPDATE users SET logged_in = 1, WHERE email = '${email}'`
     );
 
     // Check if update was successful
@@ -96,6 +98,90 @@ app.post("/login", async (req, res) => {
       }
     });
 
+
+//......................................Admin Login Logout Endpoints....................................
+
+// ---------------login endpoint-----------------
+    app.post("/adminLogin", async (req, res) => {
+      const { email, password } = req.body;
+    
+      try {
+        const request = pool.request();
+        const updateResult = await request.query(
+          `UPDATE admin SET admin_logged_in_status = 1 WHERE admin_email = '${email}'`
+        );
+    
+        // Check if update was successful
+        if (updateResult.rowsAffected > 0) {
+          const result = await request.query(
+            `SELECT * FROM admin WHERE admin_email = '${email}' AND admin_password = '${password}'`
+          );
+    
+          if (result.recordset.length > 0) {
+            const admin = result.recordset[0];
+            const responsePayload = { email: admin.admin_email, role: admin.admin_role };
+    
+            // Send the response with the payload
+            res.status(200).json(responsePayload);
+          } else {
+            // Update failed, but user provided correct credentials. Log error and send a specific message.
+            console.error(
+              "Admin logged in successfully, but database update failed."
+            );
+            res.status(500).json({ message: "Internal server error." });
+          }
+        } else {
+          // Update failed, admin might have invalid credentials.
+          console.error("Login error:");
+          res.status(401).json({ message: "Invalid credentials." });
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Internal server error." });
+      }
+    });
+    
+//   --------------Logout endpoint-----------------
+    app.post("/adminLogout", async (req, res) => {
+      try {
+        const { email } = req.body;
+    
+        // Update admin logged_in status to 0
+        const request = pool.request();
+        await request
+          .input("email", sql.VarChar, email)
+          .query("UPDATE admin SET admin_logged_in_status = 0 WHERE admin_email = @email");
+    
+        // Respond with success message
+        res.status(200).json({ message: "Successfully logged out." });
+      } catch (error) {
+        console.error("Error during logout:", error);
+        res.status(500).json({ message: "Internal server error." });
+      }
+    });
+    
+ // -------------Admin details endpoint--------------------
+    app.get("/admin-details", async (req, res) => {
+      try {
+        const { email } = req.query;
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT adminID, admin_email, admin_name, admin_role, admin_employeeID, admin_phone FROM admin WHERE admin_email = '${email}'`
+        );
+    
+        if (result.recordset.length > 0) {
+          const admin = result.recordset[0];
+          res.status(200).json(admin);
+        } else {
+          res.status(404).json({ message: "Admin not found" });
+        }
+      } catch (error) {
+        console.error("Error fetching admin details:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+
     // -------------User details endpoint--------------------
     app.get("/user-details", async (req, res) => {
       try {
@@ -107,9 +193,7 @@ app.post("/login", async (req, res) => {
     
         if (result.recordset.length > 0) {
           const user = result.recordset[0];
-          // Modify this line to include the loginHistory field in the response
-          const userWithLoginHistory = { ...user, loginHistory: user.lastLoginTime ? [user.lastLoginTime] : [] };
-          res.status(200).json(userWithLoginHistory);
+          res.status(200).json(user);
         } else {
           res.status(404).json({ message: "User not found" });
         }

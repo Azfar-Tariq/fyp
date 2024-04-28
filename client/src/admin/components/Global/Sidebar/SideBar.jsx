@@ -22,7 +22,7 @@ export default function SideBar() {
       }
 
       const response = await fetch(
-        `http://localhost:3001/user-details?email=${email}`,
+        `http://localhost:3001/admin-details?email=${email}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -85,7 +85,7 @@ export default function SideBar() {
             <div className="leading-4">
               <h4 className="font-semibold">{user.name}</h4>
               <span className="text-xs text-gray-600">
-                {user.email}
+                {user.admin_email}
               </span>
             </div>
           </div>

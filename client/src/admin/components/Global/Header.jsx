@@ -17,7 +17,7 @@ export default function Header() {
       }
 
       const response = await fetch(
-        `http://localhost:3001/user-details?email=${email}`,
+        `http://localhost:3001/admin-details?email=${email}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -45,14 +45,6 @@ export default function Header() {
         IoT Based Electricity Conservation System
       </h1>
       <div className="flex items-center gap-2">
-        {/* <div className="relative">
-          <HiOutlineSearch fontSize={20} className="text-gray-400 absolute top-1/2 left-3 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="text-sm focus:outline-none active:outline-none border border-gray-300 w-[24rem] h-10 pl-11 pr-4 rounded-sm"
-          />
-        </div> */}
       </div>
       <div className="flex items-center gap-2 mr-2">
         <Popover className="relative">
@@ -90,7 +82,7 @@ export default function Header() {
           )}
         </Popover>
         <h3 className="text-center text-xl text-purple-600 font-medium leading-8">
-          {user ? user.name : "Loading..."}
+          {user ? user.admin_name : "Loading..."}
         </h3>
       </div>
     </div>
