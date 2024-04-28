@@ -145,12 +145,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faSignOutAlt, faEye, faEyeSlash, faIdBadge, faUser, faEnvelope, faPhone, faUserShield } from "@fortawesome/free-solid-svg-icons";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const get = async () => {
@@ -197,7 +199,12 @@ const Profile = () => {
       }
 
       localStorage.removeItem("email");
-      navigate("/"); // Redirect to the login page after logout
+      setLoading(true);
+    // Delay navigation to simulate loading process
+    setTimeout(() => {
+    setLoading(false); // Set loading to false after 5 seconds
+      navigate("/");
+    }, 1000);
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -212,12 +219,13 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto bg-white rounded-md shadow-md " >
-      {/* style={{ backgroundImage: `url(${backgroundImage})` }} */}
-      {/* Header Section */}
-      {/* <div className="flex items-center justify-center border-b-2 border-black pb-4 mb-8">
-        <h1 className="text-3xl font-bold">User Profile</h1>
-      </div> */}
+    <div className="container mx-auto bg-white rounded-md shadow-md">
+      {/* Loader component */}
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-500 bg-opacity-75 z-50">
+          <ClipLoader color="#4A90E2" loading={loading} size={50} />
+        </div>
+      )}
 
       {/* Personal Information Section */}
       <div className="mb-8 bg-gray-100 border border-gray-200 rounded-md m-14 p-12">

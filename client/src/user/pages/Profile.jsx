@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader";
 
 export default function UserProfile() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const get = async () => {
     try {
@@ -51,7 +53,13 @@ export default function UserProfile() {
       }
 
       localStorage.removeItem("email");
-      navigate("/"); // Redirect to the login page after logout
+      setLoading(true);
+    // Delay navigation to simulate loading process
+    setTimeout(() => {
+    setLoading(false); 
+      navigate("/userLogin");
+    }, 1000);
+     
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -71,6 +79,13 @@ export default function UserProfile() {
 
   return (
     <div className="p-10 text-2xl font-bold ">
+       {/*display loader after sccueeful logout*/}
+       {loading && (
+        <div className="absolute inset-0 bg-black opacity-50 flex items-center justify-center z-50">
+
+          <ClipLoader color={"#36d7b7"} loading={loading} size={150} />
+        </div>
+      )}
       <h1>Profile</h1>
       <div className="flex justify-center mt-20">
         <div className="max-w-xs">
