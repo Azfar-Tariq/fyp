@@ -1,9 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
-import { IcOutlineKeyboardArrowDown } from "../assets/icons/down";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Axios from "axios";
-import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 import Add from "./Add";
 import ModalOverlay from "./ModalOverlay";
 import Dialog from "./Dialog";
@@ -49,7 +46,7 @@ export default function Select({
       });
   };
 
-  const fetchCameras = () => {
+  const fetchCameras = (selectedArea) => {
     Axios.get(`http://localhost:3001/readArea/${selectedArea}/readCamera`)
       .then((response) => {
         setCameras(response.data);
@@ -57,48 +54,6 @@ export default function Select({
       .catch((error) => {
         console.error("Failed to get cameras:", error);
       });
-  };
-
-  const handleAreaSubmitDialog = () => {
-    Axios.post("http://localhost:3001/insertArea", {
-      areaName: areaName,
-    })
-      .then((response) => {
-        console.log(response.data);
-        fetchAreas();
-        toast.success("Building added successfully");
-      })
-      .catch((error) => {
-        console.error("Failed to save building:", error);
-      });
-    setIsAreaDialogOpen(false);
-    setIsCameraDialogOpen(false);
-    setAreaName("");
-  };
-
-  const handleCameraSubmitDialog = () => {
-    Axios.post(`http://localhost:3001/readArea/${selectedArea}/addCamera`, {
-      cameraName: cameraName,
-    })
-      .then((response) => {
-        console.log(response.data);
-        fetchCameras();
-        toast.success("Lab added successfully");
-      })
-      .catch((err) => {
-        console.error("Failed to save lab:", err);
-      });
-    setIsAreaDialogOpen(false);
-    setIsCameraDialogOpen(false);
-    setCameraName("");
-  };
-
-  const toggleCameraDialog = () => {
-    setIsCameraDialogOpen(!isCameraDialogOpen);
-  };
-
-  const toggleAreaDialog = () => {
-    setIsAreaDialogOpen(!isAreaDialogOpen);
   };
 
   const handleAreaClick = (areaId) => {
@@ -111,73 +66,6 @@ export default function Select({
 
   const handleCameraClick = (cameraId) => {
     onCameraChange(cameraId);
-  };
-
-  const deleteArea = () => {
-    Axios.delete(`http://localhost:3001/deleteArea/${selectedArea}`)
-      .then((res) => {
-        console.log(res.data);
-        fetchAreas();
-        toast.success("Building deleted successfully");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const deleteCamera = () => {
-    Axios.delete(
-      `http://localhost:3001/readArea/${selectedArea}/deleteCamera/${selectedCamera}`
-    )
-      .then((res) => {
-        console.log(res.data);
-        fetchCameras();
-        toast.success("Building deleted successfully");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const openAreaEditDialog = () => {
-    setIsEditAreaDialogOpen(true);
-  };
-
-  const openCameraEditDialog = () => {
-    setIsEditCameraDialogOpen(true);
-  };
-
-  const handleEditAreaSubmitDialog = () => {
-    Axios.put(`http://localhost:3001/updateArea/${selectedArea}`, {
-      newAreaName: editAreaName,
-    })
-      .then((res) => {
-        console.log(res.data);
-        fetchAreas();
-        toast.success("Building updated successfully");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setIsEditAreaDialogOpen(false);
-  };
-
-  const handleEditCameraSubmitDialog = () => {
-    Axios.put(
-      `http://localhost:3001/readArea/${selectedArea}/updateCamera/${selectedCamera}`,
-      {
-        newCameraName: editCameraName,
-      }
-    )
-      .then((res) => {
-        console.log(res.data);
-        fetchCameras();
-        toast.success("Building updated successfully");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setIsEditCameraDialogOpen(false);
   };
 
   return (
@@ -209,49 +97,6 @@ export default function Select({
                   </option>
                 ))}
               </select>
-              <div className="flex gap-2">
-                <Add toggleDialog={toggleAreaDialog} text="Area" />
-                {selectedArea && (
-                  <div
-                    className="p-3 mt-4 rounded-md items-center text-white text-center hover:cursor-pointer bg-purple-500 hover:bg-purple-700 transition duration-100 ease-in-out"
-                    onClick={openAreaEditDialog}
-                  >
-                    <MaterialSymbolsEditOutlineRounded />
-                  </div>
-                )}
-                {isEditAreaDialogOpen && (
-                  <ModalOverlay isOpen={isEditAreaDialogOpen}>
-                    <Dialog
-                      text="Edit Area"
-                      text2="Area"
-                      name={editAreaName}
-                      setName={setEditAreaName}
-                      onClose={() => setIsEditAreaDialogOpen(false)}
-                      onSubmit={handleEditAreaSubmitDialog}
-                    />
-                  </ModalOverlay>
-                )}
-                {selectedArea && (
-                  <div
-                    className="p-3 mt-4 rounded-md items-center text-white text-center hover:cursor-pointer bg-purple-500 hover:bg-purple-700 transition duration-100 ease-in-out"
-                    onClick={deleteArea}
-                  >
-                    <MaterialSymbolsDelete />
-                  </div>
-                )}
-                {isAreaDialogOpen && (
-                  <ModalOverlay isOpen={isAreaDialogOpen}>
-                    <Dialog
-                      text="Add Area"
-                      text2="Area"
-                      name={areaName}
-                      setName={setAreaName}
-                      onClose={toggleAreaDialog}
-                      onSubmit={handleAreaSubmitDialog}
-                    />
-                  </ModalOverlay>
-                )}
-              </div>
             </div>
             {selectedArea && (
               <div>
@@ -274,49 +119,6 @@ export default function Select({
                     </option>
                   ))}
                 </select>
-                <div className="flex gap-2">
-                  <Add toggleDialog={toggleCameraDialog} text="Camera" />
-                  {selectedArea && (
-                    <div
-                      className="p-3 mt-4 rounded-md items-center text-white text-center hover:cursor-pointer bg-purple-500 hover:bg-purple-700 transition duration-100 ease-in-out"
-                      onClick={openCameraEditDialog}
-                    >
-                      <MaterialSymbolsEditOutlineRounded />
-                    </div>
-                  )}
-                  {isEditCameraDialogOpen && (
-                    <ModalOverlay isOpen={isEditCameraDialogOpen}>
-                      <Dialog
-                        text="Edit Camera"
-                        text2="Camera"
-                        name={editCameraName}
-                        setName={setEditCameraName}
-                        onClose={() => setIsEditCameraDialogOpen(false)}
-                        onSubmit={handleEditCameraSubmitDialog}
-                      />
-                    </ModalOverlay>
-                  )}
-                  {selectedArea && (
-                    <div
-                      className="p-3 mt-4 rounded-md items-center text-white text-center hover:cursor-pointer bg-purple-500 hover:bg-purple-700 transition duration-100 ease-in-out"
-                      onClick={deleteCamera}
-                    >
-                      <MaterialSymbolsDelete />
-                    </div>
-                  )}
-                  {isCameraDialogOpen && (
-                    <ModalOverlay isOpen={isCameraDialogOpen}>
-                      <Dialog
-                        text="Add Camera"
-                        text2="Camera"
-                        name={cameraName}
-                        setName={setCameraName}
-                        onClose={toggleCameraDialog}
-                        onSubmit={handleCameraSubmitDialog}
-                      />
-                    </ModalOverlay>
-                  )}
-                </div>
               </div>
             )}
           </div>
