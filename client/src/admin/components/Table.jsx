@@ -60,8 +60,6 @@ export default function Table({
   }, [selectedCamera]);
 
   const handleRowSelectionChange = (row) => {
-    // setSelectedRowId(row.original.RectangleID);
-    // onSelectedRectangleChange(row.original.RectangleID);
     const newSelectedRowId = row.original.RectangleID;
     setSelectedRowId((prevSelectedRowId) =>
       prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
