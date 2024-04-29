@@ -202,18 +202,22 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
         `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
       )
         .then((response) => {
-          const rectangleData = response.data[0];
-          setAnnotations((prevAnnotations) => [
-            ...prevAnnotations,
-            {
-              id: rectangleData.RectangleID,
-              x: rectangleData.x1,
-              y: rectangleData.y1,
-              width: rectangleData.x2 - rectangleData.x1,
-              height: rectangleData.y2 - rectangleData.y1,
-            },
-          ]);
-          drawEditedRectangle();
+          const selectedRectData = response.data.find(
+            (rectangle) => rectangle.RectangleID === selectedRectangleId
+          );
+          if (selectedRectData) {
+            setAnnotations((prevAnnotations) => [
+              ...prevAnnotations,
+              {
+                id: selectedRectData.RectangleID,
+                x: selectedRectData.x1,
+                y: selectedRectData.y1,
+                width: selectedRectData.x2 - selectedRectData.x1,
+                height: selectedRectData.y2 - selectedRectData.y1,
+              },
+            ]);
+            drawEditedRectangle();
+          }
         })
         .catch((error) => {
           console.error("Failed to get data:", error);
@@ -222,8 +226,6 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
   };
 
   const drawEditedRectangle = () => {
-    console.log("Drawing edited rectangle");
-    console.log(annotations);
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const img = new Image();

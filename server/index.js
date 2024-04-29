@@ -19,7 +19,7 @@ const config = {
   host: "localhost",
   user: "admin",
   password: "admin123",
-  server: "DESKTOP-946V6E1", // Replace with your SQL Server instance name
+  server: "DESKTOP-M1UFNP6", // Replace with your SQL Server instance name
   database: "fyp", // Replace with your database name
   options: {
     encrypt: true,
@@ -36,48 +36,47 @@ poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
 
-//....................................User Login and Logout Endpoints................................
+    //....................................User Login and Logout Endpoints................................
 
- // ---------------login endpoint-----------------
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+    // ---------------login endpoint-----------------
+    app.post("/login", async (req, res) => {
+      const { email, password } = req.body;
 
-  try {
-    const request = pool.request();
-    const updateResult = await request.query(
-      `UPDATE users SET logged_in = 1 WHERE email = '${email}'`
-    );
-
-    // Check if update was successful
-    if (updateResult.rowsAffected > 0) {
-      const result = await request.query(
-        `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`
-      );
-
-      if (result.recordset.length > 0) {
-        const user = result.recordset[0];
-        const responsePayload = { email: user.email, role: user.role };
-
-        // Send the response with the payload
-        res.status(200).json(responsePayload);
-      } else {
-        // Update failed, but user provided correct credentials. Log error and send a specific message.
-        console.error(
-          "User logged in successfully, but database update failed."
+      try {
+        const request = pool.request();
+        const updateResult = await request.query(
+          `UPDATE users SET logged_in = 1 WHERE email = '${email}'`
         );
+
+        // Check if update was successful
+        if (updateResult.rowsAffected > 0) {
+          const result = await request.query(
+            `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`
+          );
+
+          if (result.recordset.length > 0) {
+            const user = result.recordset[0];
+            const responsePayload = { email: user.email, role: user.role };
+
+            // Send the response with the payload
+            res.status(200).json(responsePayload);
+          } else {
+            // Update failed, but user provided correct credentials. Log error and send a specific message.
+            console.error(
+              "User logged in successfully, but database update failed."
+            );
+            res.status(500).json({ message: "Internal server error." });
+          }
+        } else {
+          // Update failed, user might have invalid credentials.
+          console.error("Login error:");
+          res.status(401).json({ message: "Invalid credentials." });
+        }
+      } catch (error) {
+        console.error("Login error:", error);
         res.status(500).json({ message: "Internal server error." });
       }
-    } else {
-      // Update failed, user might have invalid credentials.
-      console.error("Login error:");
-      res.status(401).json({ message: "Invalid credentials." });
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Internal server error." });
-  }
-});
-
+    });
 
     //   --------------Logout endpoint-----------------
     app.post("/logout", async (req, res) => {
@@ -98,29 +97,31 @@ app.post("/login", async (req, res) => {
       }
     });
 
+    //......................................Admin Login Logout Endpoints....................................
 
-//......................................Admin Login Logout Endpoints....................................
-
-// ---------------login endpoint-----------------
+    // ---------------login endpoint-----------------
     app.post("/adminLogin", async (req, res) => {
       const { email, password } = req.body;
-    
+
       try {
         const request = pool.request();
         const updateResult = await request.query(
           `UPDATE admin SET admin_logged_in_status = 1 WHERE admin_email = '${email}'`
         );
-    
+
         // Check if update was successful
         if (updateResult.rowsAffected > 0) {
           const result = await request.query(
             `SELECT * FROM admin WHERE admin_email = '${email}' AND admin_password = '${password}'`
           );
-    
+
           if (result.recordset.length > 0) {
             const admin = result.recordset[0];
-            const responsePayload = { email: admin.admin_email, role: admin.admin_role };
-    
+            const responsePayload = {
+              email: admin.admin_email,
+              role: admin.admin_role,
+            };
+
             // Send the response with the payload
             res.status(200).json(responsePayload);
           } else {
@@ -140,18 +141,20 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    
-//   --------------Logout endpoint-----------------
+
+    //   --------------Logout endpoint-----------------
     app.post("/adminLogout", async (req, res) => {
       try {
         const { email } = req.body;
-    
+
         // Update admin logged_in status to 0
         const request = pool.request();
         await request
           .input("email", sql.VarChar, email)
-          .query("UPDATE admin SET admin_logged_in_status = 0 WHERE admin_email = @email");
-    
+          .query(
+            "UPDATE admin SET admin_logged_in_status = 0 WHERE admin_email = @email"
+          );
+
         // Respond with success message
         res.status(200).json({ message: "Successfully logged out." });
       } catch (error) {
@@ -159,8 +162,8 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    
- // -------------Admin details endpoint--------------------
+
+    // -------------Admin details endpoint--------------------
     app.get("/admin-details", async (req, res) => {
       try {
         const { email } = req.query;
@@ -168,7 +171,7 @@ app.post("/login", async (req, res) => {
         const result = await request.query(
           `SELECT adminID, admin_email, admin_name, admin_role, admin_employeeID, admin_phone FROM admin WHERE admin_email = '${email}'`
         );
-    
+
         if (result.recordset.length > 0) {
           const admin = result.recordset[0];
           res.status(200).json(admin);
@@ -181,7 +184,6 @@ app.post("/login", async (req, res) => {
       }
     });
 
-
     // -------------User details endpoint--------------------
     app.get("/user-details", async (req, res) => {
       try {
@@ -190,7 +192,7 @@ app.post("/login", async (req, res) => {
         const result = await request.query(
           `SELECT * FROM users WHERE email = '${email}'`
         );
-    
+
         if (result.recordset.length > 0) {
           const user = result.recordset[0];
           res.status(200).json(user);
@@ -526,26 +528,30 @@ app.post("/login", async (req, res) => {
     app.put("/updateArea/:id", async (req, res) => {
       const { areaName, description, address, focalPerson, contact } = req.body;
       const id = parseInt(req.params.id, 10);
-    
+
       try {
         const request = pool.request();
         const result = await request.query(
           `SELECT * FROM Area WHERE AreaID = ${id}`
         );
         const area = result.recordset[0];
-    
+
         if (!area) {
           res.status(404).send("Area not found");
           return;
         }
-    
+
         // Update the fields regardless of whether they are truthy or not
-        const newAreaName = areaName!== undefined? `'${areaName}'` : area.AreaName;
-        const newDescription = description!== undefined? `'${description}'` : area.Description;
-        const newAddress = address!== undefined? `'${address}'` : area.Address;
-        const newFocalPerson = focalPerson!== undefined? `'${focalPerson}'` : area.FocalPerson;
-        const newContact = contact!== undefined? `${contact}` : area.Contact;
-    
+        const newAreaName =
+          areaName !== undefined ? `'${areaName}'` : area.AreaName;
+        const newDescription =
+          description !== undefined ? `'${description}'` : area.Description;
+        const newAddress =
+          address !== undefined ? `'${address}'` : area.Address;
+        const newFocalPerson =
+          focalPerson !== undefined ? `'${focalPerson}'` : area.FocalPerson;
+        const newContact = contact !== undefined ? `${contact}` : area.Contact;
+
         await request.query(
           `UPDATE Area
           SET
@@ -557,7 +563,7 @@ app.post("/login", async (req, res) => {
           WHERE
           AreaID = ${id}`
         );
-    
+
         res.status(200).send("Area updated successfully");
       } catch (err) {
         console.log(err);
@@ -593,24 +599,24 @@ app.post("/login", async (req, res) => {
 
     //  -------------------Camera Endpoints--------------------
     // Send camera data to database
-    app.get('/cameras', async (req, res) => {
+    app.get("/cameras", async (req, res) => {
       try {
         // Connect to the database
         await sql.connect(config);
-    
+
         // Query to fetch all cameras with details
         const result = await sql.query(`
           SELECT c.CameraID, c.CameraName, c.description AS CameraDescription,a.AreaID, a.AreaName
           FROM Camera c
           INNER JOIN Area a ON c.AreaID = a.AreaID
         `);
-    
+
         // Send the response with fetched data
         res.json(result.recordset);
       } catch (error) {
         // If an error occurs, send an error response
-        console.error('Error fetching cameras:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error("Error fetching cameras:", error);
+        res.status(500).json({ error: "Internal server error" });
       } finally {
         // Close the database connection
         await sql.close();
@@ -721,7 +727,6 @@ app.post("/login", async (req, res) => {
       }
     });
 
-
     // Delete camera data from database
     app.delete("/readArea/:areaId/deleteCamera/:cameraId", async (req, res) => {
       const areaId = req.params.areaId;
@@ -745,9 +750,7 @@ app.post("/login", async (req, res) => {
 
       try {
         const request = pool.request();
-        await request.query(
-          `DELETE FROM Camera WHERE CameraID = ${cameraId}`
-        );
+        await request.query(`DELETE FROM Camera WHERE CameraID = ${cameraId}`);
 
         res.status(200).send("Camera deleted successfully");
       } catch (err) {

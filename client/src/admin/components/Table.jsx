@@ -92,9 +92,11 @@ export default function Table({
   };
 
   const handleInputChange = (e, rowIdx, key) => {
-    const newData = [...editableData];
-    newData[rowIdx][key] = parseFloat(e.target.value);
-    setEditableData(newData);
+    if (selectedRowId) {
+      const newData = [...editableData];
+      newData[rowIdx][key] = parseFloat(e.target.value);
+      setEditableData(newData);
+    }
   };
 
   const handleSaveChanges = () => {
@@ -149,6 +151,7 @@ export default function Table({
             value={row.original.x1}
             onChange={(e) => handleInputChange(e, row.index, "x1")}
             style={{ width: "50px" }}
+            readOnly={!selectedRowId}
           />
         );
       },
@@ -163,6 +166,7 @@ export default function Table({
             value={row.original.y1}
             onChange={(e) => handleInputChange(e, row.index, "y1")}
             style={{ width: "50px" }}
+            readOnly={!selectedRowId}
           />
         );
       },
@@ -177,6 +181,7 @@ export default function Table({
             value={row.original.x2}
             onChange={(e) => handleInputChange(e, row.index, "x2")}
             style={{ width: "50px" }}
+            readOnly={!selectedRowId}
           />
         );
       },
@@ -191,6 +196,7 @@ export default function Table({
             value={row.original.y2}
             onChange={(e) => handleInputChange(e, row.index, "y2")}
             style={{ width: "50px" }}
+            readOnly={!selectedRowId}
           />
         );
       },
