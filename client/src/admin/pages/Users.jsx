@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ManualRequestCard from "../components/ManualRequestCard";
+import ManualRequestCard from "../components/MannualControl/ManualRequestCard";
 import { toast } from "react-toastify";
 import Axios from "axios";
 import { MaterialSymbolsAddRounded } from "../assets/icons/add";

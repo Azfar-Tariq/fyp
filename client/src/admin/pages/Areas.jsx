@@ -2,8 +2,8 @@
       import Axios from "axios";
       import { ToastContainer, toast } from "react-toastify";
       import "react-toastify/dist/ReactToastify.css";
-      import AddAreaForm from "../components/Area_Components/AddAreaForm";
-      import EditAreaForm from "../components/Area_Components/EditAreaForm";
+      import AddAreaForm from "../components/Area/AddAreaForm";
+      import EditAreaForm from "../components/Area/EditAreaForm";
       import {
         useReactTable,
         getCoreRowModel,

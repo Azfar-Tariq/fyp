@@ -9,7 +9,7 @@ import {
 import Axios from "axios";
 import { useRef } from "react";
 import { useEffect, useState } from "react";
-import { MaterialSymbolsDelete } from "./../assets/icons/delete";
+import { MaterialSymbolsDelete } from "../../assets/icons/delete";
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);

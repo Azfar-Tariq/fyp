@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import Table from "../../admin/components/Table";
-import Select from "../../admin/components/Select";
+import Table from "../../admin/components/Configuration_Components/Table";
+import Select from "../../admin/components/Configuration_Components//Select";
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import ImageAnnotator from "../components/ImageAnnotator";

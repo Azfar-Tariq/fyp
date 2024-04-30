@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import image from "../assets/images/labs/lab8.jpg";
+import image from "../../assets/images/labs/lab8.jpg";
 import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;

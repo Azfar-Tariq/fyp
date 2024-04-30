@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-import Table from "../components/Table";
-import Select from "../components/Select";
+import Table from "../components/Configuration_Components/Table";
+import Select from "../components/Configuration_Components/Select";
 import { useEffect, useState } from "react";
 import Axios from "axios";
-import ImageAnnotator from "../components/ImageAnnotator";
+import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
 
 const placeholderImage = "https://via.placeholder.com/600x350";
 

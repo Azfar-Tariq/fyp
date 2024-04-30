@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import InsertModel from "../components/Camera_Components/InsertModel";
-import EditModel from "../components/Camera_Components/EditModel";
+import InsertModel from "../components/Camera/InsertModel";
+import EditModel from "../components/Camera/EditModel";
 import {
   useReactTable,
   getCoreRowModel,
@@ -281,13 +281,13 @@ export default function Cameras() {
       >
         Add
       </button>
-      <button class="focus:outline-none w-28 h-12 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+      <button className="focus:outline-none w-28 h-12 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
        onClick={handleEditCamera}>
 Edit
 
 </button>
 
-      <button type="button" class="focus:outline-none  w-28 h-12 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+      <button type="button" className="focus:outline-none  w-28 h-12 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
        onClick={handleDeleteSelectedRow}
       >
         Delete

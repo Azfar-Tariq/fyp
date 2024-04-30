@@ -1,5 +1,5 @@
 import React from 'react'
-import DashboardStatsGrid from "../components/Dashboard_Components/DashboardStatsGrid";
+import DashboardStatsGrid from "../components/Dashboard/DashboardStatsGrid"
 
 const Dashboard = () => {
   return (

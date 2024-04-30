@@ -19,7 +19,7 @@ const config = {
   host: "localhost",
   user: "admin",
   password: "admin123",
-  server: "DESKTOP-M1UFNP6", // Replace with your SQL Server instance name
+  server: "DESKTOP-946V6E1", // Replace with your SQL Server instance name
   database: "fyp", // Replace with your database name
   options: {
     encrypt: true,
