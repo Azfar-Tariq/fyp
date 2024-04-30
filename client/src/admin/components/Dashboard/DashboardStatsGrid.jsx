@@ -4,7 +4,7 @@ import { IoBarChart, IoSettings } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { IoPeople } from "react-icons/io5";
 import { MaterialSymbolsArrowForwardIosRounded } from "../../assets/icons/foward";
-import { MaterialSymbolsAndroidCamera } from "./../../assets/icons/camera";
+import { MaterialSymbolsAndroidCamera } from "../../assets/icons/camera";
 import Chart from "chart.js/auto";
 import { MajesticonsMapMarkerArea } from "../../assets/icons/area";
 import { Link } from "react-router-dom";
