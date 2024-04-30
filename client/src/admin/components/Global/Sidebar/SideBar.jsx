@@ -1,17 +1,15 @@
-
 import { useState, useEffect } from "react";
 import SidebarItem from "./SidebarItem";
 import sidebarItems from "./SidebarItemsData";
 
-
 import { useNavigate } from "react-router-dom";
-import { ChevronLast, ChevronFirst } from "lucide-react"
+import { ChevronLast, ChevronFirst } from "lucide-react";
 export default function SideBar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState({ name: '', email: '' });
+  const [user, setUser] = useState({ name: "", email: "" });
   const [activeIndex, setActiveIndex] = useState(0);
   const navigate = useNavigate();
-  
+
   const get = async () => {
     try {
       const email = localStorage.getItem("email");
@@ -51,14 +49,14 @@ export default function SideBar() {
 
   return (
     <aside
-      className={`h-screen bg-white border-r shadow-sm transition-all`}
+      className={`h-screen bg-background border-r border-background shadow-sm transition-all`}
     >
       <nav className="h-full flex flex-col">
         <div className="p-4 pb-2 flex justify-between items-center">
-          <span className="text-lg font-semibold">Logo</span>
+          <span className="text-lg font-semibold text-icon">Logo</span>
           <button
             onClick={toggleMenu}
-            className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
+            className="p-1.5 rounded-lg duration-150 text-icon bg-[#1b1d24] hover:bg-icon hover:text-background"
           >
             {menuOpen ? <ChevronFirst /> : <ChevronLast />}
           </button>
@@ -66,14 +64,19 @@ export default function SideBar() {
 
         <ul className="flex-1 px-3">
           {sidebarItems.map((item, index) => (
-            <SidebarItem key={index} item={item} active={activeIndex === index} onClick={() => {
-              setActiveIndex(index);
-              navigate(item.dest);
-            }} ></SidebarItem>
+            <SidebarItem
+              key={index}
+              item={item}
+              active={activeIndex === index}
+              onClick={() => {
+                setActiveIndex(index);
+                navigate(item.dest);
+              }}
+            ></SidebarItem>
           ))}
         </ul>
 
-        <div className="border-t flex p-3">
+        <div className="border-t flex p-4 gap-4">
           <img
             src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
             alt=""
@@ -83,10 +86,8 @@ export default function SideBar() {
             className={`flex justify-between items-center overflow-hidden transition-all`}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">{user.name}</h4>
-              <span className="text-xs text-gray-600">
-                {user.admin_email}
-              </span>
+              <h4 className="font-semibold text-white">{user.name}</h4>
+              <span className="text-xs text-white">{user.admin_email}</span>
             </div>
           </div>
         </div>

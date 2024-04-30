@@ -16,7 +16,7 @@ function App() {
         <Route element={<UserPrivateRoute />}>
           <Route path="/user/*" element={<User />} />
         </Route>
-        <Route path="/userLogin/" element={<UserLogin />}/>
+        <Route path="/userLogin/" element={<UserLogin />} />
         <Route path="/" element={<AdminLogin />} />
       </Routes>
     </Router>

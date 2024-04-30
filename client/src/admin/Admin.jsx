@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import Header from "./components/Global/Header";
 import SideBar from "./components/Global/Sidebar/SideBar";
 import Configuration from "./pages/Configuration";
@@ -9,15 +9,43 @@ import Users from "./pages/Users";
 import Profile from "./pages/Profile";
 import ErrorPage from "./pages/ErrorPage";
 import Dashboard from "./pages/Dashboard";
+import { useEffect } from "react";
 
 export default function Admin() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const pageTitle = getPageTitle(location.pathname);
+    document.title = pageTitle;
+  }, [location]);
+
+  const getPageTitle = (pathname) => {
+    switch (pathname) {
+      case "/admin":
+        return "Dashboard";
+      case "/admin/configuration":
+        return "Configuration";
+      case "/admin/analytics":
+        return "Analytics";
+      case "/admin/areas":
+        return "Areas";
+      case "/admin/cameras":
+        return "Cameras";
+      case "/admin/users":
+        return "Users";
+      case "/admin/profile":
+        return "Profile";
+      default:
+        break;
+    }
+  };
   return (
     <div className="flex">
       <div className="w-1/5 fixed">
         <SideBar />
       </div>
       <div className="flex flex-col w-4/5" style={{ marginLeft: "20%" }}>
-        <Header className="mb2.5" />
+        <Header className="mb2.5" pageTitle={getPageTitle(location.pathname)} />
         <div className="overflow-auto">
           <Routes>
             <Route path="/" element={<Outlet />}>

@@ -1,9 +1,9 @@
 // import { useEffect, useState } from "react";
 // import { IoPeople, IoMap, IoCamera } from "react-icons/io5";
-import { IoBarChart, IoSettings } from "react-icons/io5";
+import { IoSettings } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { IoPeople } from "react-icons/io5";
-import { MaterialSymbolsArrowForwardIosRounded } from "../../assets/icons/foward";
+import { MaterialSymbolsArrowForwardIosRounded } from "../../assets/icons/forward";
 import { MaterialSymbolsAndroidCamera } from "../../assets/icons/camera";
 import Chart from "chart.js/auto";
 import { MajesticonsMapMarkerArea } from "../../assets/icons/area";
@@ -14,7 +14,6 @@ export default function DashboardStatsGrid() {
   const [users, setUsers] = useState(0);
   const [areas, setAreas] = useState(0);
   const [cameras, setCameras] = useState(0);
-
 
   useEffect(() => {
     // Dummy data for the line graph
@@ -73,58 +72,63 @@ export default function DashboardStatsGrid() {
         console.error("Failed to get Areas:", err);
       });
 
-      Axios.get("http://localhost:3001/readAllCameras")
+    Axios.get("http://localhost:3001/readAllCameras")
       .then((res) => {
         setCameras(res.data.length);
       })
       .catch((err) => {
         console.error("Failed to get Cameras:", err);
       });
-
   }, []);
 
   return (
-    <div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      <DashboardBox
-        icon={<IoPeople className="text-6xl p-0 m-0 text-white" />}
-        title="Users"
-        value={users}
-        link="/admin/users"
-        color="bg-blue-500"
-        description="Manage user accounts and permissions."
-      />
-      <DashboardBox
-        icon={
-          <MajesticonsMapMarkerArea className="text-6xl p-0 m-0 text-white" />
-        }
-        title="Areas"
-        value={areas}
-        link="/admin/areas"
-        color="bg-green-500"
-        description="View, edit, and monitor surveillance areas."
-      />
-      <DashboardBox
-        icon={
-          <MaterialSymbolsAndroidCamera className="text-6xl p-0 m-0 text-white" />
-        }
-        title="Cameras"
-        value={cameras}
-        link="/admin/cameras"
-        color="bg-yellow-500"
-        description="Monitor live camera feeds and recordings."
-      />
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 pb-6">
-      <SidebarItem
-        title="Configuration"
-        link="/admin/configuration"
-        description="Manage system configurations"
-      />
-      <div className="col-span-2">
-        <AnalyticsGraph />
+    <div className="bg-primary">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        <DashboardBox
+          icon={<IoPeople className="text-6xl p-0 m-0 text-icon" />}
+          title="Users"
+          value={users}
+          link="/admin/users"
+          color="bg-background"
+          description="Manage user accounts and permissions."
+        />
+        <DashboardBox
+          icon={
+            <MajesticonsMapMarkerArea
+              size="4rem"
+              className="text-6xl p-0 m-0 text-icon"
+            />
+          }
+          title="Areas"
+          value={areas}
+          link="/admin/areas"
+          color="bg-background"
+          description="View, edit, and monitor surveillance areas."
+        />
+        <DashboardBox
+          icon={
+            <MaterialSymbolsAndroidCamera
+              size="4rem"
+              className="text-6xl p-0 m-0 text-icon"
+            />
+          }
+          title="Cameras"
+          value={cameras}
+          link="/admin/cameras"
+          color="bg-background"
+          description="Monitor live camera feeds and recordings."
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 pb-6">
+        <SidebarItem
+          title="Configuration"
+          link="/admin/configuration"
+          description="Manage system configurations"
+        />
+        <div className="col-span-2">
+          <AnalyticsGraph />
         </div>
-        </div>
+      </div>
     </div>
   );
 }
@@ -172,16 +176,16 @@ function DashboardBox({ icon, title, value, link, color, description }) {
             </div>
             <h2 className="text-2xl text-white font-semibold mb-2">{title}</h2>
           </div>
-          <p className="text-gray-200 text-4xl m-2">{value}</p>
+          <p className="text-white text-4xl m-2">{value}</p>
         </div>
 
-        <p className="text-gray-200 text-sm mt-2">{description}</p>
-        <button className="flex items-center text-blue-300 text-sm mt-2 focus:outline-none hover:text-blue-400">
+        <p className="text-white text-sm mt-2">{description}</p>
+        <button className="flex items-center text-white text-sm mt-2 focus:outline-none hover:text-blue-400">
           See More
           <MaterialSymbolsArrowForwardIosRounded className="ml-2" />
         </button>
         <div className="mt-4 border-t border-gray-300 pt-4">
-          <p className="text-xs text-gray-800">
+          <p className="text-xs text-white">
             Last updated: {new Date().toLocaleString()}
           </p>
         </div>
@@ -193,18 +197,12 @@ function DashboardBox({ icon, title, value, link, color, description }) {
 function SidebarItem({ title, link, description }) {
   return (
     <Link to={link}>
-    <div className="bg-gray-800 rounded-lg p-6 text-white hover:bg-gray-700 transition duration-300 ease-in-out transform hover:-translate-y-1">
-      {title === "Analytics" ? (
-        <IoBarChart className="text-5xl mb-4" />
-      ) : null}
-      {title === "Configuration" ? (
-        <IoSettings className="text-5xl mb-4" />
-      ) : null}
-      <h2 className="text-xl font-semibold mb-2">{title}</h2>
-      <p className="text-sm">{description}</p>
-      <p className="text-sm mt-2">Click to navigate</p>
-    </div>
-  </Link>
-);
+      <div className="bg-background rounded-lg p-6 text-white transition duration-300 ease-in-out transform hover:-translate-y-1">
+        <IoSettings className="text-5xl mb-4 text-icon" />
+        <h2 className="text-xl font-semibold mb-2">{title}</h2>
+        <p className="text-sm">{description}</p>
+        <p className="text-sm mt-2">Click to navigate</p>
+      </div>
+    </Link>
+  );
 }
-
