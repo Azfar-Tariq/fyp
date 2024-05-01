@@ -4,6 +4,7 @@
       import "react-toastify/dist/ReactToastify.css";
       import AddAreaForm from "../components/Area/AddAreaForm";
       import EditAreaForm from "../components/Area/EditAreaForm";
+      import ClipLoader from "react-spinners/ClipLoader";
       import {
         useReactTable,
         getCoreRowModel,
@@ -48,7 +49,9 @@
           Axios.get("http://localhost:3001/readArea")
             .then((response) => {
               setData(response.data);
-              setLoading(false);
+              setTimeout(() => {
+                setLoading(false); 
+                }, 1000);
               // console.log(response.data)
             })
             .catch((error) => {
@@ -210,7 +213,12 @@
             </div>
       
             {loading ? (
-              <div>Loading ...</div>
+              <div> {loading && (
+                <div className="absolute inset-0 bg-black opacity-50 flex items-center justify-center z-50">
+        
+                  <ClipLoader color={"#36d7b7"} loading={loading} size={150} />
+                </div>
+              )}</div>
             ) : (
               <table className="w-full border-collapse border border-gray-300">
     <thead>
