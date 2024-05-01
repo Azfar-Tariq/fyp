@@ -16,6 +16,7 @@ export default function ManualControl() {
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [teacherId, setTeacherId] = useState(null);
 
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
@@ -27,7 +28,26 @@ export default function ManualControl() {
   const handleSelectedRectangleChange = (rectangleId) => {
     setSelectedRectangle(rectangleId);
   };
-
+// console.log("Selected area:" ,selectedArea);
+// console.log("Selected Camera:", selectedCamera);
+  const handleManualRequest = () => {
+    if (selectedCamera && teacherId) {
+      Axios.post("http://localhost:3001/request-manual-control", {
+        teacherEmail: teacherId,
+        labId: selectedCamera,
+        areaId: selectedArea, // You may need to adjust this value based on your database schema
+      })
+        .then((response) => {
+          toast.success(response.data.message);
+        })
+        .catch((error) => {
+          console.error("Error sending manual control request:", error);
+          toast.error("Failed to send manual control request.");
+        });
+    } else {
+      toast.warning("Please select an area and camera.");
+    }
+  };
   const fetchData = async () => {
     try {
       setLoading(true);

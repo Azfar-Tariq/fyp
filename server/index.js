@@ -395,24 +395,24 @@ poolConnect
 
     // Endpoint to handle manual control request
     app.post("/request-manual-control", async (req, res) => {
+      const { teacherEmail, labId, buildingId } = req.body;
+    
       try {
-        const { teacherEmail, labId, buildingId } = req.body;
-
         // Fetch teacher details using email from the users table
         const requestUser = await pool
           .request()
           .input("email", sql.NVarChar, teacherEmail)
           .query("SELECT id, name FROM users WHERE email = @email");
-
+    
         if (requestUser.recordset.length === 0) {
           console.error("User not found with the provided email.");
           res.status(404).json({ message: "User not found." });
           return;
         }
-
+    
         const teacherId = requestUser.recordset[0].id;
         const teacherName = requestUser.recordset[0].name;
-
+    
         // Update the 'manualControlRequested' status for the user
         const updateRequest = pool.request();
         await updateRequest
@@ -420,7 +420,7 @@ poolConnect
           .query(
             "UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId"
           );
-
+    
         // Store the request in the database
         const insertRequest = pool.request();
         await insertRequest
@@ -430,7 +430,15 @@ poolConnect
           .query(
             "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
           );
-
+    
+        // Send a socket.io event to the admin
+        io.emit("new-manual-control-request", {
+          teacherId,
+          teacherName,
+          labId,
+          buildingId,
+        });
+    
         // Return the details of the manual control request, including teacher's name
         res.status(200).json({
           message: "Request sent successfully!",
@@ -875,120 +883,7 @@ poolConnect
       }
     });
 
-    // -------- PC's Data Endpoints --------
-    // send data to database
-    // app.post(
-    //   "/readBuilding/:buildingId/readLab/:labId/addCoordinates",
-    //   async (req, res) => {
-    //     const buildingId = req.params.buildingId;
-    //     const labId = req.params.labId;
-    //     const { x1, y1, x2, y2, pcStatus } = req.body;
-
-    //     try {
-    //       const request = pool.request();
-    //       const buildingResult = await request.query(
-    //         `SELECT * FROM BuildingData WHERE id = ${buildingId}`
-    //       );
-    //       const building = buildingResult.recordset[0];
-
-    //       if (!building) {
-    //         res.status(404).send("Building not found");
-    //         return;
-    //       }
-    //       const labResult = await request.query(
-    //         `SELECT * FROM Lab WHERE id = ${labId} AND buildingId = ${buildingId}`
-    //       );
-    //       const lab = labResult.recordset[0];
-    //       if (!lab) {
-    //         res.status(404).send("Lab not found in the building");
-    //         return;
-    //       }
-    //       await request
-    //         .input("buildingId", sql.Int, buildingId)
-    //         .input("labId", sql.Int, labId)
-    //         .input("x1", sql.Int, x1)
-    //         .input("y1", sql.Int, y1)
-    //         .input("x2", sql.Int, x2)
-    //         .input("y2", sql.Int, y2)
-    //         .input("pcStatus", sql.Bit, pcStatus)
-    //         .query(
-    //           `INSERT INTO cameraData (buildingId, labId, x1, y1, x2, y2, pcStatus) VALUES (@buildingID, @labId, @x1, @y1, @x2, @y2, @pcStatus)`
-    //         );
-
-    //       res.status(200).send("Coordinates saved to database");
-    //     } catch (err) {
-    //       console.log(err);
-    //       res.status(500).send("Failed to save Coordinates to the database");
-    //     }
-    //   }
-    // );
-
-    // // get data from database
-    // app.get(
-    //   "/readBuilding/:buildingId/readLab/:labId/readCoordinates",
-    //   async (req, res) => {
-    //     const buildingId = req.params.buildingId;
-    //     const labId = req.params.labId;
-
-    //     try {
-    //       const request = pool.request();
-    //       const result = await request.query(
-    //         `SELECT id, x1, y1, x2, y2, pcStatus FROM cameraData WHERE labId = ${labId}`
-    //       );
-    //       res.status(200).json(result.recordset);
-    //     } catch (err) {
-    //       console.log(err);
-    //       res.status(500).send("Failed to get Coordinates from the database");
-    //     }
-    //   }
-    // );
-
-    // // edit data from database
-    // app.put(
-    //   "/readBuilding/:buildingId/readLab/:labId/updatePC/:pcId",
-    //   async (req, res) => {
-    //     const buildingId = req.params.buildingId;
-    //     const labId = req.params.labId;
-    //     const pcId = req.params.pcId;
-    //     const { pcName, pcStatus } = req.body;
-
-    //     try {
-    //       const request = pool.request();
-    //       await request
-    //         .input("pcId", sql.Int, pcId)
-    //         .input("pcName", sql.NVarChar, pcName)
-    //         .input("pcStatus", sql.Bit, pcStatus)
-    //         .query(
-    //           `UPDATE PC SET pcName = @pcName, pcStatus = @pcStatus WHERE id = @pcId`
-    //         );
-
-    //       res.status(200).send("PC updated successfully");
-    //     } catch (err) {
-    //       console.log(err);
-    //       res.status(500).send("Failed to update PC in the database");
-    //     }
-    //   }
-    // );
-
-    // // delete data from database
-    // app.delete(
-    //   "/readBuilding/:buildingId/readLab/:labId/deleteCoordinates/:cellId",
-    //   async (req, res) => {
-    //     const cellId = req.params.cellId;
-
-    //     try {
-    //       const request = pool.request();
-    //       await request.query(`DELETE FROM cameraData WHERE id = '${cellId}'`);
-
-    //       res.status(200).send("Coordinates deleted successfully");
-    //     } catch (err) {
-    //       console.log(err);
-    //       res
-    //         .status(500)
-    //         .send("Failed to delete Coordinates from the database");
-    //     }
-    //   }
-    // );
+    
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
