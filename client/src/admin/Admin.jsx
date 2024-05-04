@@ -40,7 +40,7 @@ export default function Admin() {
     }
   };
   return (
-    <div className="flex">
+    <div className="flex bg-primary min-h-screen">
       <div className="w-1/5 fixed">
         <SideBar />
       </div>

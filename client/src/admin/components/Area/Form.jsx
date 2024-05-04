@@ -10,7 +10,10 @@ const AreaForm = ({ onSave, initialValues }) => {
   };
 
   const handleAddField = () => {
-    setFormFields([...formFields, { name: "", description: "", address: "", focalPerson: "", contact: "" }]);
+    setFormFields([
+      ...formFields,
+      { name: "", description: "", address: "", focalPerson: "", contact: "" },
+    ]);
   };
 
   const handleRemoveField = (index) => {

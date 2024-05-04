@@ -112,11 +112,11 @@ export default function Configuration() {
   };
 
   return (
-    <div className="py-6 px-4 flex flex-col h-full overflow-y-auto">
+    <div className="bg-primary py-6 px-4 flex flex-col h-full overflow-y-auto">
       <div className="flex-1">
         <div className="flex gap-8">
           <div>
-            <p className="text-3xl font-bold mb-4">Configuration</p>
+            <p className="text-3xl font-bold text-white mb-4">Image</p>
             {selectedCamera ? (
               <div>
                 <ImageAnnotator

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import ManualRequestCard from "../components/MannualControl/ManualRequestCard";
 import { toast } from "react-toastify";
+import { MaterialSymbolsEditOutlineRounded } from "../assets/icons/edit";
+import { MaterialSymbolsDelete } from "../assets/icons/delete";
 import Axios from "axios";
 import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
@@ -63,43 +65,69 @@ const Users = () => {
   };
 
   return (
-    <div className="col-span-4 p-6">
-      <section className="text-gray-600 body-font">
+    <div className="col-span-4 p-6 bg-primary">
+      <section className="body-font">
         <div className="container px-5 py-5 mx-auto">
-          <div className="flex flex-wrap -m-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {users.map((user, index) => (
-              <div key={index} className="p-2 lg:w-1/3 md:w-1/2 w-full">
-                <div className="h-full flex bg-white items-center border-gray-200 border p-4 rounded-lg shadow">
-                  <img
-                    className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                    src="https://dummyimage.com/80x80"
-                  />
-                  <div className="flex-grow">
-                    <h2 className="text-gray-900 title-font font-medium">
-                      {user.name}
-                    </h2>
-                    <p className="text-gray-500">{user.email}</p>
+              <div
+                key={index}
+                className="p-4 rounded-lg shadow bg-background text-white"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 className="text-lg font-bold">{user.name}</h2>
+                    <p className="text-sm">{user.email}</p>
                   </div>
-                  <span
-                    className={
-                      user.logged_in
-                        ? "bg-green-500 w-3 h-3 rounded-full"
-                        : "bg-red-500 w-3 h-3 rounded-full"
-                    }
-                  ></span>
+                  <div className="flex items-center">
+                    <span
+                      className={
+                        user.logged_in
+                          ? "bg-green-500 w-3 h-3 rounded-full mr-1"
+                          : "bg-red-500 w-3 h-3 rounded-full mr-1"
+                      }
+                    ></span>
+                    <span className="text-xs">
+                      {user.logged_in ? "Online" : "Offline"}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm mr-2">Status:</span>
+                    <span className="text-sm font-bold">
+                      {user.status ? "" : "No Status"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm mr-2">Last Updated:</span>
+                    <span className="text-sm">
+                      {user.last_updated ? (
+                        ""
+                      ) : (
+                        <p className="text-xs text-white">
+                          {new Date().toLocaleString()}
+                        </p>
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4 gap-2 flex justify-end items-center text-icon">
+                  <button className="p-2 gap-2 flex rounded-lg duration-150 hover:bg-icon hover:text-black">
+                    <MaterialSymbolsEditOutlineRounded />
+                    Edit
+                  </button>
+                  <button className="p-2 gap-2 flex rounded-lg duration-150 hover:bg-icon hover:text-black">
+                    <MaterialSymbolsDelete />
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
-            <div className=" p-2 lg:w-1/3 md:w-1/2 w-full">
-              <div className=" bg-white h-full flex items-center border-gray-200 border p-4 rounded-lg shadow hover:bg-gray-100">
-                <div className="mr-4">
-                  <MaterialSymbolsAddRounded />
-                </div>
-                <div className="flex-grow">
-                  <h2 className="text-gray-900 title-font font-medium">
-                    Add More Users
-                  </h2>
-                </div>
+            <div className="bg-white p-4 rounded-lg shadow">
+              <div className="flex justify-center items-center">
+                <MaterialSymbolsAddRounded />
+                <h2 className="text-lg font-bold ml-2">Add More Users</h2>
               </div>
             </div>
           </div>

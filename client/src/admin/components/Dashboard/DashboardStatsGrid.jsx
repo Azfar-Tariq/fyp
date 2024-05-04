@@ -1,5 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { IoPeople, IoMap, IoCamera } from "react-icons/io5";
 import { IoSettings } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { IoPeople } from "react-icons/io5";
