@@ -2,6 +2,7 @@
 import Table from "../components/Configuration_Components/Table";
 import Select from "../components/Configuration_Components/Select";
 import { useEffect, useState } from "react";
+import { UilSave } from "../assets/icons/save";
 import Axios from "axios";
 import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
 
@@ -116,7 +117,6 @@ export default function Configuration() {
       <div className="flex-1">
         <div className="flex gap-8">
           <div>
-            <p className="text-3xl font-bold text-white mb-4">Image</p>
             {selectedCamera ? (
               <div>
                 <ImageAnnotator
@@ -126,10 +126,11 @@ export default function Configuration() {
                 />
                 <div className="hidden sm:block m-2">
                   <button
-                    className="bg-blue-500 text-white p-2 rounded"
+                    className="bg-background flex gap-2 text-white text-lg p-2 rounded hover:bg-icon hover:text-black duration-150"
                     onClick={handleSaveButtonClick}
                   >
-                    Save Changes
+                    <UilSave />
+                    Save
                   </button>
                 </div>
               </div>

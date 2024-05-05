@@ -48,9 +48,7 @@ export default function SideBar() {
   };
 
   return (
-    <aside
-      className={`h-screen bg-background border-r border-background shadow-sm transition-all`}
-    >
+    <aside className="h-screen bg-background shadow-md shadow-black">
       <nav className="h-full flex flex-col">
         <div className="p-4 pb-2 flex justify-between items-center">
           <span className="text-lg font-semibold text-icon">Logo</span>

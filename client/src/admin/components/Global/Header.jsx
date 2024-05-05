@@ -58,7 +58,7 @@ export default function Header({ pageTitle }) {
                 <Popover.Button
                   className={classNames(
                     open && "bg-primary",
-                    "group bg-primary inline-flex items-center rounded-lg text-icon hover:bg-icon hover:text-primary transition ease-in-out duration-300 p-1.5 focus:outline-none"
+                    "group bg-primary inline-flex p-3 items-center rounded-lg text-icon hover:bg-icon hover:text-primary transition ease-in-out duration-300 focus:outline-none"
                   )}
                 >
                   <HiOutlineBell fontSize={24} />

@@ -96,7 +96,7 @@ const Users = () => {
                   <div className="flex flex-col gap-2">
                     <span className="text-sm mr-2">Status:</span>
                     <span className="text-sm font-bold">
-                      {user.status ? "" : "No Status"}
+                      {user.status ? "" : "No Request"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -124,10 +124,10 @@ const Users = () => {
                 </div>
               </div>
             ))}
-            <div className="bg-white p-4 rounded-lg shadow">
+            <div className="bg-background text-white flex justify-center items-center m-16 mx-24 p-4 rounded-lg shadow">
               <div className="flex justify-center items-center">
                 <MaterialSymbolsAddRounded />
-                <h2 className="text-lg font-bold ml-2">Add More Users</h2>
+                <h2 className="text-lg font-bold ml-2">Add User</h2>
               </div>
             </div>
           </div>

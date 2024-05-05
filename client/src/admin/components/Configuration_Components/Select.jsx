@@ -55,7 +55,7 @@ export default function Select({
   };
 
   return (
-    <div className="container mx-auto pt-12">
+    <div className="container mx-auto">
       <ToastContainer />
       <div className="max-w-md mx-auto bg-background rounded-lg overflow-hidden">
         <div className="p-4">

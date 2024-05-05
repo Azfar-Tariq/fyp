@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
+import { MaterialSymbolsEditOutlineRounded } from "../../assets/icons/edit";
+import { UilSave } from "../../assets/icons/save";
 import image from "../../assets/images/labs/lab8.jpg";
 import Axios from "axios";
 
@@ -354,17 +357,26 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
-      <div className="hidden sm:block m-2">
+      <div className="hidden sm:flex gap-4 m-2">
         <button
-          className="bg-red-500 text-white p-2 rounded"
+          className="bg-background text-white flex p-2 gap-2 rounded hover:bg-icon hover:text-black duration-150"
           onClick={handleClearChanges}
         >
+          <MaterialSymbolsBackspaceRounded />
           Clear Changes
         </button>
-        <button className="p-2 rounded" onClick={callEditedRectangle}>
+        <button
+          className="flex p-2 gap-2 rounded bg-background text-white hover:bg-icon hover:text-black duration-150"
+          onClick={callEditedRectangle}
+        >
+          <MaterialSymbolsEditOutlineRounded />
           Edit Changes
         </button>
-        <button className="p-2 rounded" onClick={handleSaveChanges}>
+        <button
+          className="flex p-2 gap-2 rounded bg-background text-white hover:bg-icon hover:text-black duration-150"
+          onClick={handleSaveChanges}
+        >
+          <UilSave />
           Save Changes
         </button>
       </div>
