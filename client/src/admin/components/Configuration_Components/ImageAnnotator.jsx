@@ -9,7 +9,7 @@ const MINIMUM_SHAPE_SIZE = 10;
 const DEFAULT_RECTANGLE_COLOR = "red";
 const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
 
-function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
+function ImageAnnotator({ selectedRectangle, selectedCamera }) {
   const [data, setData] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
@@ -135,24 +135,9 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
           )
         );
         setSelectedAnnotation(updatedAnnotation);
-
-        onBoxCreated({
-          topLeft: { x: updatedAnnotation.x, y: updatedAnnotation.y },
-          bottomRight: {
-            x: updatedAnnotation.x + updatedAnnotation.width,
-            y: updatedAnnotation.y + updatedAnnotation.height,
-          },
-        });
       }
     },
-    [
-      drawing,
-      selectedAnnotation,
-      startPoint.x,
-      startPoint.y,
-      currentAnnotation,
-      onBoxCreated,
-    ]
+    [drawing, selectedAnnotation, startPoint.x, startPoint.y, currentAnnotation]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -163,13 +148,6 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
         currentAnnotation.width >= MINIMUM_SHAPE_SIZE &&
         currentAnnotation.height >= MINIMUM_SHAPE_SIZE
       ) {
-        const topLeft = { x: currentAnnotation.x, y: currentAnnotation.y };
-        const bottomRight = {
-          x: currentAnnotation.x + currentAnnotation.width,
-          y: currentAnnotation.y + currentAnnotation.height,
-        };
-
-        onBoxCreated({ topLeft, bottomRight });
         setAnnotations([...annotations, currentAnnotation]);
       }
 
@@ -183,13 +161,7 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
       setAnnotations([...annotations, selectedAnnotation]);
       setSelectedAnnotation(null);
     }
-  }, [
-    drawing,
-    selectedAnnotation,
-    currentAnnotation,
-    onBoxCreated,
-    annotations,
-  ]);
+  }, [drawing, selectedAnnotation, currentAnnotation, annotations]);
 
   const handleClearChanges = () => {
     setAnnotations([]);
@@ -273,6 +245,7 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
               y1: y,
               x2: x + width,
               y2: y + height,
+              status: 0,
             }
           );
           console.log("Updated rectangle");
@@ -281,6 +254,48 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
       }
     } catch (error) {
       console.error("Failed to save changes:", error);
+    }
+  };
+
+  const handleSaveButtonClick = async () => {
+    console.log(annotations);
+    try {
+      if (selectedRectangleId) {
+        handleSaveChanges();
+      } else {
+        console.log("Saveeee");
+        console.log(annotations);
+        if (annotations.length > 0) {
+          // Iterate over annotations to save each rectangle
+          for (const annotation of annotations) {
+            if (
+              annotation.width >= MINIMUM_SHAPE_SIZE &&
+              annotation.height >= MINIMUM_SHAPE_SIZE
+            ) {
+              console.log(annotation);
+              const { x, y, width, height } = annotation;
+              console.log(x, y, width, height);
+              await Axios.post(
+                `http://localhost:3001/readCamera/${selectedCamera}/addBoundedRectangle`,
+                {
+                  x1: x,
+                  y1: y,
+                  x2: x + width,
+                  y2: y + height,
+                  status: 0,
+                }
+              );
+            }
+          }
+          console.log("Coordinates added successfully");
+          fetchData();
+          setAnnotations([]); // Clear annotations after saving
+        } else {
+          console.log("No annotations to save");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save rectangle", error);
     }
   };
 
@@ -374,7 +389,7 @@ function ImageAnnotator({ onBoxCreated, selectedRectangle, selectedCamera }) {
         </button>
         <button
           className="flex p-2 gap-2 rounded bg-background text-white hover:bg-icon hover:text-black duration-150"
-          onClick={handleSaveChanges}
+          onClick={handleSaveButtonClick}
         >
           <UilSave />
           Save Changes

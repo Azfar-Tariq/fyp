@@ -12,7 +12,6 @@ export default function Configuration() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [data, setData] = useState([]);
-  const [drawnRectangles, setDrawnRectangles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
@@ -59,59 +58,6 @@ export default function Configuration() {
     }
   }, [selectedCamera]);
 
-  const handleBoxCreated = async (boxCoordinates) => {
-    setDrawnRectangles((prevCoordinates) => [
-      ...prevCoordinates,
-      boxCoordinates,
-    ]);
-  };
-
-  const handleSaveButtonClick = async () => {
-    try {
-      // Iterate over drawnRectangles and send each rectangle's coordinates to the API
-      const latestCoordinates = drawnRectangles[drawnRectangles.length - 1];
-      console.log("AAAAAAAAAA");
-      if (latestCoordinates) {
-        const { topLeft, bottomRight } = latestCoordinates;
-        const { x: x1, y: y1 } = topLeft;
-        const { x: x2, y: y2 } = bottomRight;
-        const status = 0;
-        await Axios.post(
-          `http://localhost:3001/readCamera/${selectedCamera}/addBoundedRectangle`,
-          {
-            x1,
-            y1,
-            x2,
-            y2,
-            status,
-          }
-        );
-        // toast.success("Coordinates added successfully");
-        console.log("Coordinates added successfully");
-        setDrawnRectangles((prevCoordinates) => [
-          ...prevCoordinates.slice(0, -1),
-        ]);
-
-        Axios.get(
-          `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
-        )
-          .then((response) => {
-            setData(response.data);
-          })
-          .catch((error) => {
-            console.error("Failed to get data:", error);
-          });
-
-        setTableKey((prevKey) => prevKey + 1);
-      } else {
-        // toast.warning("No coordinates to save");
-        console.log("No coordinates to save");
-      }
-    } catch (err) {
-      console.error("Failed to save coordinates:", err);
-    }
-  };
-
   return (
     <div className="bg-primary py-6 px-4 flex flex-col h-full overflow-y-auto">
       <div className="flex-1">
@@ -120,19 +66,9 @@ export default function Configuration() {
             {selectedCamera ? (
               <div>
                 <ImageAnnotator
-                  onBoxCreated={handleBoxCreated}
                   selectedRectangle={selectedRectangle}
                   selectedCamera={selectedCamera}
                 />
-                <div className="hidden sm:block m-2">
-                  <button
-                    className="bg-background flex gap-2 text-white text-lg p-2 rounded hover:bg-icon hover:text-black duration-150"
-                    onClick={handleSaveButtonClick}
-                  >
-                    <UilSave />
-                    Save
-                  </button>
-                </div>
               </div>
             ) : (
               <img src={placeholderImage} className="rounded-md" />

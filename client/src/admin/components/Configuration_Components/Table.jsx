@@ -10,6 +10,7 @@ import Axios from "axios";
 import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { MaterialSymbolsDelete } from "../../assets/icons/delete";
+import { UilSave } from "../../assets/icons/save";
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
@@ -106,7 +107,7 @@ export default function Table({
         (rectangle) => rectangle.RectangleID === selectedRowId
       );
       if (selectedRectangle) {
-        const { RectangleID, x1, y1, x2, y2, status } = selectedRectangle;
+        const { RectangleID, x1, y1, x2, y2 } = selectedRectangle;
         Axios.put(
           `http://localhost:3001/updateBoundedRectangle/${RectangleID}`,
           {
@@ -114,7 +115,7 @@ export default function Table({
             y1: parseInt(y1),
             x2: parseInt(x2),
             y2: parseInt(y2),
-            status: status,
+            status: 0,
           }
         )
           .then((response) => {
@@ -150,7 +151,7 @@ export default function Table({
             type="number"
             value={row.original.x1}
             onChange={(e) => handleInputChange(e, row.index, "x1")}
-            style={{ width: "50px" }}
+            className="bg-gray-900 text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -165,7 +166,7 @@ export default function Table({
             type="number"
             value={row.original.y1}
             onChange={(e) => handleInputChange(e, row.index, "y1")}
-            style={{ width: "50px" }}
+            className="bg-gray-900 text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -180,7 +181,7 @@ export default function Table({
             type="number"
             value={row.original.x2}
             onChange={(e) => handleInputChange(e, row.index, "x2")}
-            style={{ width: "50px" }}
+            className="bg-gray-900 text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -195,7 +196,7 @@ export default function Table({
             type="number"
             value={row.original.y2}
             onChange={(e) => handleInputChange(e, row.index, "y2")}
-            style={{ width: "50px" }}
+            className="bg-gray-900 text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -235,7 +236,7 @@ export default function Table({
           <input
             id="filter"
             type="text"
-            className="bg-purple-50 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
+            className="bg-background text-white py-2 px-4 rounded focus:outline-none"
             placeholder="Search..."
             value={filtering}
             onChange={(e) => setFiltering(e.target.value)}
@@ -243,21 +244,23 @@ export default function Table({
         </div>
         <button
           onClick={handleDeleteSelectedRow}
-          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
+          className="flex gap-2 bg-background text-white py-2 px-3 rounded-full hover:bg-icon hover:text-black transition duration-150 ease-in-out focus:outline-none"
         >
           <MaterialSymbolsDelete />
+          Delete
         </button>
         <button
           onClick={handleSaveChanges}
-          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
+          className="flex gap-2 bg-background text-white py-2 px-3 rounded-full hover:bg-icon hover:text-black transition duration-150 ease-in-out focus:outline-none"
         >
-          Save Changes
+          <UilSave />
+          Save
         </button>
       </div>
       {loading ? (
         <div>Loading ...</div>
       ) : (
-        <table className="w3-table-all">
+        <table className="w-full table-auto bg-gray-900 text-white">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -265,6 +268,7 @@ export default function Table({
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
+                    className="py-2 px-4 cursor-pointer text-left"
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -283,9 +287,9 @@ export default function Table({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} className="border-b border-gray-800">
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
+                  <td key={cell.id} className="py-2 px-4">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -297,27 +301,27 @@ export default function Table({
       <div className="flex justify-center items-center gap-4 mt-2">
         <button
           onClick={() => table.setPageIndex(0)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           First Page
         </button>
         <button
           disabled={!table.getCanPreviousPage()}
           onClick={() => table.previousPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Previous Page
         </button>
         <button
           disabled={!table.getCanNextPage()}
           onClick={() => table.nextPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Next Page
         </button>
         <button
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Last Page
         </button>
