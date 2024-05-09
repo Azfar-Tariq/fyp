@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import SidebarItem from "./SidebarItem";
 import sidebarItems from "./SidebarItemsData";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLast, ChevronFirst } from "lucide-react";
 export default function SideBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState({ name: "", email: "" });
   const [activeIndex, setActiveIndex] = useState(0);
+  const location = useLocation();
   const navigate = useNavigate();
 
   const get = async () => {
@@ -42,6 +43,13 @@ export default function SideBar() {
   useEffect(() => {
     get();
   }, []);
+
+  useEffect(() => {
+    const index = sidebarItems.findIndex(
+      (item) => item.dest === location.pathname
+    );
+    setActiveIndex(index !== -1 ? index : 0);
+  }, [location]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
