@@ -205,10 +205,9 @@ poolConnect
       }
     });
 
-    // Add a new user
     app.post("/addUser", async (req, res) => {
-      const { email, password, name, role } = req.body;
-
+      const { email, password, name, role, employeeID, phone } = req.body;
+    
       try {
         const pool = await sql.connect(config);
         const request = pool.request();
@@ -217,8 +216,10 @@ poolConnect
           .input("password", sql.NVarChar(255), password)
           .input("name", sql.NVarChar(255), name)
           .input("role", sql.NVarChar(50), role)
+          .input("employeeID", sql.Int, employeeID)
+          .input("phone", sql.BigInt, phone)
           .query(
-            "INSERT INTO users (email, password, name, role VALUES (@email, @password, @name, @role)"
+            "INSERT INTO users (email, password, name, role, employeeID, phone) VALUES (@email, @password, @name, @role, @employeeID, @phone)"
           );
         res.status(200).send("User added successfully");
       } catch (err) {
@@ -226,12 +227,12 @@ poolConnect
         res.status(500).send("Failed to add user");
       }
     });
-
+    
     // Edit an existing user
     app.put("/editUser/:id", async (req, res) => {
-      const { email, password, name, role } = req.body;
+      const { email, password, name, role, employeeID, phone } = req.body;
       const id = req.params.id;
-
+    
       try {
         const pool = await sql.connect(config);
         const request = pool.request();
@@ -239,19 +240,27 @@ poolConnect
           `SELECT * FROM users WHERE id = ${id}`
         );
         const user = result.recordset[0];
-
+    
         if (!user) {
           res.status(404).send("User not found");
           return;
         }
-
+    
         await request
           .input("email", sql.NVarChar(255), email)
           .input("password", sql.NVarChar(255), password)
           .input("name", sql.NVarChar(255), name)
           .input("role", sql.NVarChar(50), role)
+          .input("employeeID", sql.Int, employeeID)
+          .input("phone", sql.BigInt, phone)
           .query(
-            `UPDATE users SET email = @email, password = @password, name = @name, role = @role WHERE id = ${id}`
+            `UPDATE users SET email = @email, 
+                                password = @password, 
+                                name = @name, 
+                                role = @role, 
+                                employeeID = @employeeID, 
+                                phone = @phone 
+                                WHERE id = ${id}`
           );
         res.status(200).send("User updated successfully");
       } catch (err) {
@@ -259,11 +268,11 @@ poolConnect
         res.status(500).send("Failed to update user");
       }
     });
-
+    
     // Remove an existing user
     app.delete("/removeUser/:id", async (req, res) => {
       const id = req.params.id;
-
+    
       try {
         const pool = await sql.connect(config);
         const request = pool.request();
@@ -271,12 +280,12 @@ poolConnect
           `SELECT * FROM users WHERE id = ${id}`
         );
         const user = result.recordset[0];
-
+    
         if (!user) {
           res.status(404).send("User not found");
           return;
         }
-
+    
         await request.query(`DELETE FROM users WHERE id = ${id}`);
         res.status(200).send("User removed successfully");
       } catch (err) {
