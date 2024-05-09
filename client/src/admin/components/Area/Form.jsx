@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const AreaForm = ({ onSave, initialValues }) => {
   const [formFields, setFormFields] = useState(initialValues);
@@ -28,7 +28,7 @@ const AreaForm = ({ onSave, initialValues }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="text-white">
       {formFields.map((obj, index) => (
         <div key={index}>
           <input

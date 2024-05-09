@@ -151,7 +151,7 @@ export default function Table({
             type="number"
             value={row.original.x1}
             onChange={(e) => handleInputChange(e, row.index, "x1")}
-            className="bg-gray-900 text-white w-12 focus:outline-none"
+            className="bg-background text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -166,7 +166,7 @@ export default function Table({
             type="number"
             value={row.original.y1}
             onChange={(e) => handleInputChange(e, row.index, "y1")}
-            className="bg-gray-900 text-white w-12 focus:outline-none"
+            className="bg-background text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -181,7 +181,7 @@ export default function Table({
             type="number"
             value={row.original.x2}
             onChange={(e) => handleInputChange(e, row.index, "x2")}
-            className="bg-gray-900 text-white w-12 focus:outline-none"
+            className="bg-background text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -196,7 +196,7 @@ export default function Table({
             type="number"
             value={row.original.y2}
             onChange={(e) => handleInputChange(e, row.index, "y2")}
-            className="bg-gray-900 text-white w-12 focus:outline-none"
+            className="bg-background text-white w-12 focus:outline-none"
             readOnly={!selectedRowId}
           />
         );
@@ -260,7 +260,7 @@ export default function Table({
       {loading ? (
         <div>Loading ...</div>
       ) : (
-        <table className="w-full table-auto bg-gray-900 text-white">
+        <table className="w-full table-auto bg-background text-white">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -287,7 +287,7 @@ export default function Table({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b border-gray-800">
+              <tr key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="py-2 px-4">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

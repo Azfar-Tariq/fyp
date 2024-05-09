@@ -13,7 +13,10 @@ function EditAreaForm({ onSave, onClose, defaultValues }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col space-y-4 text-white"
+    >
       <div className="flex flex-col space-y-1">
         <label htmlFor="name" className="text-sm font-medium">
           Area Name:
@@ -23,7 +26,7 @@ function EditAreaForm({ onSave, onClose, defaultValues }) {
           id="name"
           value={areaName}
           onChange={(e) => setAreaName(e.target.value)}
-          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="rounded-md text-black p-2 focus:outline-none"
         />
       </div>
       <div className="flex flex-col space-y-1">
@@ -34,7 +37,7 @@ function EditAreaForm({ onSave, onClose, defaultValues }) {
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 h-24 resize-none" // Adjust height as needed
+          className="rounded-md text-black p-2 focus:outline-none h-24 resize-none" // Adjust height as needed
         />
       </div>
       <div className="flex flex-col space-y-1">
@@ -46,7 +49,7 @@ function EditAreaForm({ onSave, onClose, defaultValues }) {
           id="address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="rounded-md text-black p-2 focus:outline-none"
         />
       </div>
       <div className="flex flex-col space-y-1">
@@ -58,7 +61,7 @@ function EditAreaForm({ onSave, onClose, defaultValues }) {
           id="focalPerson"
           value={focalPerson}
           onChange={(e) => setFocalPerson(e.target.value)}
-          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="rounded-md text-black p-2 focus:outline-none"
         />
       </div>
       <div className="flex flex-col space-y-1">
@@ -70,7 +73,7 @@ function EditAreaForm({ onSave, onClose, defaultValues }) {
           id="contact"
           value={contact}
           onChange={(e) => setContact(e.target.value)}
-          className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="rounded-md text-black p-2 focus:outline-none"
         />
       </div>
       <div className="flex space-x-2">
