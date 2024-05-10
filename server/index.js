@@ -400,7 +400,8 @@ app.delete("/removeUser/:id", async (req, res) => {
     app.post("/request-manual-control", async (req, res) => {
       try {
         const { email, AreaID } = req.body;
-        console.log()
+        console.log(req.body)
+        console.log(res.body)
     
         // Fetch user details using email from the users table
         const userResult = await pool
@@ -448,11 +449,15 @@ app.get("/manual-control-requests", async (req, res) => {
   try {
     const request = pool.request();
     const result = await request.query(`
-      SELECT MCR.*, U.name AS userName, A.areaName
-      FROM ManualControlRequests MCR
-      JOIN users U ON MCR.userId = U.id
-      JOIN Area A ON MCR.areaId = A.AreaID
-      WHERE MCR.status = 'Pending'
+    SELECT MCR.*, U.name AS userName, 
+    CASE 
+      WHEN U.manualControlRequested = 1 THEN A.areaName 
+      ELSE NULL 
+    END AS areaName
+  FROM ManualControlRequests MCR
+  JOIN users U ON MCR.userId = U.id
+  LEFT JOIN Area A ON U.manualControlRequested = 1 AND MCR.areaId = A.AreaID
+  WHERE MCR.status = 'Pending'
     `);
 
     if (result.recordset.length > 0) {
