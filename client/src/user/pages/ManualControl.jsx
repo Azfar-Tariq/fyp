@@ -16,6 +16,7 @@ export default function Configuration() {
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
 
+  const email = localStorage.getItem("email");
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
   };
@@ -39,6 +40,23 @@ export default function Configuration() {
       console.error("Failed to fetch data:", error);
       setLoading(false);
     }
+  };
+
+
+  const handleManualControlRequest = () => {
+    setLoading(true);
+    Axios.post("http://localhost:3001/request-manual-control", { email, selectedArea })
+      .then((response) => {
+        console.log(response.data);
+        // Handle success, e.g., show a success message
+      })
+      .catch((error) => {
+        console.error("Error sending manual control request:", error);
+        // Handle error, e.g., show an error message
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -94,6 +112,15 @@ export default function Configuration() {
           />
         </div>
       )}
+      <button
+      onClick={handleManualControlRequest}
+      className={`flex gap-2 bg-background text-white py-2 px-3 rounded-full hover:bg-icon hover:text-black transition duration-150 ease-in-out focus:outline-none ${
+        loading ? "opacity-50 pointer-events-none" : ""
+      }`}
+      disabled={loading}
+    >
+      Send Request
+    </button>
     </div>
   );
 }

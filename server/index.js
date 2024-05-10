@@ -400,6 +400,7 @@ app.delete("/removeUser/:id", async (req, res) => {
     app.post("/request-manual-control", async (req, res) => {
       try {
         const { email, AreaID } = req.body;
+        console.log()
     
         // Fetch user details using email from the users table
         const userResult = await pool
