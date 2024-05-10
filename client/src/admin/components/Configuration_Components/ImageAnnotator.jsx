@@ -22,6 +22,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
     height: 0,
   });
   const [selectedRectangleId, setSelectedRectangleId] = useState(null);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -300,6 +301,10 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
   };
 
   useEffect(() => {
+    setButtonDisabled(selectedRectangle === null);
+  }, [selectedRectangle]);
+
+  useEffect(() => {
     const wrapper = wrapperRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -381,7 +386,12 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
           Clear Changes
         </button>
         <button
-          className="flex p-2 gap-2 rounded bg-background text-white hover:bg-icon hover:text-black duration-150"
+          className={`flex p-2 gap-2 rounded bg-background text-white duration-150 ${
+            buttonDisabled
+              ? "cursor-not-allowed opacity-50"
+              : "hover:bg-icon hover:text-black"
+          }`}
+          disabled={buttonDisabled}
           onClick={callEditedRectangle}
         >
           <MaterialSymbolsEditOutlineRounded />

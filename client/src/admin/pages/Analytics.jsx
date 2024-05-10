@@ -88,8 +88,8 @@ export default function Analytics() {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Analytics</h1>
-      
+      <h1 className="text-3xl font-bold text-white mb-8">Analytics</h1>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {areaList.map((val, index) => (
           <div key={index} className="relative">

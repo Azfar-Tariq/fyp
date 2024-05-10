@@ -204,7 +204,7 @@ export default function Areas() {
           <input
             id="filter"
             type="text"
-            className="py-2 px-4 rounded focus:outline-none"
+            className="py-2 px-4 bg-background text-white rounded focus:outline-none"
             placeholder="Search..."
             value={filtering}
             onChange={(e) => setFiltering(e.target.value)}

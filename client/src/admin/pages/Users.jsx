@@ -247,7 +247,7 @@ const Users = () => {
               </div>
             ))}
             <div
-              className="bg-background text-white flex justify-center items-center m-16 mx-24 p-4 rounded-lg shadow"
+              className="bg-background hover:bg-icon text-white hover:text-black flex justify-center items-center m-16 mx-24 p-4 rounded-lg shadow hover:cursor-pointer duration-150"
               onClick={() => {
                 setIsNewUser(true);
                 openModal({});
