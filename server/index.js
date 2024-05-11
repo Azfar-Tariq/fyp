@@ -901,6 +901,43 @@ app.get("/manual-control-requests", async (req, res) => {
     console.error("Failed to connect to SQL Server:", err);
   });
 
+  app.get("/readCameraWithManualStatus/:cameraId/readBoundedRectangles", async (req, res) => {
+    const cameraId = req.params.cameraId;
+  
+    try {
+      const request = pool.request();
+      const result = await request.query(`
+        SELECT BR.RectangleID, BR.x1, BR.y1, BR.x2, BR.y2, BR.Status, ID.Manual_Status
+        FROM BoundedRectangle BR
+        INNER JOIN IoTDevices ID ON BR.RectangleID = ID.RectangleID
+        WHERE BR.CameraID = ${cameraId}
+      `);
+      res.status(200).json(result.recordset);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Failed to get Bounded Rectangles with manual status from the database");
+    }
+  });
+  app.put("/updateManualStatus/:rectangleId", async (req, res) => {
+    const rectangleId = req.params.rectangleId;
+    const { Manual_Status } = req.body;
+    console.log(req.body)
+  
+    try {
+      const request = pool.request();
+      const result = await request.query(`
+        UPDATE IoTDevices
+        SET Manual_Status = ${Manual_Status}
+        WHERE RectangleID = ${rectangleId}
+      `);
+      res.status(200).send("Manual status updated successfully");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Failed to update manual status");
+    }
+  });
+    
+
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });

@@ -12,12 +12,12 @@ import { useEffect, useState } from "react";
 import { MaterialSymbolsDelete } from "../../assets/icons/delete";
 import { UilSave } from "../../assets/icons/save";
 
-function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
+function IndeterminateCheckbox({ indeterminate, className = "",...rest }) {
   const ref = useRef(null);
 
   useEffect(() => {
     if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate = !rest.checked && indeterminate;
+      ref.current.indeterminate =!rest.checked && indeterminate;
     }
   }, [ref, indeterminate, rest.checked]);
 
@@ -43,72 +43,60 @@ export default function Table({
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [editableData, setEditableData] = useState([]);
+  // const [manualStatusMap, setManualStatusMap] = useState(new Map()); // Add a state to store the manual status map
 
   useEffect(() => {
-    setLoading(true);
-    Axios.get(
-      `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
-    )
-      .then((response) => {
-        setData(response.data);
-        setEditableData(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setLoading(false);
-      });
-  }, [selectedCamera]);
+  setLoading(true);
+  Axios.get(`http://localhost:3001/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`)
+   .then((response) => {
+      setData(response.data);
+      setEditableData(response.data);
+      setLoading(false);
+    })
+   .catch((error) => {
+      console.error(error);
+      setLoading(false);
+    });
+}, [selectedCamera]);
 
-  useEffect(() => {
-    setLoading(true);
-    Axios.get("http://localhost:3001/boundedRectanglesManualStatus")
-      .then((response) => {
-        const manualStatusMap = new Map();
-        response.data.forEach((item) => {
-          manualStatusMap.set(item.RectangleID, item.Manual_Status);
-        });
-        setData((prevData) =>
-          prevData.map((row) => ({
-            ...row,
-            Manual_Status: manualStatusMap.get(row.RectangleID),
-          }))
-        );
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setLoading(false);
-      });
-  }, []);
-
-  const handleRowSelectionChange = (row) => {
+   const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.RectangleID;
     setSelectedRowId((prevSelectedRowId) =>
-      prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
+      prevSelectedRowId === newSelectedRowId? null : newSelectedRowId
     );
     onSelectedRectangleChange(
-      selectedRowId === newSelectedRowId ? null : newSelectedRowId
+      selectedRowId === newSelectedRowId? null : newSelectedRowId
     );
   };
 
+  const updateManualStatus = (newManualStatus) => {
+    Axios.put(`http://localhost:3001/updateManualStatus/${selectedRowId}`, {
+      Manual_Status: newManualStatus,
+    })
+      .then((response) => {
+        console.log(response.data);
+        // Optionally update local state or perform any other actions upon successful update
+      })
+      .catch((error) => {
+        console.error("Failed to update manual status:", error);
+      });
+  };
+  
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(
-        `http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`
-      )
-        .then((response) => {
+      Axios.delete(`http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`)
+       .then((response) => {
           console.log(response);
           setData((prevData) =>
-            prevData.filter((row) => row.RectangleID !== selectedRowId)
+            prevData.filter((row) => row.RectangleID!== selectedRowId)
           );
           setEditableData((prevData) =>
-            prevData.filter((row) => row.RectangleID !== selectedRowId)
+            prevData.filter((row) => row.RectangleID!== selectedRowId)
           );
           setSelectedRowId(null);
           onDeleteRectangle();
         })
-        .catch((error) => {
+       .catch((error) => {
           console.error(`Error deleting rectangle ${selectedRowId}`, error);
         });
     }
@@ -140,10 +128,10 @@ export default function Table({
             status: 0,
           }
         )
-          .then((response) => {
+         .then((response) => {
             console.log(response.data);
           })
-          .catch((error) => {
+         .catch((error) => {
             console.error("Failed to update rectangle:", error);
           });
       }
@@ -231,7 +219,28 @@ export default function Table({
     {
       header: "Manual Status",
       accessorKey: "Manual_Status",
-    },
+      cell: ({ row }) => {
+        const handleManualStatusChange = (e) => {
+          const newManualStatus = e.target.value === "true" ? 1 : 0;
+          updateManualStatus(newManualStatus); // Call your function to update status in DB or API
+          console.log(newManualStatus);
+        };
+    
+        return (
+          <select
+            value={row.original.Manual_Status === 0 ? "0" : "1"} // Set default value based on Manual_Status
+            onChange={handleManualStatusChange}
+            className="bg-background text-white w-full py-1 px-2 rounded focus:outline-none"
+            disabled={!selectedRowId}
+          >
+            <option value="0">Off</option>
+            <option value="1">On</option>
+          </select>
+        );
+      },
+    }
+
+    
   ];
 
   const table = useReactTable({
@@ -283,8 +292,8 @@ export default function Table({
           Save
         </button>
       </div>
-      {loading ? (
-        <div>Loading ...</div>
+      {loading? (
+        <div>Loading...</div>
       ) : (
         <table className="w-full table-auto bg-background text-white">
           <thead>
@@ -304,7 +313,7 @@ export default function Table({
                       {
                         asc: "▲",
                         desc: "▼",
-                      }[header.column.getIsSorted() ?? null]
+                      }[header.column.getIsSorted()?? null]
                     }
                   </th>
                 ))}
@@ -313,10 +322,13 @@ export default function Table({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} className={selectedRowId === row.original.RectangleID ? "bg-icon text-black" : ""}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="py-2 px-4">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
                   </td>
                 ))}
               </tr>
@@ -324,34 +336,12 @@ export default function Table({
           </tbody>
         </table>
       )}
-      <div className="flex justify-center items-center gap-4 mt-2">
-        <button
-          onClick={() => table.setPageIndex(0)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          First Page
-        </button>
-        <button
-          disabled={!table.getCanPreviousPage()}
-          onClick={() => table.previousPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          Previous Page
-        </button>
-        <button
-          disabled={!table.getCanNextPage()}
-          onClick={() => table.nextPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          Next Page
-        </button>
-        <button
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          Last Page
-        </button>
-      </div>
+      {/* <Pagination
+        currentPage={table.state.pagination.currentPage}
+        totalPages={table.state.pagination.totalPages}
+        onPageChange={table.getSetPageHandler()}
+      /> */}
     </div>
   );
 }
+
