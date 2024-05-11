@@ -221,25 +221,24 @@ export default function Table({
       accessorKey: "Manual_Status",
       cell: ({ row }) => {
         const handleManualStatusChange = (e) => {
-          const newManualStatus = e.target.value === "true" ? 1 : 0;
-          updateManualStatus(newManualStatus); // Call your function to update status in DB or API
-          console.log(newManualStatus);
+          const newManualStatus = parseInt(e.target.value);
+          updateManualStatus(newManualStatus);
         };
+        
     
         return (
           <select
-            value={row.original.Manual_Status === 0 ? "0" : "1"} // Set default value based on Manual_Status
+            value={row.original.Manual_Status}
             onChange={handleManualStatusChange}
             className="bg-background text-white w-full py-1 px-2 rounded focus:outline-none"
             disabled={!selectedRowId}
           >
-            <option value="0">Off</option>
-            <option value="1">On</option>
+            <option value={0}>Off</option>
+            <option value={1}>On</option>
           </select>
         );
       },
-    }
-
+    },
     
   ];
 
