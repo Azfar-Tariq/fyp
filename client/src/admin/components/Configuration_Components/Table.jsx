@@ -60,6 +60,28 @@ export default function Table({
       });
   }, [selectedCamera]);
 
+  useEffect(() => {
+    setLoading(true);
+    Axios.get("http://localhost:3001/boundedRectanglesManualStatus")
+      .then((response) => {
+        const manualStatusMap = new Map();
+        response.data.forEach((item) => {
+          manualStatusMap.set(item.RectangleID, item.Manual_Status);
+        });
+        setData((prevData) =>
+          prevData.map((row) => ({
+            ...row,
+            Manual_Status: manualStatusMap.get(row.RectangleID),
+          }))
+        );
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, []);
+
   const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.RectangleID;
     setSelectedRowId((prevSelectedRowId) =>
@@ -205,6 +227,10 @@ export default function Table({
     {
       header: "Status",
       accessorKey: "Status",
+    },
+    {
+      header: "Manual Status",
+      accessorKey: "Manual_Status",
     },
   ];
 
