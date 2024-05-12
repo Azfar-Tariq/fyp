@@ -7,29 +7,29 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const server = http.createServer(app); // Create HTTP server
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-  },
-});
+// const server = http.createServer(app); // Create HTTP server
+// const io = require("socket.io")(server, {
+//   cors: {
+//     origin: "*",
+//   },
+// });
 
-io.on("connection", (socket) => {
-  console.log("User connected");
+// io.on("connection", (socket) => {
+//   console.log("User connected");
 
-  // Handle disconnection
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
+//   // Handle disconnection
+//   socket.on("disconnect", () => {
+//     console.log("User disconnected");
+//   });
 
-  // Listen to custom events
-  socket.on("manual-control-request", (data) => {
-    // Broadcast the request to all connected clients
-    io.emit("new-manual-control-request", data);
-  });
+//   // Listen to custom events
+//   socket.on("manual-control-request", (data) => {
+//     // Broadcast the request to all connected clients
+//     io.emit("new-manual-control-request", data);
+//   });
 
-  // Other event listeners for accepting/denying requests
-});
+//   // Other event listeners for accepting/denying requests
+// });
 // SQL Server configuration
 const config = {
   host: "localhost",
@@ -937,6 +937,8 @@ app.get("/manual-control-requests", async (req, res) => {
     }
   });
     
+  //-------------------------------------For Live Imag Capture-----------------------
+  
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
