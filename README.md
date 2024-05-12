@@ -76,3 +76,6 @@ ADD columnName int;
 
 remname a column<br>
 EXEC sp_rename 'tableName.CurrentColumnName', 'NewColumnName', 'COLUMN';
+
+
+.\server\libs\ffmpeg.exe -i rtsp://{admin}:{energycam#1}@{192.168.800.230}:554/stream1 -vf "select=eq(n\,0)" -frames:v 1 -vf scale=640:-1 -q:v 2 -f image2 -update 1 .server\frame.jpg
