@@ -12,12 +12,12 @@ import { useEffect, useState } from "react";
 import { MaterialSymbolsDelete } from "../../assets/icons/delete";
 import { UilSave } from "../../assets/icons/save";
 
-function IndeterminateCheckbox({ indeterminate, className = "",...rest }) {
+function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
 
   useEffect(() => {
     if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate =!rest.checked && indeterminate;
+      ref.current.indeterminate = !rest.checked && indeterminate;
     }
   }, [ref, indeterminate, rest.checked]);
 
@@ -43,60 +43,76 @@ export default function Table({
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [editableData, setEditableData] = useState([]);
-  // const [manualStatusMap, setManualStatusMap] = useState(new Map()); // Add a state to store the manual status map
+  const [manualStatusMap, setManualStatusMap] = useState(new Map());
 
   useEffect(() => {
-  setLoading(true);
-  Axios.get(`http://localhost:3001/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`)
-   .then((response) => {
-      setData(response.data);
-      setEditableData(response.data);
-      setLoading(false);
-    })
-   .catch((error) => {
-      console.error(error);
-      setLoading(false);
-    });
-}, [selectedCamera]);
+    setLoading(true);
+    Axios.get(
+      `http://localhost:3001/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`
+    )
+      .then((response) => {
+        console.log(response.data);
+        setData(response.data);
+        setEditableData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  }, [selectedCamera]);
 
-   const handleRowSelectionChange = (row) => {
+  useEffect(() => {
+    const newMap = new Map();
+    data.forEach((row) => {
+      newMap.set(row.RectangleID, !!row.Manual_Status);
+    });
+    console.log("Manual Status Map:", newMap); // Debugging
+    setManualStatusMap(newMap);
+  }, [data]);
+
+  const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.RectangleID;
     setSelectedRowId((prevSelectedRowId) =>
-      prevSelectedRowId === newSelectedRowId? null : newSelectedRowId
+      prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
     onSelectedRectangleChange(
-      selectedRowId === newSelectedRowId? null : newSelectedRowId
+      selectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
   };
 
-  const updateManualStatus = (newManualStatus) => {
-    Axios.put(`http://localhost:3001/updateManualStatus/${selectedRowId}`, {
-      Manual_Status: newManualStatus,
+  const updateManualStatus = (rectangleId, newManualStatus) => {
+    Axios.put(`http://localhost:3001/updateManualStatus/${rectangleId}`, {
+      Manual_Status: newManualStatus ? 1 : 0,
     })
       .then((response) => {
         console.log(response.data);
-        // Optionally update local state or perform any other actions upon successful update
+        const newMap = new Map(manualStatusMap);
+        newMap.set(rectangleId, newManualStatus);
+        setManualStatusMap(newMap);
       })
       .catch((error) => {
         console.error("Failed to update manual status:", error);
       });
   };
-  
+
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(`http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`)
-       .then((response) => {
+      Axios.delete(
+        `http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`
+      )
+        .then((response) => {
           console.log(response);
           setData((prevData) =>
-            prevData.filter((row) => row.RectangleID!== selectedRowId)
+            prevData.filter((row) => row.RectangleID !== selectedRowId)
           );
           setEditableData((prevData) =>
-            prevData.filter((row) => row.RectangleID!== selectedRowId)
+            prevData.filter((row) => row.RectangleID !== selectedRowId)
           );
           setSelectedRowId(null);
           onDeleteRectangle();
         })
-       .catch((error) => {
+        .catch((error) => {
           console.error(`Error deleting rectangle ${selectedRowId}`, error);
         });
     }
@@ -128,10 +144,10 @@ export default function Table({
             status: 0,
           }
         )
-         .then((response) => {
+          .then((response) => {
             console.log(response.data);
           })
-         .catch((error) => {
+          .catch((error) => {
             console.error("Failed to update rectangle:", error);
           });
       }
@@ -219,27 +235,31 @@ export default function Table({
     {
       header: "Manual Status",
       accessorKey: "Manual_Status",
-      cell: ({ row }) => {
-        const handleManualStatusChange = (e) => {
-          const newManualStatus = parseInt(e.target.value);
-          updateManualStatus(newManualStatus);
-        };
-        
-    
-        return (
-          <select
-            value={row.original.Manual_Status}
-            onChange={handleManualStatusChange}
-            className="bg-background text-white w-full py-1 px-2 rounded focus:outline-none"
-            disabled={!selectedRowId}
-          >
-            <option value={0}>Off</option>
-            <option value={1}>On</option>
-          </select>
-        );
-      },
+      cell: ({ row }) => (
+        <button
+          type="button"
+          className={`${
+            manualStatusMap.get(row.original.RectangleID)
+              ? "bg-green-500"
+              : "bg-gray-300"
+          } w-12 h-6 rounded-full focus:outline-none`}
+          onClick={() =>
+            updateManualStatus(
+              row.original.RectangleID,
+              !manualStatusMap.get(row.original.RectangleID)
+            )
+          }
+        >
+          <span
+            className={`${
+              manualStatusMap.get(row.original.RectangleID)
+                ? "translate-x-3"
+                : "-translate-x-3"
+            } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
+          />
+        </button>
+      ),
     },
-    
   ];
 
   const table = useReactTable({
@@ -291,7 +311,7 @@ export default function Table({
           Save
         </button>
       </div>
-      {loading? (
+      {loading ? (
         <div>Loading...</div>
       ) : (
         <table className="w-full table-auto bg-background text-white">
@@ -312,7 +332,7 @@ export default function Table({
                       {
                         asc: "▲",
                         desc: "▼",
-                      }[header.column.getIsSorted()?? null]
+                      }[header.column.getIsSorted() ?? null]
                     }
                   </th>
                 ))}
@@ -321,13 +341,10 @@ export default function Table({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={selectedRowId === row.original.RectangleID ? "bg-icon text-black" : ""}>
+              <tr key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="py-2 px-4">
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
               </tr>
@@ -343,4 +360,3 @@ export default function Table({
     </div>
   );
 }
-
