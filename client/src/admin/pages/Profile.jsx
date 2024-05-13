@@ -2,25 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEdit,
-  faSignOutAlt,
-  faEye,
-  faEyeSlash,
-  faIdBadge,
-  faUser,
-  faEnvelope,
-  faPhone,
-  faUserShield,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import AdminImage from "../assets/images/profile.png";
 
 const Profile = () => {
   const [admin, setAdmin] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const get = async () => {
+  const getAdminProfile = async () => {
     try {
       const email = localStorage.getItem("email");
 
@@ -67,7 +57,7 @@ const Profile = () => {
       setLoading(true);
       // Delay navigation to simulate loading process
       setTimeout(() => {
-        setLoading(false); // Set loading to false after 5 seconds
+        setLoading(false); // Set loading to false after 1 second
         navigate("/");
       }, 1000);
     } catch (error) {
@@ -76,7 +66,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    get();
+    getAdminProfile();
   }, []);
 
   if (!admin) {
@@ -84,111 +74,51 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto bg-primary text-black rounded-md shadow-md">
-      {/* Loader component */}
+    <div className="flex justify-center items-center mt-20">
       {loading && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-500 bg-opacity-75 z-50">
+        <div className="fixed w-full h-full flex justify-center items-center z-50">
           <ClipLoader color="#4A90E2" loading={loading} size={50} />
         </div>
       )}
-
-      {/* Personal Information Section */}
-      <div className="mb-8 bg-background border border-gray-200 rounded-md m-14 p-12">
-        <h2 className="text-xl text-white font-semibold border-b-2 border-gray-400 mb-4">
-          Personal Information
-        </h2>
-        {/* Employee ID */}
-        <div className="mb-4">
-          <label className="block text-gray-200 mb-2">Employee ID</label>
-          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
-            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
-              <FontAwesomeIcon icon={faIdBadge} />
+      <div className="max-w-sm w-full bg-background text-white shadow-lg rounded-lg overflow-hidden">
+        <div className="p-4">
+          <div className="flex flex-col font-bold text-xl items-center mb-2">
+            Admin Profile
+          </div>
+          <div className="flex flex-col items-center">
+            {/* Admin Profile Image Placeholder */}
+            <div
+              className="w-40 rounded-full h-40 bg-cover bg-center m-4"
+              style={{ backgroundImage: `url(${AdminImage})` }}
+            ></div>
+          </div>
+          <div className="flex flex-col">
+            <div className="mb-2">
+              <span className="font-semibold">Employee ID:</span>{" "}
+              {admin.admin_employeeID}
             </div>
-            <span>{admin.admin_employeeID}</span>
+            <div className="mb-2">
+              <span className="font-semibold">Name:</span> {admin.admin_name}
+            </div>
+            <div className="mb-2">
+              <span className="font-semibold">Email:</span> {admin.admin_email}
+            </div>
+            <div className="mb-4">
+              <span className="font-semibold">Phone Number:</span>{" "}
+              {admin.admin_phone}
+            </div>
           </div>
         </div>
-        {/* Name */}
-        <div className="mb-4">
-          <label className="block text-gray-200 mb-2">Name</label>
-          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
-            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
-              <FontAwesomeIcon icon={faUser} />
-            </div>
-            <span>{admin.admin_name}</span>
-          </div>
+        <div className="px-4 pb-4">
+          {/* Logout Button */}
+          <button
+            className="bg-red-500 text-white py-2 px-4 rounded-md w-full hover:bg-white hover:text-red-500 transition duration-300"
+            onClick={handleLogout}
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
+            Logout
+          </button>
         </div>
-        {/* Email */}
-        <div className="mb-4">
-          <label className="block text-gray-200 mb-2">Email</label>
-          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
-            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
-              <FontAwesomeIcon icon={faEnvelope} />
-            </div>
-            <span>{admin.admin_email}</span>
-          </div>
-        </div>
-        {/* Phone Number */}
-        <div className="mb-4">
-          <label className="block text-gray-200 mb-2">Phone Number</label>
-          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
-            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
-              <FontAwesomeIcon icon={faPhone} />
-            </div>
-            <span>{admin.admin_phone}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Security & Settings Section */}
-      <div className="mb-8 bg-background border border-gray-200 rounded-md m-14 p-12">
-        <h2 className="text-xl text-white border-b-2 border-gray-400 font-semibold mb-4">
-          Settings
-        </h2>
-        {/* Password */}
-        <div className="mb-4">
-          <label className="block text-gray-200 mb-2">Password</label>
-          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
-            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
-              <FontAwesomeIcon
-                icon={showPassword ? faEyeSlash : faEye}
-                onClick={() => setShowPassword(!showPassword)}
-              />
-            </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              value="********"
-              readOnly
-              className="border-none focus:outline-none flex-grow text-gray-700 bg-transparent"
-            />
-          </div>
-        </div>
-        {/* Role */}
-        <div>
-          <label className="block text-gray-200 mb-2">Role</label>
-          <div className="flex items-center border border-gray-300 bg-white rounded-md p-2">
-            <div className="mr-2 flex items-center justify-center bg-black text-white rounded-md w-8 h-8">
-              <FontAwesomeIcon icon={faUserShield} />
-            </div>
-            <span>{admin.admin_role}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Actions Section */}
-      <div className="flex justify-end m-8 p-8 mb-0">
-        {/* Edit Profile Button */}
-        <button className="bg-effect text-white px-4 py-2 rounded-md mr-4 hover:bg-white hover:text-black transition duration-300">
-          <FontAwesomeIcon icon={faEdit} className="mr-2" />
-          Edit Profile
-        </button>
-        {/* Logout Button */}
-        <button
-          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-white hover:text-red-500 transition duration-300"
-          onClick={handleLogout}
-        >
-          <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
-          Logout
-        </button>
       </div>
     </div>
   );
