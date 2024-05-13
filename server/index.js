@@ -787,6 +787,7 @@ poolConnect
     app.post("/readCamera/:cameraId/addBoundedRectangle", async (req, res) => {
       const cameraId = req.params.cameraId;
       const { x1, y1, x2, y2, status } = req.body;
+      const manualStatus = false;
 
       try {
         const request = pool.request();
@@ -800,7 +801,7 @@ poolConnect
           return;
         }
 
-        await request
+        const result = await request
           .input("cameraId", sql.Int, cameraId)
           .input("x1", sql.Int, x1)
           .input("y1", sql.Int, y1)
@@ -808,7 +809,19 @@ poolConnect
           .input("y2", sql.Int, y2)
           .input("status", sql.Bit, status)
           .query(
-            `INSERT INTO BoundedRectangle (CameraID, x1, y1, x2, y2, Status) VALUES (@cameraId, @x1, @y1, @x2, @y2, @status)`
+            `INSERT INTO BoundedRectangle (CameraID, x1, y1, x2, y2, Status)
+            OUTPUT inserted.RectangleID
+            VALUES (@cameraId, @x1, @y1, @x2, @y2, @status)`
+          );
+
+        const newRectangleId = result.recordset[0].RectangleID;
+
+        await request
+          .input("rectangleId", sql.Int, newRectangleId)
+          .input("manualStatus", sql.Bit, manualStatus)
+          .query(
+            `INSERT INTO IoTDevices (RectangleID, Manual_Status) 
+            VALUES (@rectangleId, @manualStatus)`
           );
 
         res.status(200).send("Bounded Rectangle saved to database");

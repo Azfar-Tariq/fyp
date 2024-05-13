@@ -234,35 +234,40 @@ export default function Table({
       },
     },
     {
-      header: "Status",
+      header: "Occupancy",
       accessorKey: "Status",
     },
     {
-      header: "Manual Status",
+      header: "Automation Type",
       accessorKey: "Manual_Status",
       cell: ({ row }) => (
-        <button
-          type="button"
-          className={`${
-            manualStatusMap.get(row.original.RectangleID)
-              ? "bg-green-500"
-              : "bg-gray-300"
-          } w-12 h-6 rounded-full focus:outline-none`}
-          onClick={() =>
-            updateManualStatus(
-              row.original.RectangleID,
-              !manualStatusMap.get(row.original.RectangleID)
-            )
-          }
-        >
-          <span
+        <div className="flex gap-2">
+          <button
+            type="button"
             className={`${
               manualStatusMap.get(row.original.RectangleID)
-                ? "translate-x-3"
-                : "-translate-x-3"
-            } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
-          />
-        </button>
+                ? "bg-green-500"
+                : "bg-gray-300"
+            } w-12 h-6 rounded-full focus:outline-none`}
+            onClick={() =>
+              updateManualStatus(
+                row.original.RectangleID,
+                !manualStatusMap.get(row.original.RectangleID)
+              )
+            }
+          >
+            <span
+              className={`${
+                manualStatusMap.get(row.original.RectangleID)
+                  ? "translate-x-3"
+                  : "-translate-x-3"
+              } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
+            />
+          </button>
+          {manualStatusMap.get(row.original.RectangleID)
+            ? "Manual"
+            : "Automatic"}
+        </div>
       ),
     },
   ];

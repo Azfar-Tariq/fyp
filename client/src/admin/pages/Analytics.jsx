@@ -102,10 +102,10 @@ export default function Analytics() {
       </div>
 
       {selectedAreaName && (
-        <div className="mt-8">
+        <div className="mx-8">
           <strong>Selected Area: </strong> {selectedAreaName}
           <div className="mt-6 flex justify-between">
-            <div>
+            <div className="bg-white pt-4 pr-4">
               <Chart
                 options={chartData.options}
                 series={chartData.series}
@@ -114,15 +114,9 @@ export default function Analytics() {
                 height={320}
               />
             </div>
-            <div>
+            <div className="bg-white">
               <PieChart data={chartData.series[0].data} />
             </div>
-          </div>
-          <div className="mt-4">
-            <p className="font-semibold text-lg">Statistics:</p>
-            <p className="font-normal text-sm">
-              Highest Usage is at {maxUsageTime}
-            </p>
           </div>
         </div>
       )}

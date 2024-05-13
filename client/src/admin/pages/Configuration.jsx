@@ -4,7 +4,6 @@ import Select from "../components/Configuration_Components/Select";
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
-import image from "../assets/images/labfetched/camera_image.jpg";
 
 const placeholderImage = "https://via.placeholder.com/800x400";
 
@@ -61,6 +60,10 @@ export default function Configuration() {
     setSelectedRectangle(rectangleId);
   };
 
+  const handleImageAnnotatorSave = () => {
+    setTableKey((prevKey) => prevKey + 1);
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -102,12 +105,12 @@ export default function Configuration() {
                 <ImageAnnotator
                   selectedRectangle={selectedRectangle}
                   selectedCamera={selectedCamera}
+                  onSave={handleImageAnnotatorSave}
                 />
               </div>
             ) : (
               <div>
                 <img src={placeholderImage} className="rounded-md" />
-                <img src={image} />
               </div>
             )}
           </div>

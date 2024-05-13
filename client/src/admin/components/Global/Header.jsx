@@ -40,7 +40,7 @@ export default function Header({ pageTitle }) {
   }, []);
 
   return (
-    <div className="bg-background h-20 px-4 flex items-center justify-between">
+    <div className="bg-background sticky top-0 z-20 h-20 px-4 flex items-center justify-between">
       <h1 className="text-2xl text-white font-bold ml-2">{pageTitle}</h1>
       <div className="flex gap-4">
         <div className="flex items-center bg-primary px-4 p-2 rounded-lg">
