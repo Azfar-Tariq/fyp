@@ -173,7 +173,6 @@ export default function Areas() {
       Header: "Contact Number",
       accessorKey: "contact",
     },
-    // Add other columns as needed
   ];
 
   const table = useReactTable({
