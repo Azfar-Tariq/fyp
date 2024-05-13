@@ -290,6 +290,20 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
           console.log("Coordinates added successfully");
           fetchData();
           setAnnotations([]); // Clear annotations after saving
+
+          // Fetch and send coordinates to another PC
+          try {
+            const formattedCoordinates = annotations.map(
+              ({ x, y, width, height }) => ({ x, y, width, height })
+            );
+            const response = await Axios.post(
+              "http://10.120.141.94:5000/send_coordinates",
+              { coordinates: formattedCoordinates }
+            );
+            console.log("Coordinates sent to other PC:", response.data);
+          } catch (error) {
+            console.error("Failed to send coordinates to other PC:", error);
+          }
         } else {
           console.log("No annotations to save");
         }
@@ -298,6 +312,19 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
       console.error("Failed to save rectangle", error);
     }
   };
+
+  // const sendCoordinatesToOtherPC = async (coordinates) => {
+  //   try {
+  //     // Make an API call to the endpoint on the other PC
+  //     const response = await Axios.post(
+  //       "http://other_pc_ip_address:port/saveCoordinates",
+  //       { coordinates }
+  //     );
+  //     console.log("Coordinates sent to other PC:", response.data);
+  //   } catch (error) {
+  //     console.error("Failed to send coordinates to other PC:", error);
+  //   }
+  // };
 
   useEffect(() => {
     const wrapper = wrapperRef.current;

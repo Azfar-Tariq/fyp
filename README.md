@@ -76,3 +76,4 @@ ADD columnName int;
 
 remname a column<br>
 EXEC sp_rename 'tableName.CurrentColumnName', 'NewColumnName', 'COLUMN';
+http://10.120.141.94:5000/send_Coordinates
