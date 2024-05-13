@@ -4,6 +4,7 @@ import Select from "../components/Configuration_Components/Select";
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
+import image from "../assets/images/labfetched/camera_image.jpg";
 
 const placeholderImage = "https://via.placeholder.com/800x400";
 
@@ -14,6 +15,40 @@ export default function Configuration() {
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
+
+  useEffect(() => {
+    downloadImage();
+  }, []);
+
+  const downloadImage = () => {
+    const apiUrl = "http://10.120.141.94:5000/get_room_image";
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary link element
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "camera_image.jpg"; // Set the download attribute
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Revoke the temporary URL
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error fetching image:", error);
+      });
+  };
 
   const handleAreaChange = (areaId) => {
     setSelectedArea(areaId);
@@ -70,7 +105,10 @@ export default function Configuration() {
                 />
               </div>
             ) : (
-              <img src={placeholderImage} className="rounded-md" />
+              <div>
+                <img src={placeholderImage} className="rounded-md" />
+                <img src={image} />
+              </div>
             )}
           </div>
           <div>

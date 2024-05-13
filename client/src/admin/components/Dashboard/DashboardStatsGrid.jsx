@@ -32,7 +32,7 @@ export default function DashboardStatsGrid() {
       ],
       datasets: [
         {
-          label: "Sales",
+          label: "Electricity Usage",
           data: [12, 19, 3, 5, 2, 3, 15, 17, 8, 2, 10, 15],
           fill: false,
           borderColor: "rgb(75, 192, 192)",

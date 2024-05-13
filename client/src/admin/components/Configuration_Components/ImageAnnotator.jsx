@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
 import { MaterialSymbolsEditOutlineRounded } from "../../assets/icons/edit";
 import { UilSave } from "../../assets/icons/save";
-import image from "../../assets/images/labs/lab8.jpg";
+import image2 from "../../assets/images/labs/lab8.jpg";
+import image from "../../assets/images/labfetched/camera_image.jpg";
 import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;
@@ -25,10 +26,60 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
+  const [picture, setPicture] = useState();
 
   useEffect(() => {
+    // fetchImage();
     fetchData();
   });
+
+  // useEffect(() => {
+  //   console.log("Image fetched");
+  //   downloadImage();
+  // }, []);
+
+  const downloadImage = () => {
+    const apiUrl = "http://10.120.141.94:5000/get_room_image";
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary link element
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "camera_image.jpg"; // Set the download attribute
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Revoke the temporary URL
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error fetching image:", error);
+      });
+  };
+
+  const fetchImage = async () => {
+    try {
+      const response = await Axios.get("http://10.120.141.94/getImage", {
+        responseType: "blob", // Set response type to blob
+      });
+      const imageUrl = URL.createObjectURL(response.data); // Create object URL for blob data
+      setPicture(imageUrl); // Set image state with URL
+      console.log("Image fetched successfully");
+    } catch (error) {
+      console.error("Failed to fetch image:", error);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -207,8 +258,9 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
     const img = new Image();
     img.src = image;
     img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
 
       const drawLoop = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -312,8 +364,9 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
     const img = new Image();
     img.src = image;
     img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
 
       const drawLoop = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -358,6 +411,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
     data,
     selectedRectangle,
     selectedRectangleId,
+    picture,
   ]);
 
   return (
@@ -377,6 +431,8 @@ function ImageAnnotator({ selectedRectangle, selectedCamera }) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
+      <canvas style={{ background: `url(${image})` }}></canvas>
+      <img src={image} width={800} height={400} alt="" />
       <div className="hidden sm:flex gap-4 m-2">
         <button
           className="bg-background text-white flex p-2 gap-2 rounded hover:bg-icon hover:text-black duration-150"
