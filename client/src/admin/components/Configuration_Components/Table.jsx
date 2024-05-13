@@ -43,13 +43,16 @@ export default function Table({
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [editableData, setEditableData] = useState([]);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [manualStatusMap, setManualStatusMap] = useState(new Map());
 
   useEffect(() => {
     setLoading(true);
     Axios.get(
-      `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+      `http://localhost:3001/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`
     )
       .then((response) => {
+        console.log(response.data);
         setData(response.data);
         setEditableData(response.data);
         setLoading(false);
@@ -60,6 +63,15 @@ export default function Table({
       });
   }, [selectedCamera]);
 
+  useEffect(() => {
+    const newMap = new Map();
+    data.forEach((row) => {
+      newMap.set(row.RectangleID, !!row.Manual_Status);
+    });
+    console.log("Manual Status Map:", newMap); // Debugging
+    setManualStatusMap(newMap);
+  }, [data]);
+
   const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.RectangleID;
     setSelectedRowId((prevSelectedRowId) =>
@@ -68,6 +80,21 @@ export default function Table({
     onSelectedRectangleChange(
       selectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
+  };
+
+  const updateManualStatus = (rectangleId, newManualStatus) => {
+    Axios.put(`http://localhost:3001/updateManualStatus/${rectangleId}`, {
+      Manual_Status: newManualStatus ? 1 : 0,
+    })
+      .then((response) => {
+        console.log(response.data);
+        const newMap = new Map(manualStatusMap);
+        newMap.set(rectangleId, newManualStatus);
+        setManualStatusMap(newMap);
+      })
+      .catch((error) => {
+        console.error("Failed to update manual status:", error);
+      });
   };
 
   const handleDeleteSelectedRow = () => {
@@ -127,6 +154,10 @@ export default function Table({
       }
     }
   };
+
+  useEffect(() => {
+    setButtonDisabled(selectedRowId === null);
+  }, [setButtonDisabled, selectedRowId]);
 
   const columns = [
     {
@@ -206,6 +237,34 @@ export default function Table({
       header: "Status",
       accessorKey: "Status",
     },
+    {
+      header: "Manual Status",
+      accessorKey: "Manual_Status",
+      cell: ({ row }) => (
+        <button
+          type="button"
+          className={`${
+            manualStatusMap.get(row.original.RectangleID)
+              ? "bg-green-500"
+              : "bg-gray-300"
+          } w-12 h-6 rounded-full focus:outline-none`}
+          onClick={() =>
+            updateManualStatus(
+              row.original.RectangleID,
+              !manualStatusMap.get(row.original.RectangleID)
+            )
+          }
+        >
+          <span
+            className={`${
+              manualStatusMap.get(row.original.RectangleID)
+                ? "translate-x-3"
+                : "-translate-x-3"
+            } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
+          />
+        </button>
+      ),
+    },
   ];
 
   const table = useReactTable({
@@ -244,21 +303,31 @@ export default function Table({
         </div>
         <button
           onClick={handleDeleteSelectedRow}
-          className="flex gap-2 bg-background text-white py-2 px-3 rounded-full hover:bg-icon hover:text-black transition duration-150 ease-in-out focus:outline-none"
+          className={`flex gap-2 bg-background text-white py-2 px-3 rounded-full transition duration-150 ease-in-out focus:outline-none ${
+            buttonDisabled
+              ? "cursor-not-allowed opacity-50"
+              : "hover:bg-icon hover:text-black"
+          }`}
+          disabled={buttonDisabled}
         >
           <MaterialSymbolsDelete />
           Delete
         </button>
         <button
           onClick={handleSaveChanges}
-          className="flex gap-2 bg-background text-white py-2 px-3 rounded-full hover:bg-icon hover:text-black transition duration-150 ease-in-out focus:outline-none"
+          className={`flex gap-2 bg-background text-white py-2 px-3 rounded-full transition duration-150 ease-in-out focus:outline-none ${
+            buttonDisabled
+              ? "cursor-not-allowed opacity-50"
+              : "hover:bg-icon hover:text-black"
+          }`}
+          disabled={buttonDisabled}
         >
           <UilSave />
           Save
         </button>
       </div>
       {loading ? (
-        <div>Loading ...</div>
+        <div>Loading...</div>
       ) : (
         <table className="w-full table-auto bg-background text-white">
           <thead>
@@ -298,34 +367,11 @@ export default function Table({
           </tbody>
         </table>
       )}
-      <div className="flex justify-center items-center gap-4 mt-2">
-        <button
-          onClick={() => table.setPageIndex(0)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          First Page
-        </button>
-        <button
-          disabled={!table.getCanPreviousPage()}
-          onClick={() => table.previousPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          Previous Page
-        </button>
-        <button
-          disabled={!table.getCanNextPage()}
-          onClick={() => table.nextPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          Next Page
-        </button>
-        <button
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          Last Page
-        </button>
-      </div>
+      {/* <Pagination
+        currentPage={table.state.pagination.currentPage}
+        totalPages={table.state.pagination.totalPages}
+        onPageChange={table.getSetPageHandler()}
+      /> */}
     </div>
   );
 }

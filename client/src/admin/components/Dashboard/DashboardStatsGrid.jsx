@@ -81,7 +81,7 @@ export default function DashboardStatsGrid() {
 
   return (
     <div className="bg-primary">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
         <DashboardBox
           icon={<IoPeople className="text-6xl p-0 m-0 text-icon" />}
           title="Users"
@@ -116,16 +116,16 @@ export default function DashboardStatsGrid() {
           color="bg-background"
           description="Monitor live camera feeds and recordings."
         />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 pb-6">
-        <SidebarItem
+        <DashboardBox
+          icon={<IoSettings className="text-6xl p-0 m-0 text-icon" />}
           title="Configuration"
           link="/admin/configuration"
-          description="Manage system configurations"
+          color="bg-background"
+          description="Manage user accounts and permissions."
         />
-        <div className="col-span-2">
-          <AnalyticsGraph />
-        </div>
+      </div>
+      <div className="mx-6 mb-4">
+        <AnalyticsGraph />
       </div>
     </div>
   );
@@ -140,7 +140,7 @@ function AnalyticsGraph() {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 text-white">
+    <div className="bg-gray-800 w-full col-span-4 rounded-lg p-6 text-white">
       <h2 className="text-xl font-semibold mb-2">Analytics</h2>
       <canvas id="analyticsChart" width="400" height="200"></canvas>
       <div className="mt-4">
@@ -178,28 +178,15 @@ function DashboardBox({ icon, title, value, link, color, description }) {
         </div>
 
         <p className="text-white text-sm mt-2">{description}</p>
-        <button className="flex items-center text-white text-sm mt-2 focus:outline-none hover:text-blue-400">
+        <button className="flex items-center text-white text-sm mt-2 focus:outline-none">
           See More
           <MaterialSymbolsArrowForwardIosRounded className="ml-2" />
         </button>
-        <div className="mt-4 border-t border-gray-300 pt-4">
+        {/*<div className="mt-4 border-t border-gray-300 pt-4">
           <p className="text-xs text-white">
             Last updated: {new Date().toLocaleString()}
           </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function SidebarItem({ title, link, description }) {
-  return (
-    <Link to={link}>
-      <div className="bg-background rounded-lg p-6 text-white transition duration-300 ease-in-out transform hover:-translate-y-1">
-        <IoSettings className="text-5xl mb-4 text-icon" />
-        <h2 className="text-xl font-semibold mb-2">{title}</h2>
-        <p className="text-sm">{description}</p>
-        <p className="text-sm mt-2">Click to navigate</p>
+        </div>*/}
       </div>
     </Link>
   );
