@@ -12,6 +12,7 @@ const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
 
 function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
   const [data, setData] = useState([]);
+  const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -304,6 +305,19 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
     }
   };
 
+  useEffect(() => {
+    // Extract xi, y1, x2, y2, and id from each bounded rectangle in data
+    const extractedData = data.map((rectangle) => ({
+      // id: rectangle.id,
+      x1: rectangle.x1,
+      y1: rectangle.y1,
+      x2: rectangle.x2,
+      y2: rectangle.y2,
+    }));
+
+    // Store the extracted data in the new state
+    setBoundedRectanglesData(extractedData);
+  }, [data]);
   const handleSaveButtonClick = async () => {
     console.log(annotations);
     try {
@@ -337,11 +351,24 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
           console.log("Coordinates added successfully");
           fetchData();
           setAnnotations([]); // Clear annotations after saving
+
+          // Fetch and send coordinates to another PC
+          try {
+            // const formattedCoordinates = annotations.map(
+            //   ({ x, y, width, height }) => ({ x, y, width, height })
+            // );
+            const response = await Axios.post(
+              "http://10.120.141.94:5000/send_coordinates",
+              { coordinates: boundedRectanglesData }
+            );
+            console.log("Coordinates sent to other PC:", response.data);
+          } catch (error) {
+            console.error("Failed to send coordinates to other PC:", error);
+          }
         } else {
           console.log("No annotations to save");
         }
       }
-      onSave();
     } catch (error) {
       console.error("Failed to save rectangle", error);
     }
