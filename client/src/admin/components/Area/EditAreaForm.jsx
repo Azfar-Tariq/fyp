@@ -1,11 +1,21 @@
 import { useState } from "react";
 
 function EditAreaForm({ onSave, onClose, defaultValues }) {
-  const [areaName, setAreaName] = useState(defaultValues.areaName);
-  const [description, setDescription] = useState(defaultValues.description);
-  const [address, setAddress] = useState(defaultValues.address);
-  const [focalPerson, setFocalPerson] = useState(defaultValues.focalPerson);
-  const [contact, setContact] = useState(defaultValues.contact);
+  // Destructure defaultValues to get initial values for each field
+  const {
+    areaName: defaultAreaName,
+    description: defaultDescription,
+    address: defaultAddress,
+    focalPerson: defaultFocalPerson,
+    contact: defaultContact,
+  } = defaultValues;
+
+  // Use useState to initialize state with default values
+  const [areaName, setAreaName] = useState(defaultAreaName);
+  const [description, setDescription] = useState(defaultDescription);
+  const [address, setAddress] = useState(defaultAddress);
+  const [focalPerson, setFocalPerson] = useState(defaultFocalPerson);
+  const [contact, setContact] = useState(defaultContact);
 
   const handleSubmit = (e) => {
     e.preventDefault();

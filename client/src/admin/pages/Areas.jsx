@@ -42,6 +42,7 @@ export default function Areas() {
   const [filtering, setFiltering] = useState("");
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  // const [areaList, setAreaList] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -61,6 +62,8 @@ export default function Areas() {
     try {
       const response = await Axios.get("http://localhost:3001/readArea");
       setAreaList(response.data);
+      let areaList = setAreaList;
+      console.log("Area List:", areaList);
     } catch (err) {
       console.error("Failed to get Areas:", err);
     }
@@ -308,7 +311,7 @@ export default function Areas() {
         <EditAreaForm
           onSave={handleEditAreaSave}
           onClose={() => setShowEditForm(false)}
-          defaultValues={selectedArea}
+          defaultValues={arealist}
           title="Edit Area"
         />
       )}

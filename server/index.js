@@ -222,95 +222,94 @@ poolConnect
     });
 
     // Add a new user
-app.post("/addUser", async (req, res) => {
-  const { email, password, name, role, employeeID, phone } = req.body;
+    app.post("/addUser", async (req, res) => {
+      const { email, password, name, role, employeeID, phone } = req.body;
 
-  try {
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    await request
-      .input("email", sql.NVarChar(255), email)
-      .input("password", sql.NVarChar(255), password)
-      .input("name", sql.NVarChar(255), name)
-      .input("role", sql.NVarChar(50), role)
-      .input("employeeID", sql.Int, employeeID)
-      .input("phone", sql.BigInt, phone)
-      .query(
-        "INSERT INTO users (email, password, name, role, employeeID, phone) VALUES (@email, @password, @name, @role, @employeeID, @phone)"
-      );
-    res.status(200).send("User added successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to add user");
-  }
-});
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        await request
+          .input("email", sql.NVarChar(255), email)
+          .input("password", sql.NVarChar(255), password)
+          .input("name", sql.NVarChar(255), name)
+          .input("role", sql.NVarChar(50), role)
+          .input("employeeID", sql.Int, employeeID)
+          .input("phone", sql.BigInt, phone)
+          .query(
+            "INSERT INTO users (email, password, name, role, employeeID, phone) VALUES (@email, @password, @name, @role, @employeeID, @phone)"
+          );
+        res.status(200).send("User added successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to add user");
+      }
+    });
 
-// Edit an existing user
-app.put("/editUser/:id", async (req, res) => {
-  const { email, password, name, role, employeeID, phone } = req.body;
-  const id = req.params.id;
+    // Edit an existing user
+    app.put("/editUser/:id", async (req, res) => {
+      const { email, password, name, role, employeeID, phone } = req.body;
+      const id = req.params.id;
 
-  try {
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    const result = await request.query(
-      `SELECT * FROM users WHERE id = ${id}`
-    );
-    const user = result.recordset[0];
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT * FROM users WHERE id = ${id}`
+        );
+        const user = result.recordset[0];
 
-    if (!user) {
-      res.status(404).send("User not found");
-      return;
-    }
+        if (!user) {
+          res.status(404).send("User not found");
+          return;
+        }
 
-    await request
-      .input("email", sql.NVarChar(255), email)
-      .input("password", sql.NVarChar(255), password)
-      .input("name", sql.NVarChar(255), name)
-      .input("role", sql.NVarChar(50), role)
-      .input("employeeID", sql.Int, employeeID)
-      .input("phone", sql.BigInt, phone)
-      .query(
-        `UPDATE users SET email = @email, 
+        await request
+          .input("email", sql.NVarChar(255), email)
+          .input("password", sql.NVarChar(255), password)
+          .input("name", sql.NVarChar(255), name)
+          .input("role", sql.NVarChar(50), role)
+          .input("employeeID", sql.Int, employeeID)
+          .input("phone", sql.BigInt, phone)
+          .query(
+            `UPDATE users SET email = @email, 
                             password = @password, 
                             name = @name, 
                             role = @role, 
                             employeeID = @employeeID, 
                             phone = @phone 
                             WHERE id = ${id}`
-      );
-    res.status(200).send("User updated successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to update user");
-  }
-});
+          );
+        res.status(200).send("User updated successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to update user");
+      }
+    });
 
-// Remove an existing user
-app.delete("/removeUser/:id", async (req, res) => {
-  const id = req.params.id;
+    // Remove an existing user
+    app.delete("/removeUser/:id", async (req, res) => {
+      const id = req.params.id;
 
-  try {
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    const result = await request.query(
-      `SELECT * FROM users WHERE id = ${id}`
-    );
-    const user = result.recordset[0];
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        const result = await request.query(
+          `SELECT * FROM users WHERE id = ${id}`
+        );
+        const user = result.recordset[0];
 
-    if (!user) {
-      res.status(404).send("User not found");
-      return;
-    }
+        if (!user) {
+          res.status(404).send("User not found");
+          return;
+        }
 
-    await request.query(`DELETE FROM users WHERE id = ${id}`);
-    res.status(200).send("User removed successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to remove user");
-  }
-});
-
+        await request.query(`DELETE FROM users WHERE id = ${id}`);
+        res.status(200).send("User removed successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to remove user");
+      }
+    });
 
     // ----------Get  All Users for Users.js in Admin Dashboard endpoint-------------
     app.get("/users", async (req, res) => {
@@ -329,40 +328,45 @@ app.delete("/removeUser/:id", async (req, res) => {
     app.put("/grant-manual-control/:requestId", async (req, res) => {
       try {
         const { requestId } = req.params;
-    
+
         // Fetch teacherId from ManualControlRequests
         const requestResult = await pool
           .request()
           .input("requestId", sql.Int, requestId)
-          .query("SELECT userId FROM ManualControlRequests WHERE id = @requestId");
+          .query(
+            "SELECT userId FROM ManualControlRequests WHERE id = @requestId"
+          );
         const userId = requestResult.recordset[0].userId;
-    
+
         // Fetch teacher's email from users table
         const emailResult = await pool
           .request()
           .input("userId", sql.Int, userId)
           .query("SELECT email FROM users WHERE id = @userId");
         const teacherEmail = emailResult.recordset[0].email;
-        
+
         // Update request status and manualControlRequested in the database
         await Promise.all([
           pool
             .request()
             .input("requestId", sql.Int, requestId)
-            .query("UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"),
+            .query(
+              "UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"
+            ),
           pool
             .request()
             .input("userId", sql.Int, userId)
-            .query("UPDATE users SET manualControlRequested = 2 WHERE id = @userId"),
+            .query(
+              "UPDATE users SET manualControlRequested = 2 WHERE id = @userId"
+            ),
         ]);
-    
+
         res.status(200).json({ message: "Access granted successfully!" });
       } catch (error) {
         console.error("Error granting manual control access:", error);
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    
 
     // Endpoint to deny manual control access
     app.put("/deny-manual-control/:requestId", async (req, res) => {
@@ -373,64 +377,73 @@ app.delete("/removeUser/:id", async (req, res) => {
         const requestResult = await pool
           .request()
           .input("requestId", sql.Int, requestId)
-          .query("SELECT userId FROM ManualControlRequests WHERE id = @requestId");
+          .query(
+            "SELECT userId FROM ManualControlRequests WHERE id = @requestId"
+          );
         const userId = requestResult.recordset[0].userId;
-    
+
         // Update request status and manualControlRequested in the database
         await Promise.all([
           pool
             .request()
             .input("requestId", sql.Int, requestId)
-            .query("UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"),
+            .query(
+              "UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"
+            ),
           pool
             .request()
             .input("userId", sql.Int, userId)
-            .query("UPDATE users SET manualControlRequested = 0 WHERE id = @userId"),
+            .query(
+              "UPDATE users SET manualControlRequested = 0 WHERE id = @userId"
+            ),
         ]);
-    
+
         res.status(200).json({ message: "Access denied successfully!" });
       } catch (error) {
         console.error("Error denying manual control access:", error);
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    
 
     // Endpoint to send manual control request
     app.post("/request-manual-control", async (req, res) => {
       try {
         const { email, AreaID } = req.body;
-        console.log(req.body)
-        console.log(res.body)
-    
+        console.log(req.body);
+        console.log(res.body);
+
         // Fetch user details using email from the users table
         const userResult = await pool
           .request()
           .input("email", sql.NVarChar, email)
           .query("SELECT id, name FROM users WHERE email = @email");
-    
+
         if (userResult.recordset.length === 0) {
           console.error("User not found with the provided email.");
           res.status(404).json({ message: "User not found." });
           return;
         }
-    
+
         const userId = userResult.recordset[0].id;
         const userName = userResult.recordset[0].name;
-    
+
         // Update the 'manualControlRequested' status for the user
         await pool
           .request()
           .input("userId", sql.Int, userId)
-          .query("UPDATE users SET manualControlRequested = 1 WHERE id = @userId");
-    
+          .query(
+            "UPDATE users SET manualControlRequested = 1 WHERE id = @userId"
+          );
+
         // Store the request in the database
         await pool
           .request()
           .input("userId", sql.Int, userId)
           .input("areaId", sql.Int, AreaID)
-          .query("INSERT INTO ManualControlRequests (userId, areaId) VALUES (@userId, @AreaID)");
-    
+          .query(
+            "INSERT INTO ManualControlRequests (userId, areaId) VALUES (@userId, @AreaID)"
+          );
+
         // Return the details of the manual control request, including user's name
         res.status(200).json({
           message: "Request sent successfully!",
@@ -442,13 +455,12 @@ app.delete("/removeUser/:id", async (req, res) => {
         res.status(500).json({ message: "Internal server error." });
       }
     });
-    
 
-// Endpoint to get manual control requests
-app.get("/manual-control-requests", async (req, res) => {
-  try {
-    const request = pool.request();
-    const result = await request.query(`
+    // Endpoint to get manual control requests
+    app.get("/manual-control-requests", async (req, res) => {
+      try {
+        const request = pool.request();
+        const result = await request.query(`
     SELECT MCR.*, U.name AS userName, 
     CASE 
       WHEN U.manualControlRequested = 1 THEN A.areaName 
@@ -460,18 +472,17 @@ app.get("/manual-control-requests", async (req, res) => {
   WHERE MCR.status = 'Pending'
     `);
 
-    if (result.recordset.length > 0) {
-      const manualRequests = result.recordset;
-      res.status(200).json(manualRequests);
-    } else {
-      res.status(404).json({ message: "No manual control requests found" });
-    }
-  } catch (error) {
-    console.error("Error fetching manual control requests:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
+        if (result.recordset.length > 0) {
+          const manualRequests = result.recordset;
+          res.status(200).json(manualRequests);
+        } else {
+          res.status(404).json({ message: "No manual control requests found" });
+        }
+      } catch (error) {
+        console.error("Error fetching manual control requests:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
 
     // -------- Area Data Endpoints --------
     // send data to database
@@ -834,7 +845,7 @@ app.get("/manual-control-requests", async (req, res) => {
     });
 
     // edit data from database
-    
+
     app.put("/updateBoundedRectangle/:rectangleId", async (req, res) => {
       const rectangleId = req.params.rectangleId;
       const { x1, y1, x2, y2, status } = req.body;
@@ -895,15 +906,16 @@ app.get("/manual-control-requests", async (req, res) => {
         res.status(500).send("Failed to get data from the database");
       }
     });
-    
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
   });
 
-  app.get("/readCameraWithManualStatus/:cameraId/readBoundedRectangles", async (req, res) => {
+app.get(
+  "/readCameraWithManualStatus/:cameraId/readBoundedRectangles",
+  async (req, res) => {
     const cameraId = req.params.cameraId;
-  
+
     try {
       const request = pool.request();
       const result = await request.query(`
@@ -915,28 +927,32 @@ app.get("/manual-control-requests", async (req, res) => {
       res.status(200).json(result.recordset);
     } catch (err) {
       console.error(err);
-      res.status(500).send("Failed to get Bounded Rectangles with manual status from the database");
+      res
+        .status(500)
+        .send(
+          "Failed to get Bounded Rectangles with manual status from the database"
+        );
     }
-  });
-  app.put("/updateManualStatus/:rectangleId", async (req, res) => {
-    const rectangleId = req.params.rectangleId;
-    const { Manual_Status } = req.body;
-    console.log(req.body)
-  
-    try {
-      const request = pool.request();
-      const result = await request.query(`
+  }
+);
+app.put("/updateManualStatus/:rectangleId", async (req, res) => {
+  const rectangleId = req.params.rectangleId;
+  const { Manual_Status } = req.body;
+  console.log(req.body);
+
+  try {
+    const request = pool.request();
+    const result = await request.query(`
         UPDATE IoTDevices
         SET Manual_Status = ${Manual_Status}
         WHERE RectangleID = ${rectangleId}
       `);
-      res.status(200).send("Manual status updated successfully");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Failed to update manual status");
-    }
-  });
-    
+    res.status(200).send("Manual status updated successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to update manual status");
+  }
+});
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
