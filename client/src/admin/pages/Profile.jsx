@@ -80,7 +80,7 @@ const Profile = () => {
           <ClipLoader color="#4A90E2" loading={loading} size={50} />
         </div>
       )}
-      <div className="max-w-sm w-full bg-background text-white shadow-lg rounded-lg overflow-hidden">
+      <div className="w-[20rem] bg-background text-white shadow-lg rounded-lg overflow-hidden">
         <div className="p-4">
           <div className="flex flex-col font-bold text-xl items-center mb-2">
             Admin Profile

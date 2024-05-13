@@ -2,11 +2,10 @@
 import Table from "../components/Configuration_Components/Table";
 import Select from "../components/Configuration_Components/Select";
 import { useEffect, useState } from "react";
-import { UilSave } from "../assets/icons/save";
 import Axios from "axios";
 import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
 
-const placeholderImage = "https://via.placeholder.com/600x350";
+const placeholderImage = "https://via.placeholder.com/800x400";
 
 export default function Configuration() {
   const [selectedArea, setSelectedArea] = useState(null);
