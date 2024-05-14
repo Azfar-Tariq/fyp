@@ -88,10 +88,9 @@ export default function Cameras() {
 
   // .................................Edit Camera Data..........................................
   const handleEditCamera = () => {
-    // const selectedRow = data.find((row) => row.id === selectedRowId);
     if (selectedRowId) {
-      setEditing(true);
-      setSelectedCamera(selectedRowId);
+      const selectedCamera = data.find((row) => row.CameraID === selectedRowId);
+      setSelectedCamera(selectedCamera);
       setShowEditModel(true); // Show the EditModel
     }
   };
