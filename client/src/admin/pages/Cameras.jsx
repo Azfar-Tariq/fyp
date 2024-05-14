@@ -11,6 +11,9 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
+import { MaterialSymbolsDelete } from "../assets/icons/delete";
+import { MaterialSymbolsEditOutlineRounded } from "../assets/icons/edit";
+import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
@@ -266,25 +269,28 @@ export default function Cameras() {
         </button>
       </div>
 
-      <div className="flex justify-center gap-4 mt-4">
+      <div className="flex justify-center gap-6 mt-4">
         <button
-          className="text-white w-28 h-12 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          className="bg-background text-white flex p-3 gap-2 rounded-lg hover:bg-icon hover:text-black duration-150"
           onClick={toggleInsertModel}
         >
+          <MaterialSymbolsAddRounded />
           Add
         </button>
         <button
-          className="focus:outline-none w-28 h-12 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+          className="bg-background text-white flex p-3 gap-2 rounded-lg hover:bg-icon hover:text-black duration-150"
           onClick={handleEditCamera}
         >
+          <MaterialSymbolsEditOutlineRounded />
           Edit
         </button>
 
         <button
           type="button"
-          className="focus:outline-none  w-28 h-12 text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+          className="bg-background text-white flex p-3 gap-2 rounded-lg hover:bg-icon hover:text-black duration-150"
           onClick={handleDeleteSelectedRow}
         >
+          <MaterialSymbolsDelete />
           Delete
         </button>
 

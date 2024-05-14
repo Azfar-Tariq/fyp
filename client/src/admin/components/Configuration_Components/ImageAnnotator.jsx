@@ -317,7 +317,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
 
     // Store the extracted data in the new state
     setBoundedRectanglesData(extractedData);
-  }, [data]);
+  }, []);
   const handleSaveButtonClick = async () => {
     console.log(annotations);
     try {
@@ -369,6 +369,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
           console.log("No annotations to save");
         }
       }
+      onSave();
     } catch (error) {
       console.error("Failed to save rectangle", error);
     }

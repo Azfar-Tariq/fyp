@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { UilSave } from "../../assets/icons/save";
+import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
 // import { fetchData } from "../../pages/Cameras"; // Import the fetchData function
 
 const InsertModel = ({ isOpen, onClose }) => {
@@ -27,12 +29,12 @@ const InsertModel = ({ isOpen, onClose }) => {
       alert("Please select an area to add a new camera.");
       return;
     }
-      const newCamera = {
+    const newCamera = {
       areaId: selectedArea,
       cameraName: cameraName,
       description: cameraDescription,
     };
-  
+
     // console.log(selectedArea);
 
     // Call the API to add a new camera
@@ -44,7 +46,7 @@ const InsertModel = ({ isOpen, onClose }) => {
         // setData(newData);
 
         // Close the modal after saving
-        onClose(); 
+        onClose();
         toast.success("New Camera Added Successfully");
         // Fetch updated data from the server
         // fetchData(newData);
@@ -60,8 +62,8 @@ const InsertModel = ({ isOpen, onClose }) => {
         isOpen ? "block" : "hidden"
       }`}
     >
-      <div className="bg-white rounded-lg p-4">
-      <ToastContainer />
+      <div className="bg-background text-white rounded-lg p-4">
+        <ToastContainer />
         <h2 className="text-lg font-bold mb-2">Add Camera</h2>
         <form>
           <label className="block mb-2">
@@ -98,21 +100,22 @@ const InsertModel = ({ isOpen, onClose }) => {
               className="block w-full p-2 pl-10 text-sm text-gray-700"
             />
           </label>
-          <button
-            type="button"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          
+          <div className="flex justify-center items-center gap-2">
+            <button
+              className="flex p-2 gap-2 rounded bg-background text-white hover:bg-icon hover:text-black duration-150"
+              onClick={handleSave}
+            >
+              <UilSave />
+              Save
+            </button>
+            <button
+              className="bg-background text-white flex p-2 gap-2 rounded hover:bg-icon hover:text-black duration-150"
+              onClick={onClose}
+            >
+              <MaterialSymbolsBackspaceRounded />
+              Close
+            </button>
+          </div>
         </form>
       </div>
     </div>
