@@ -10,9 +10,14 @@ const MINIMUM_SHAPE_SIZE = 10;
 const DEFAULT_RECTANGLE_COLOR = "red";
 const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
 
-function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
+function ImageAnnotator({
+  selectedRectangle,
+  selectedCamera,
+  onSave,
+  imageData,
+}) {
   const [data, setData] = useState([]);
-  const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
+  // const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -27,41 +32,70 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
-  const [imageData, setImageData] = useState(null);
+  // const [imageData, setImageData] = useState(null);
   // const [picture, setPicture] = useState();
 
   useEffect(() => {
     fetchData();
   });
 
-  useEffect(() => {
-    downloadImage();
-  }, []); // Empty dependency array ensures useEffect runs only once
+  // useEffect(() => {
+  //   downloadImage();
+  // }, []); // Empty dependency array ensures useEffect runs only once
 
-  const downloadImage = () => {
-    const apiUrl = "http://10.112.71.52:5000/get_room_image";
+  // const downloadImage = () => {
+  //   const apiUrl = "http://10.112.71.52:5000/get_room_image";
 
-    fetch(apiUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.blob();
-      })
-      .then((blob) => {
-        // Convert the blob to a data URL
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-          const dataUrl = reader.result;
-          // Set the image data in state
-          setImageData(dataUrl);
-        };
-      })
-      .catch((error) => {
-        console.error("Error fetching image:", error);
-      });
-  };
+  //   fetch(apiUrl)
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.blob();
+  //     })
+  //     .then((blob) => {
+  //       // Convert the blob to a data URL
+  //       const reader = new FileReader();
+  //       reader.readAsDataURL(blob);
+  //       reader.onloadend = () => {
+  //         const dataUrl = reader.result;
+  //         // Set the image data in state
+  //         setImageData(dataUrl);
+  //       };
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching image:", error);
+  //     });
+  // };
+
+  // useEffect(() => {
+  //   downloadImage();
+  // }, []); // Empty dependency array ensures useEffect runs only once
+
+  // const downloadImage = () => {
+  //   const apiUrl = "http://10.112.71.52:5000/get_room_image";
+
+  //   fetch(apiUrl)
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.blob();
+  //     })
+  //     .then((blob) => {
+  //       // Convert the blob to a data URL
+  //       const reader = new FileReader();
+  //       reader.readAsDataURL(blob);
+  //       reader.onloadend = () => {
+  //         const dataUrl = reader.result;
+  //         // Set the image data in state
+  //         setImageData(dataUrl);
+  //       };
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching image:", error);
+  //     });
+  // };
 
   // const downloadImage = () => {
   //   const apiUrl = "http://10.120.141.94:5000/get_room_image";
@@ -112,6 +146,16 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
         `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
       );
       setData(response.data);
+      // const extractedData = data.map((rectangle) => ({
+      //   // id: rectangle.id,
+      //   x1: rectangle.x1,
+      //   y1: rectangle.y1,
+      //   x2: rectangle.x2,
+      //   y2: rectangle.y2,
+      // }));
+
+      // Store the extracted data in the new state
+      // setBoundedRectanglesData(extractedData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
@@ -335,27 +379,26 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
     }
   };
 
-  useEffect(() => {
-    // Extract xi, y1, x2, y2, and id from each bounded rectangle in data
-    const extractedData = data.map((rectangle) => ({
-      // id: rectangle.id,
-      x1: rectangle.x1,
-      y1: rectangle.y1,
-      x2: rectangle.x2,
-      y2: rectangle.y2,
-    }));
+  // useEffect(() => {
+  //   console.log("data", data);
+  //   // Extract xi, y1, x2, y2, and id from each bounded rectangle in data
+  //   const extractedData = data.map((rectangle) => ({
+  //     // id: rectangle.id,
+  //     x1: rectangle.x1,
+  //     y1: rectangle.y1,
+  //     x2: rectangle.x2,
+  //     y2: rectangle.y2,
+  //   }));
 
-    // Store the extracted data in the new state
-    setBoundedRectanglesData(extractedData);
-  }, []);
+  //   // Store the extracted data in the new state
+  //   setBoundedRectanglesData(extractedData);
+  // }, []);
+
   const handleSaveButtonClick = async () => {
-    console.log(annotations);
     try {
       if (selectedRectangleId) {
         handleSaveChanges();
       } else {
-        console.log("Saveeee");
-        console.log(annotations);
         if (annotations.length > 0) {
           // Iterate over annotations to save each rectangle
           for (const annotation of annotations) {
@@ -363,35 +406,39 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
               annotation.width >= MINIMUM_SHAPE_SIZE &&
               annotation.height >= MINIMUM_SHAPE_SIZE
             ) {
-              console.log(annotation);
-              const { x, y, width, height } = annotation;
-              console.log(x, y, width, height);
               await Axios.post(
                 `http://localhost:3001/readCamera/${selectedCamera}/addBoundedRectangle`,
                 {
-                  x1: x,
-                  y1: y,
-                  x2: x + width,
-                  y2: y + height,
+                  x1: annotation.x,
+                  y1: annotation.y,
+                  x2: annotation.x + annotation.width,
+                  y2: annotation.y + annotation.height,
                   status: 0,
                 }
               );
             }
           }
-          console.log("Coordinates added successfully");
-          fetchData();
+          onSave(); // Notify parent component that changes are saved
+          fetchData(); // Fetch data from the database
           setAnnotations([]); // Clear annotations after saving
 
-          // Fetch and send coordinates to another PC
           try {
-            // const formattedCoordinates = annotations.map(
-            //   ({ x, y, width, height }) => ({ x, y, width, height })
-            // );
-            const response = await Axios.post(
-              "http://10.120.141.94:5000/send_coordinates",
-              { coordinates: boundedRectanglesData }
+            // Fetch all data from the database
+            const response = await Axios.get(
+              `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
             );
-            console.log("Coordinates sent to other PC:", response.data);
+            const fetchedData = response.data;
+
+            // Send fetched data to another PC
+            const sendCoordinatesResponse = await Axios.post(
+              "http://10.120.143.187:5000/send_coordinates",
+              { coordinates: fetchedData }
+            );
+
+            console.log(
+              "Coordinates sent to other PC:",
+              sendCoordinatesResponse.data
+            );
           } catch (error) {
             console.error("Failed to send coordinates to other PC:", error);
           }
@@ -399,9 +446,8 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
           console.log("No annotations to save");
         }
       }
-      onSave();
     } catch (error) {
-      console.error("Failed to save rectangle", error);
+      console.error("Failed to save changes:", error);
     }
   };
 

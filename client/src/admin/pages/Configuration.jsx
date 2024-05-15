@@ -6,6 +6,7 @@ import Axios from "axios";
 import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
 
 const placeholderImage = "https://via.placeholder.com/800x400";
+// const IP = process.env.REACT_APP_RASPBERRYPI_IP;
 
 export default function Configuration() {
   const [selectedArea, setSelectedArea] = useState(null);
@@ -14,6 +15,36 @@ export default function Configuration() {
   const [loading, setLoading] = useState(false);
   const [tableKey, setTableKey] = useState(0);
   const [selectedRectangle, setSelectedRectangle] = useState(null);
+  const [imageData, setImageData] = useState(null);
+
+  useEffect(() => {
+    downloadImage();
+  }, []); // Empty dependency array ensures useEffect runs only once
+
+  const downloadImage = () => {
+    const apiUrl = `http://10.120.143.187:5000/get_room_image`;
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Convert the blob to a data URL
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          const dataUrl = reader.result;
+          // Set the image data in state
+          setImageData(dataUrl);
+        };
+      })
+      .catch((error) => {
+        console.error("Error fetching image:", error);
+      });
+  };
 
   // useEffect(() => {
   //   downloadImage();
@@ -106,6 +137,7 @@ export default function Configuration() {
                   selectedRectangle={selectedRectangle}
                   selectedCamera={selectedCamera}
                   onSave={handleImageAnnotatorSave}
+                  imageData={imageData}
                 />
               </div>
             ) : (
