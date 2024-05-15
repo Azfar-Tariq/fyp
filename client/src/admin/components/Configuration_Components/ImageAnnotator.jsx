@@ -3,7 +3,7 @@ import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
 import { MaterialSymbolsEditOutlineRounded } from "../../assets/icons/edit";
 import { UilSave } from "../../assets/icons/save";
 // import image2 from "../../assets/images/labs/lab8.jpg";
-import image from "../../assets/images/labfetched/camera_image.jpg";
+// import image from "../../assets/images/labfetched/camera_image.jpg";
 import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;
@@ -27,11 +27,41 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
+  const [imageData, setImageData] = useState(null);
   // const [picture, setPicture] = useState();
 
   useEffect(() => {
     fetchData();
   });
+
+  useEffect(() => {
+    downloadImage();
+  }, []); // Empty dependency array ensures useEffect runs only once
+
+  const downloadImage = () => {
+    const apiUrl = "http://10.112.71.52:5000/get_room_image";
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Convert the blob to a data URL
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          const dataUrl = reader.result;
+          // Set the image data in state
+          setImageData(dataUrl);
+        };
+      })
+      .catch((error) => {
+        console.error("Error fetching image:", error);
+      });
+  };
 
   // const downloadImage = () => {
   //   const apiUrl = "http://10.120.141.94:5000/get_room_image";
@@ -251,7 +281,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = image;
+    img.src = imageData;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -385,7 +415,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
     const ctx = canvas.getContext("2d");
 
     const img = new Image();
-    img.src = image;
+    img.src = imageData;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -434,6 +464,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
     data,
     selectedRectangle,
     selectedRectangleId,
+    imageData,
   ]);
 
   return (
@@ -446,7 +477,7 @@ function ImageAnnotator({ selectedRectangle, selectedCamera, onSave }) {
         style={{
           border: "1px solid #ccc",
           display: "block",
-          background: `url(${image})`,
+          background: `url(${imageData})`,
           backgroundSize: "100% 100%",
         }}
         onMouseDown={handleMouseDown}
