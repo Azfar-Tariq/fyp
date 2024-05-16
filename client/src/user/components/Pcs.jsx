@@ -4,19 +4,22 @@ import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { MaterialSymbolsArrowForwardIosRounded } from "../assets/icons/foward";
 import { PulseLoader } from "react-spinners";
+import { io } from "socket.io-client";
 import ImageAnnotator from "./ImageAnnotator";
 import MannualRequestButtons from "./MannualRequestButtons";
 
-const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
-  try {
-    const response = await Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
-    );
-    setPcData(response.data);
-  } catch (err) {
-    console.error("Failed to get PC Data:", err);
-  }
-};
+// const socket = io("http://localhost:3001"); // Connect to the backend Socket.IO server
+
+// const fetchPcData = async (parentBuildingId, parentLabId, setPcData) => {
+//   try {
+//     const response = await Axios.get(
+//       `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
+//     );
+//     setPcData(response.data);
+//   } catch (err) {
+//     console.error("Failed to get PC Data:", err);
+//   }
+// };
 
 export default function UserPcs({
   parentBuildingId,
@@ -52,17 +55,29 @@ export default function UserPcs({
     }
   };
 
-  useEffect(() => {
-    Axios.get(
-      `http://localhost:3001/readBuilding/${parentBuildingId}/readLab/${parentLabId}/readCoordinates`
-    )
-      .then((response) => {
-        setPcData(response.data);
-      })
-      .catch((error) => {
-        console.error("Failed to get labs:", error);
-      });
-  }, [parentBuildingId, parentLabId]);
+  // useEffect(() => {
+  //   // Subscribe to manual control notifications
+  //   socket.on("manualControlNotification", (data) => {
+  //     // if (data.email === localStorage.getItem("email")) {
+  //     // Check if the notification is intended for the logged-in user
+
+  //     if (data.status === "Granted") {
+  //       toast.success("Manual control request granted!");
+  //     } else if (data.status === "Denied") {
+  //       toast.error("Manual control request denied!");
+  //     }
+  //     // }
+  //     console.log(data.email, data.status);
+  //   });
+
+  //   // Fetch PC data
+  //   fetchPcData(parentBuildingId, parentLabId, setPcData);
+
+  //   return () => {
+  //     // Clean up event listeners
+  //     socket.off("manualControlNotification");
+  //   };
+  // }, [parentBuildingId, parentLabId]);
 
   return (
     <div className="bg-gray-100 p-4 rounded shadow">
@@ -97,9 +112,9 @@ export default function UserPcs({
         )}
       </div>
 
-      <div className="mt-4">
+      {/*<div className="mt-4">
         <MannualRequestButtons />
-      </div>
+        </div>*/}
     </div>
   );
 }

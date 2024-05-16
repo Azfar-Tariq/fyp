@@ -1,18 +1,17 @@
-export function MajesticonsAnalytics(props) {
-	return (
-		<svg
-			xmlns='http://www.w3.org/2000/svg'
-			width='1em'
-			height='1em'
-			viewBox='0 0 24 24'
-			{...props}
-		>
-			<path
-				fill='currentColor'
-				fillRule='evenodd'
-				d='M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6zm10 2a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0V8zm-4 3a1 1 0 1 0-2 0v5a1 1 0 1 0 2 0v-5zm8 3a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2z'
-				clipRule='evenodd'
-			></path>
-		</svg>
-	);
+export function CarbonAnalytics(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="2em"
+      height="2em"
+      viewBox="0 0 32 32"
+      {...props}
+    >
+      <path fill="currentColor" d="M4 2H2v26a2 2 0 0 0 2 2h26v-2H4Z"></path>
+      <path
+        fill="currentColor"
+        d="M30 9h-7v2h3.59L19 18.59l-4.29-4.3a1 1 0 0 0-1.42 0L6 21.59L7.41 23L14 16.41l4.29 4.3a1 1 0 0 0 1.42 0l8.29-8.3V16h2Z"
+      ></path>
+    </svg>
+  );
 }

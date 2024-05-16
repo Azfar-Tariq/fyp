@@ -1,0 +1,193 @@
+import { IoSettings } from "react-icons/io5";
+import { useEffect, useState } from "react";
+import { IoPeople } from "react-icons/io5";
+import { MaterialSymbolsArrowForwardIosRounded } from "../../assets/icons/forward";
+import { MaterialSymbolsAndroidCamera } from "../../assets/icons/camera";
+import Chart from "chart.js/auto";
+import { MajesticonsMapMarkerArea } from "../../assets/icons/area";
+import { Link } from "react-router-dom";
+import Axios from "axios";
+
+export default function DashboardStatsGrid() {
+  const [users, setUsers] = useState(0);
+  const [areas, setAreas] = useState(0);
+  const [cameras, setCameras] = useState(0);
+
+  useEffect(() => {
+    // Dummy data for the line graph
+    const data = {
+      labels: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+      datasets: [
+        {
+          label: "Electricity Usage",
+          data: [12, 19, 3, 5, 2, 3, 15, 17, 8, 2, 10, 15],
+          fill: false,
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+        },
+      ],
+    };
+
+    // Creating the line graph
+    const ctx = document.getElementById("analyticsChart");
+    let chartInstance = new Chart(ctx, {
+      type: "line",
+      data: data,
+    });
+
+    return () => {
+      chartInstance.destroy(); // Destroy the chart instance when the component unmounts
+    };
+  }, []);
+
+  useEffect(() => {
+    Axios.get("http://localhost:3001/users")
+      .then((res) => {
+        setUsers(res.data.length);
+      })
+      .catch((err) => {
+        console.error("Failed to get Users:", err);
+      });
+
+    Axios.get("http://localhost:3001/readArea")
+      .then((res) => {
+        setAreas(res.data.length);
+      })
+      .catch((err) => {
+        console.error("Failed to get Areas:", err);
+      });
+
+    Axios.get("http://localhost:3001/readAllCameras")
+      .then((res) => {
+        setCameras(res.data.length);
+      })
+      .catch((err) => {
+        console.error("Failed to get Cameras:", err);
+      });
+  }, []);
+
+  return (
+    <div className="bg-primary">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+        <DashboardBox
+          icon={<IoPeople className="text-6xl p-0 m-0 text-icon" />}
+          title="Users"
+          value={users}
+          link="/admin/users"
+          color="bg-background"
+          description="Manage user accounts and permissions."
+        />
+        <DashboardBox
+          icon={
+            <MajesticonsMapMarkerArea
+              size="4rem"
+              className="text-6xl p-0 m-0 text-icon"
+            />
+          }
+          title="Areas"
+          value={areas}
+          link="/admin/areas"
+          color="bg-background"
+          description="View, edit, and monitor surveillance areas."
+        />
+        <DashboardBox
+          icon={
+            <MaterialSymbolsAndroidCamera
+              size="4rem"
+              className="text-6xl p-0 m-0 text-icon"
+            />
+          }
+          title="Cameras"
+          value={cameras}
+          link="/admin/cameras"
+          color="bg-background"
+          description="Monitor live camera feeds and recordings."
+        />
+        <DashboardBox
+          icon={<IoSettings className="text-6xl p-0 m-0 text-icon" />}
+          title="Configuration"
+          link="/admin/configuration"
+          color="bg-background"
+          description="Manage user accounts and permissions."
+        />
+      </div>
+      <div className="mx-6 mb-4">
+        <AnalyticsGraph />
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsGraph() {
+  const [selectedInterval, setSelectedInterval] = useState("daily");
+
+  // Function to handle interval change
+  const handleIntervalChange = (event) => {
+    setSelectedInterval(event.target.value);
+  };
+
+  return (
+    <div className="bg-gray-800 w-full col-span-4 rounded-lg p-6 text-white">
+      <h2 className="text-xl font-semibold mb-2">Analytics</h2>
+      <canvas id="analyticsChart" width="400" height="200"></canvas>
+      <div className="mt-4">
+        <select
+          value={selectedInterval}
+          onChange={handleIntervalChange}
+          className="text-white bg-gray-700 px-3 py-1 rounded-md"
+        >
+          <option value="daily">Daily</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <Link to="/admin/analytics" className="text-sm mt-2">
+        Click to navigate
+      </Link>
+    </div>
+  );
+}
+
+function DashboardBox({ icon, title, value, link, color, description }) {
+  return (
+    <Link to={link}>
+      <div
+        className={`rounded-lg p-6 ${color} hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1`}
+      >
+        <div className="flex justify-between">
+          <div className="block">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full mb-4">
+              {icon}
+            </div>
+            <h2 className="text-2xl text-white font-semibold mb-2">{title}</h2>
+          </div>
+          <p className="text-white text-4xl m-2">{value}</p>
+        </div>
+
+        <p className="text-white text-sm mt-2">{description}</p>
+        <button className="flex items-center text-white text-sm mt-2 focus:outline-none">
+          See More
+          <MaterialSymbolsArrowForwardIosRounded className="ml-2" />
+        </button>
+        {/*<div className="mt-4 border-t border-gray-300 pt-4">
+          <p className="text-xs text-white">
+            Last updated: {new Date().toLocaleString()}
+          </p>
+        </div>*/}
+      </div>
+    </Link>
+  );
+}
