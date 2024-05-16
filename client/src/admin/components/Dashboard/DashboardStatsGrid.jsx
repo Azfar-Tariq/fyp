@@ -8,6 +8,8 @@ import { MajesticonsMapMarkerArea } from "../../assets/icons/area";
 import { Link } from "react-router-dom";
 import Axios from "axios";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 export default function DashboardStatsGrid() {
   const [users, setUsers] = useState(0);
   const [areas, setAreas] = useState(0);
@@ -54,7 +56,7 @@ export default function DashboardStatsGrid() {
   }, []);
 
   useEffect(() => {
-    Axios.get("http://localhost:3001/users")
+    Axios.get(`${HOST_ADDRESS}/users`)
       .then((res) => {
         setUsers(res.data.length);
       })
@@ -62,7 +64,7 @@ export default function DashboardStatsGrid() {
         console.error("Failed to get Users:", err);
       });
 
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`${HOST_ADDRESS}/readArea`)
       .then((res) => {
         setAreas(res.data.length);
       })
@@ -70,7 +72,7 @@ export default function DashboardStatsGrid() {
         console.error("Failed to get Areas:", err);
       });
 
-    Axios.get("http://localhost:3001/readAllCameras")
+    Axios.get(`${HOST_ADDRESS}/readAllCameras`)
       .then((res) => {
         setCameras(res.data.length);
       })

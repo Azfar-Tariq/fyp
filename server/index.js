@@ -3,6 +3,7 @@ const http = require("http"); // Import the http module
 const cors = require("cors");
 const sql = require("mssql");
 const app = express();
+require("dotenv").config();
 
 app.use(express.json());
 app.use(cors());
@@ -16,11 +17,11 @@ const server = http.createServer(app); // Create HTTP server
 
 // SQL Server configuration
 const config = {
-  host: "localhost",
-  user: "admin",
-  password: "admin123",
-  server: "DESKTOP-M1UFNP6", // Replace with your SQL Server instance name
-  database: "fyp", // Replace with your database name
+  host: `${process.env.HOST}`,
+  user: `${process.env.USER}`,
+  password: `${process.env.PASSWORD}`,
+  server: `${process.env.SERVER}`, // Replace with your SQL Server instance name
+  database: `${process.env.DATABASE}`, // Replace with your database name
   options: {
     encrypt: true,
     trustServerCertificate: true, // Change to true for local dev / self-signed certs

@@ -15,6 +15,8 @@ import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 import { MaterialSymbolsEditOutlineRounded } from "../assets/icons/edit";
 import { MaterialSymbolsDelete } from "../assets/icons/delete";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
 
@@ -48,7 +50,7 @@ export default function Areas() {
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`${HOST_ADDRESS}/readArea`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -62,7 +64,7 @@ export default function Areas() {
 
   const fetchData = async (setAreaList) => {
     try {
-      const response = await Axios.get("http://localhost:3001/readArea");
+      const response = await Axios.get(`${HOST_ADDRESS}/readArea`);
       setAreaList(response.data);
     } catch (err) {
       console.error("Failed to get Areas:", err);
@@ -90,7 +92,7 @@ export default function Areas() {
   };
 
   const handleAddFormSave = (newArea) => {
-    Axios.post("http://localhost:3001/insertArea", newArea)
+    Axios.post(`${HOST_ADDRESS}/insertArea`, newArea)
       .then((response) => {
         setData((prevData) => [...prevData, newArea]);
         setShowAddForm(false);
@@ -111,7 +113,7 @@ export default function Areas() {
   };
 
   const handleEditAreaSave = (updatedArea) => {
-    Axios.put(`http://localhost:3001/updateArea/${selectedRowId}`, updatedArea)
+    Axios.put(`${HOST_ADDRESS}/updateArea/${selectedRowId}`, updatedArea)
       .then((response) => {
         setData(
           data.map((area) => (area.id === selectedRowId ? updatedArea : area))
@@ -129,7 +131,7 @@ export default function Areas() {
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(`http://localhost:3001/deletearea/${selectedRowId}`)
+      Axios.delete(`${HOST_ADDRESS}/deletearea/${selectedRowId}`)
         .then((response) => {
           setData((prevData) =>
             prevData.filter((row) => row.id !== selectedRowId)

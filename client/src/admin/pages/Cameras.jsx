@@ -15,6 +15,8 @@ import { MaterialSymbolsDelete } from "../assets/icons/delete";
 import { MaterialSymbolsEditOutlineRounded } from "../assets/icons/edit";
 import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
 
@@ -48,7 +50,7 @@ export default function Cameras() {
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/Cameras")
+    Axios.get(`${HOST_ADDRESS}/Cameras`)
       .then((response) => {
         setData(response.data);
         setLoading(false);
@@ -62,7 +64,7 @@ export default function Cameras() {
 
   const fetchData = async (setCameraList) => {
     try {
-      const response = await Axios.get("http://localhost:3001/Cameras");
+      const response = await Axios.get(`${HOST_ADDRESS}/Cameras`);
       setCameraList(response.data);
       // console.log(response.data);
     } catch (err) {
@@ -100,10 +102,7 @@ export default function Cameras() {
   };
 
   const handleEditCameraSave = (updatedCamera) => {
-    Axios.put(
-      `http://localhost:3001/updateCamera/${selectedRowId}`,
-      updatedCamera
-    )
+    Axios.put(`${HOST_ADDRESS}/updateCamera/${selectedRowId}`, updatedCamera)
       .then((response) => {
         setData(
           data.map((Camera) =>
@@ -123,7 +122,7 @@ export default function Cameras() {
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(`http://localhost:3001/deleteCamera/${selectedRowId}`)
+      Axios.delete(`${HOST_ADDRESS}/deleteCamera/${selectedRowId}`)
         .then((response) => {
           setData((prevData) =>
             prevData.filter((row) => row.id !== selectedRowId)

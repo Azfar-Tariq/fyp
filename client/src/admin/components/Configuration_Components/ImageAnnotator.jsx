@@ -9,6 +9,9 @@ import Axios from "axios";
 const MINIMUM_SHAPE_SIZE = 10;
 const DEFAULT_RECTANGLE_COLOR = "red";
 const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+const RASPBERRY_IP = import.meta.env.VITE_RASPBERRY_PI_IP;
+const RASPBERRY_PORT = import.meta.env.VITE_RASPBERRY_PI_PORT;
 
 function ImageAnnotator({
   selectedRectangle,
@@ -143,7 +146,7 @@ function ImageAnnotator({
   const fetchData = async () => {
     try {
       const response = await Axios.get(
-        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+        `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       );
       setData(response.data);
       // const extractedData = data.map((rectangle) => ({
@@ -295,7 +298,7 @@ function ImageAnnotator({
   const callEditedRectangle = () => {
     if (selectedRectangleId) {
       Axios.get(
-        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+        `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       )
         .then((response) => {
           const selectedRectData = response.data.find(
@@ -360,16 +363,13 @@ function ImageAnnotator({
         if (selectedRectangle) {
           const { id, x, y, width, height } = selectedRectanlge;
 
-          await Axios.put(
-            `http://localhost:3001/updateBoundedRectangle/${id}`,
-            {
-              x1: x,
-              y1: y,
-              x2: x + width,
-              y2: y + height,
-              status: 0,
-            }
-          );
+          await Axios.put(`${HOST_ADDRESS}/updateBoundedRectangle/${id}`, {
+            x1: x,
+            y1: y,
+            x2: x + width,
+            y2: y + height,
+            status: 0,
+          });
           console.log("Updated rectangle");
           setAnnotations([]);
         }
@@ -407,7 +407,7 @@ function ImageAnnotator({
               annotation.height >= MINIMUM_SHAPE_SIZE
             ) {
               await Axios.post(
-                `http://localhost:3001/readCamera/${selectedCamera}/addBoundedRectangle`,
+                `${HOST_ADDRESS}/readCamera/${selectedCamera}/addBoundedRectangle`,
                 {
                   x1: annotation.x,
                   y1: annotation.y,
@@ -425,13 +425,13 @@ function ImageAnnotator({
           try {
             // Fetch all data from the database
             const response = await Axios.get(
-              `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+              `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
             );
             const fetchedData = response.data;
 
             // Send fetched data to another PC
             const sendCoordinatesResponse = await Axios.post(
-              "http://10.120.143.187:5000/send_coordinates",
+              `http://${RASPBERRY_IP}:${RASPBERRY_PORT}/send_coordinates`,
               { coordinates: fetchedData }
             );
 

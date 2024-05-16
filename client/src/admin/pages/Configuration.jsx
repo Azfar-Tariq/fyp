@@ -6,7 +6,9 @@ import Axios from "axios";
 import ImageAnnotator from "../components/Configuration_Components/ImageAnnotator";
 
 const placeholderImage = "https://via.placeholder.com/800x400";
-// const IP = process.env.REACT_APP_RASPBERRYPI_IP;
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+const RASPBERRY_IP = import.meta.env.VITE_RASPBERRY_PI_IP;
+const RASPBERRY_PORT = import.meta.env.VITE_RASPBERRY_PI_PORT;
 
 export default function Configuration() {
   const [selectedArea, setSelectedArea] = useState(null);
@@ -22,7 +24,7 @@ export default function Configuration() {
   }, []); // Empty dependency array ensures useEffect runs only once
 
   const downloadImage = () => {
-    const apiUrl = `http://10.120.143.187:5000/get_room_image`;
+    const apiUrl = `${RASPBERRY_IP}:${RASPBERRY_PORT}/get_room_image`;
 
     fetch(apiUrl)
       .then((response) => {
@@ -99,7 +101,7 @@ export default function Configuration() {
     try {
       setLoading(true);
       const response = await Axios.get(
-        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+        `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       );
       setData(response.data);
       setLoading(false);
@@ -113,7 +115,7 @@ export default function Configuration() {
     if (selectedCamera) {
       setLoading(true);
       Axios.get(
-        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+        `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       )
         .then((response) => {
           setData(response.data);

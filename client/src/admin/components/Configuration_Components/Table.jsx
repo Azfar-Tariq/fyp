@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { MaterialSymbolsDelete } from "../../assets/icons/delete";
 import { UilSave } from "../../assets/icons/save";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
 
@@ -49,7 +51,7 @@ export default function Table({
   useEffect(() => {
     setLoading(true);
     Axios.get(
-      `http://localhost:3001/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`
+      `${HOST_ADDRESS}/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`
     )
       .then((response) => {
         console.log(response.data);
@@ -83,7 +85,7 @@ export default function Table({
   };
 
   const updateManualStatus = (rectangleId, newManualStatus) => {
-    Axios.put(`http://localhost:3001/updateManualStatus/${rectangleId}`, {
+    Axios.put(`${HOST_ADDRESS}/updateManualStatus/${rectangleId}`, {
       Manual_Status: newManualStatus ? 1 : 0,
     })
       .then((response) => {
@@ -99,9 +101,7 @@ export default function Table({
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(
-        `http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`
-      )
+      Axios.delete(`${HOST_ADDRESS}/deleteBoundedRectangle/${selectedRowId}`)
         .then((response) => {
           console.log(response);
           setData((prevData) =>
@@ -135,16 +135,13 @@ export default function Table({
       );
       if (selectedRectangle) {
         const { RectangleID, x1, y1, x2, y2 } = selectedRectangle;
-        Axios.put(
-          `http://localhost:3001/updateBoundedRectangle/${RectangleID}`,
-          {
-            x1: parseInt(x1),
-            y1: parseInt(y1),
-            x2: parseInt(x2),
-            y2: parseInt(y2),
-            status: 0,
-          }
-        )
+        Axios.put(`${HOST_ADDRESS}/updateBoundedRectangle/${RectangleID}`, {
+          x1: parseInt(x1),
+          y1: parseInt(y1),
+          x2: parseInt(x2),
+          y2: parseInt(y2),
+          status: 0,
+        })
           .then((response) => {
             console.log(response.data);
           })
