@@ -2,6 +2,8 @@ const express = require("express");
 const http = require("http"); // Import the http module
 const cors = require("cors");
 const sql = require("mssql");
+const multer = require("multer");
+const path = require("path");
 const app = express();
 
 app.use(express.json());
@@ -19,7 +21,7 @@ const config = {
   host: "localhost",
   user: "admin",
   password: "admin123",
-  server: "DESKTOP-M1UFNP6", // Replace with your SQL Server instance name
+  server: "DESKTOP-IMG0LDR\\SQLEXPRESS", // Replace with your SQL Server instance name
   database: "fyp", // Replace with your database name
   options: {
     encrypt: true,
@@ -937,6 +939,45 @@ poolConnect
       } catch (err) {
         console.error(err);
         res.status(500).send("Failed to update manual status");
+      }
+    });
+
+    const storage = multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, "./images"); // Store uploaded images in the 'images' directory
+      },
+      filename: function (req, file, cb) {
+        // Generate a unique filename for the image
+        cb(null, `${Date.now()}-${file.originalname}`);
+      },
+    });
+    const upload = multer({ storage: storage });
+
+    // Route to receive and store the image
+    app.post("/fetch-image", upload.single("image"), (req, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        const filename = req.file.filename;
+        res.json({ success: true, filename });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        res.status(500).json({ error: "An error occurred" });
+      }
+    });
+
+    // Route to serve the stored image
+    app.get("/read-image/:filename", (req, res) => {
+      try {
+        const { filename } = req.params;
+
+        // Serve the image file from the local storage
+        res.sendFile(path.join(__dirname, "images", filename));
+      } catch (error) {
+        console.error("Error serving image:", error);
+        res.status(404).send("Image not found");
       }
     });
   })
