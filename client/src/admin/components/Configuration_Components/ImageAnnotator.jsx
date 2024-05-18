@@ -4,6 +4,7 @@ import { MaterialSymbolsEditOutlineRounded } from "../../assets/icons/edit";
 import { UilSave } from "../../assets/icons/save";
 // import image2 from "../../assets/images/labs/lab8.jpg";
 // import image from "../../assets/images/labfetched/camera_image.jpg";
+import image from "../../../../../server/images/lab_image.jpg";
 import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;
@@ -17,7 +18,7 @@ function ImageAnnotator({
   selectedRectangle,
   selectedCamera,
   onSave,
-  imageData,
+  // imageData,
 }) {
   const [data, setData] = useState([]);
   // const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
@@ -328,7 +329,7 @@ function ImageAnnotator({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = imageData;
+    img.src = image;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -461,7 +462,7 @@ function ImageAnnotator({
     const ctx = canvas.getContext("2d");
 
     const img = new Image();
-    img.src = imageData;
+    img.src = image;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -510,7 +511,6 @@ function ImageAnnotator({
     data,
     selectedRectangle,
     selectedRectangleId,
-    imageData,
   ]);
 
   return (
@@ -523,7 +523,7 @@ function ImageAnnotator({
         style={{
           border: "1px solid #ccc",
           display: "block",
-          background: `url(${imageData})`,
+          background: `url(${image})`,
           backgroundSize: "100% 100%",
         }}
         onMouseDown={handleMouseDown}

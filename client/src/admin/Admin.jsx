@@ -39,6 +39,7 @@ export default function Admin() {
         break;
     }
   };
+
   return (
     <div className="flex bg-primary min-h-screen">
       <div className="w-1/5 fixed">

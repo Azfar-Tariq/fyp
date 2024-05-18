@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import iot from "../assets/images/loginimg.jpg";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -28,15 +28,12 @@ const UserLogin = () => {
           localStorage.setItem("email", email);
           setLoading(true);
 
-
           // Delay navigation to simulate loading process
           setTimeout(() => {
             setLoading(false); // Set loading to false after 5 seconds
             const dashboardRoute = "/user";
             navigate(dashboardRoute); // Navigate to the user dashboard
           }, 3000);
-
-
         } else {
           console.error("Role not found in server response:", data);
           alert("Role not found in server response");
@@ -54,18 +51,15 @@ const UserLogin = () => {
     setLoading(true);
     // Delay navigation to simulate loading process
     setTimeout(() => {
-    setLoading(false); // Set loading to false after 5 seconds
-    navigate("/");
+      setLoading(false); // Set loading to false after 5 seconds
+      navigate("/");
     }, 1000);
-
   };
   return (
     <div className="relative flex h-screen w-full">
-
       {/*display loader after sccueeful login*/}
       {loading && (
         <div className="absolute inset-0 bg-black opacity-50 flex items-center justify-center z-50">
-
           <ClipLoader color={"#36d7b7"} loading={loading} size={150} />
         </div>
       )}
