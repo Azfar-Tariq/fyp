@@ -86,10 +86,23 @@ export default function Table({
       selectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
   };
+
+  const fetchManualStatus = () => {
+    Axios.get(`http://localhost:3001/getManualStatus`)
+      .then((response) => {
+        const newMap = new Map();
+        response.data.forEach((item) => {
+          newMap.set(item.RectangleID, item.Manual_Status);
+        });
+        setManualStatusMap(newMap);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch manual status:", error);
+      });
+  };
   useEffect(() => {
     fetchData();
-    const intervalId = setInterval(fetchData, 5000); // Polling interval: every 5 seconds
-    return () => clearInterval(intervalId); // Cleanup
+    fetchManualStatus();
   }, [selectedCamera]);
 
   const updateManualStatus = (rectangleId, newManualStatus) => {
