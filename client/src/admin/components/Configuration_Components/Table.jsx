@@ -86,6 +86,11 @@ export default function Table({
       selectedRowId === newSelectedRowId ? null : newSelectedRowId
     );
   };
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(fetchData, 5000); // Polling interval: every 5 seconds
+    return () => clearInterval(intervalId); // Cleanup
+  }, [selectedCamera]);
 
   const updateManualStatus = (rectangleId, newManualStatus) => {
     Axios.put(`http://localhost:3001/updateManualStatus/${rectangleId}`, {
@@ -96,7 +101,7 @@ export default function Table({
         const newMap = new Map(manualStatusMap);
         newMap.set(rectangleId, newManualStatus);
         setManualStatusMap(newMap);
-        fetchData();
+        // fetchData();
       })
       .catch((error) => {
         console.error("Failed to update manual status:", error);
