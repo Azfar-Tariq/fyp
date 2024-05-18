@@ -4,6 +4,7 @@ import { MaterialSymbolsEditOutlineRounded } from "../../assets/icons/edit";
 import { UilSave } from "../../assets/icons/save";
 // import image2 from "../../assets/images/labs/lab8.jpg";
 // import image from "../../assets/images/labfetched/camera_image.jpg";
+import imageData from "../../../../../server/images/img.jpg";
 import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;
@@ -14,7 +15,7 @@ function ImageAnnotator({
   selectedRectangle,
   selectedCamera,
   onSave,
-  imageData,
+  // imageData,
 }) {
   const [data, setData] = useState([]);
   // const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
@@ -510,7 +511,7 @@ function ImageAnnotator({
     data,
     selectedRectangle,
     selectedRectangleId,
-    imageData,
+    // imageData,
   ]);
 
   return (

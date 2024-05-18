@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AddAreaForm from "../components/Area/AddAreaForm";
-import EditAreaForm from "../components/Area/EditAreaForm";
+import InsertAreaModal from "../components/Area/InsertAreaModal";
+import EditAreaModal from "../components/Area/EditAreaModal";
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,9 +11,9 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { MaterialSymbolsAddRounded } from "../assets/icons/add";
-import { MaterialSymbolsEditOutlineRounded } from "../assets/icons/edit";
 import { MaterialSymbolsDelete } from "../assets/icons/delete";
+import { MaterialSymbolsEditOutlineRounded } from "../assets/icons/edit";
+import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
@@ -38,13 +38,13 @@ export default function Areas() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [sorting, setSorting] = useState([]);
   const [filtering, setFiltering] = useState("");
   const [rowSelection, setRowSelection] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -52,7 +52,6 @@ export default function Areas() {
       .then((response) => {
         setData(response.data);
         setLoading(false);
-        // console.log(response.data)
       })
       .catch((error) => {
         console.error(error);
@@ -68,6 +67,7 @@ export default function Areas() {
       console.error("Failed to get Areas:", err);
     }
   };
+
   const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.areaId;
     setSelectedRowId((prevSelectedRowId) =>
@@ -77,66 +77,60 @@ export default function Areas() {
     const selectedRow = data.find(
       (rowData) => rowData.areaId === newSelectedRowId
     );
-    // console.log(selectedRow.areaId);
-    setSelectedArea(selectedRow.areaId);
+    setSelectedArea(selectedRow);
   };
 
-  const handleAdd = () => {
-    setShowAddForm(true);
+  // Add Area Modal Toggle
+  const toggleAddModal = () => {
+    setShowAddModal(!showAddModal);
   };
 
-  const handleAddFormClose = () => {
-    setShowAddForm(false);
+  const toggleEditModal = () => {
+    setShowEditModal(!showEditModal);
   };
 
-  const handleAddFormSave = (newArea) => {
+  const handleAddAreaSave = (newArea) => {
     Axios.post("http://localhost:3001/insertArea", newArea)
       .then((response) => {
         setData((prevData) => [...prevData, newArea]);
-        setShowAddForm(false);
-        toast.success("New Area Has been Added Successfully");
+        toast.success("New Area Added Successfully");
+        setShowAddModal(false); // Close the AddModal after saving
       })
       .catch((error) => {
-        console.error("Error creating area", error);
+        console.error("Error adding area", error);
       });
   };
 
-  const handleEditArea = () => {
-    const selectedRow = data.find((row) => row.id === selectedRowId);
-
-    if (selectedRow) {
-      setEditing(true);
-      setSelectedArea(selectedRow);
-    }
-  };
-
   const handleEditAreaSave = (updatedArea) => {
-    Axios.put(`http://localhost:3001/updateArea/${selectedRowId}`, updatedArea)
+    Axios.put(
+      `http://localhost:3001/updateArea/${selectedArea.areaId}`,
+      updatedArea
+    )
       .then((response) => {
-        setData(
-          data.map((area) => (area.id === selectedRowId ? updatedArea : area))
+        const updatedData = data.map((area) =>
+          area.areaId === selectedArea.areaId
+            ? { ...area, ...updatedArea }
+            : area
         );
-        setEditing(false);
-        toast.success("Area Data has been Saved Successfully");
+        setData(updatedData);
+        toast.success("Area Updated Successfully");
+        setShowEditModal(false); // Close the EditModal after saving
       })
       .catch((error) => {
         console.error("Error updating area", error);
       });
   };
-  const handleEditAreaCancel = () => {
-    setEditing(false);
-  };
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
-      Axios.delete(`http://localhost:3001/deletearea/${selectedRowId}`)
+      Axios.delete(`http://localhost:3001/deleteArea/${selectedRowId}`)
         .then((response) => {
           setData((prevData) =>
-            prevData.filter((row) => row.id !== selectedRowId)
+            prevData.filter((row) => row.areaId !== selectedRowId)
           );
           setSelectedRowId(null);
           fetchData(setData); // Fetch updated data from the server
-          toast.success("Area has been Deleted Successfully");
+          toast.success("Area Deleted Successfully");
         })
         .catch((error) => {
           console.error(`Error deleting area ${selectedRowId}`, error);
@@ -161,11 +155,11 @@ export default function Areas() {
       accessorKey: "areaName",
     },
     {
-      Header: "Area Description",
+      Header: "Description",
       accessorKey: "description",
     },
     {
-      Header: "Area Address",
+      Header: "Address",
       accessorKey: "address",
     },
     {
@@ -173,7 +167,7 @@ export default function Areas() {
       accessorKey: "focalPerson",
     },
     {
-      Header: "Contact Number",
+      Header: "Contact",
       accessorKey: "contact",
     },
   ];
@@ -197,7 +191,7 @@ export default function Areas() {
   });
 
   return (
-    <div className="w3-container">
+    <div className="w-full">
       <div className="flex flex-col gap-4 my-4">
         <div className="relative">
           <label htmlFor="filter" className="sr-only">
@@ -253,7 +247,7 @@ export default function Areas() {
         )}
       </div>
 
-      <div className="flex justify-center items-center gap-4 mt-2">
+      <div className="flex justify-center items-center gap-4 mt-4 ">
         <ToastContainer />
         <button
           onClick={() => table.setPageIndex(0)}
@@ -283,40 +277,48 @@ export default function Areas() {
         </button>
       </div>
 
-      <div className="flex justify-center items-center gap-6 mt-4">
+      <div className="flex justify-center gap-6 mt-4">
         <button
           className="bg-background text-white flex p-3 gap-2 rounded-lg hover:bg-icon hover:text-black duration-150"
-          onClick={handleAdd}
+          onClick={toggleAddModal}
         >
           <MaterialSymbolsAddRounded />
           Add
         </button>
         <button
           className="bg-background text-white flex p-3 gap-2 rounded-lg hover:bg-icon hover:text-black duration-150"
-          onClick={() => setShowEditForm(true)}
+          onClick={toggleEditModal}
         >
           <MaterialSymbolsEditOutlineRounded />
           Edit
         </button>
+
         <button
+          type="button"
           className="bg-background text-white flex p-3 gap-2 rounded-lg hover:bg-icon hover:text-black duration-150"
           onClick={handleDeleteSelectedRow}
         >
           <MaterialSymbolsDelete />
           Delete
         </button>
-      </div>
-      {showAddForm && (
-        <AddAreaForm onSave={handleAddFormSave} onClose={handleAddFormClose} />
-      )}
-      {showEditForm && selectedArea && (
-        <EditAreaForm
-          onSave={handleEditAreaSave}
-          onClose={() => setShowEditForm(false)}
-          defaultValues={selectedArea}
-          title="Edit Area"
+
+        {/* Add Area Modal */}
+        <InsertAreaModal
+          isOpen={showAddModal}
+          onClose={toggleAddModal}
+          onSave={handleAddAreaSave}
         />
-      )}
+
+        {/* Edit Area Modal */}
+        {selectedArea && (
+          <EditAreaModal
+            isOpen={showEditModal}
+            onClose={toggleEditModal}
+            onSave={handleEditAreaSave}
+            area={selectedArea}
+          />
+        )}
+      </div>
     </div>
   );
 }

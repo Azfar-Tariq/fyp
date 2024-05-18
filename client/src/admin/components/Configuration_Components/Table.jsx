@@ -46,7 +46,7 @@ export default function Table({
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [manualStatusMap, setManualStatusMap] = useState(new Map());
 
-  useEffect(() => {
+  const fetchData = () => {
     setLoading(true);
     Axios.get(
       `http://localhost:3001/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`
@@ -61,6 +61,11 @@ export default function Table({
         console.error(error);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData(); // Call the fetchData function
   }, [selectedCamera]);
 
   useEffect(() => {
@@ -91,6 +96,7 @@ export default function Table({
         const newMap = new Map(manualStatusMap);
         newMap.set(rectangleId, newManualStatus);
         setManualStatusMap(newMap);
+        fetchData();
       })
       .catch((error) => {
         console.error("Failed to update manual status:", error);
