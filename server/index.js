@@ -5,11 +5,36 @@ const sql = require("mssql");
 const multer = require("multer");
 const path = require("path");
 const app = express();
+const { Server } = require("socket.io");
+const WebSocket = require("ws");
 
 app.use(express.json());
 app.use(cors());
 
 const server = http.createServer(app); // Create HTTP server
+
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://127.0.0.1:5173", // Update to your React app's URL
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//   },
+// });
+
+const wss = new WebSocket.Server({ port: 3000 });
+
+wss.on("connection", (ws) => {
+  console.log("New client connected");
+
+  ws.on("message", (message) => {
+    console.log("Received message:", message);
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+
+  ws.send("Hello! You are connected.");
+});
 // const io = require("socket.io")(server, {
 //   cors: {
 //     origin: "*",
@@ -907,11 +932,11 @@ poolConnect
         try {
           const request = pool.request();
           const result = await request.query(`
-        SELECT BR.RectangleID, BR.x1, BR.y1, BR.x2, BR.y2, BR.Status, ID.Manual_Status
-        FROM BoundedRectangle BR
-        INNER JOIN IoTDevices ID ON BR.RectangleID = ID.RectangleID
-        WHERE BR.CameraID = ${cameraId}
-      `);
+          SELECT BR.RectangleID, BR.x1, BR.y1, BR.x2, BR.y2, BR.Status, ID.Manual_Status
+          FROM BoundedRectangle BR
+          INNER JOIN IoTDevices ID ON BR.RectangleID = ID.RectangleID
+          WHERE BR.CameraID = ${cameraId}
+        `);
           res.status(200).json(result.recordset);
         } catch (err) {
           console.error(err);
@@ -923,6 +948,7 @@ poolConnect
         }
       }
     );
+
     app.put("/updateManualStatus/:rectangleId", async (req, res) => {
       const rectangleId = req.params.rectangleId;
       const { Manual_Status } = req.body;
@@ -931,17 +957,26 @@ poolConnect
       try {
         const request = pool.request();
         const result = await request.query(`
-        UPDATE IoTDevices
-        SET Manual_Status = ${Manual_Status}
-        WHERE RectangleID = ${rectangleId}
-      `);
+          UPDATE IoTDevices
+          SET Manual_Status = ${Manual_Status}
+          WHERE RectangleID = ${rectangleId}
+        `);
         res.status(200).send("Manual status updated successfully");
+
+        // Broadcast changes to connected clients
+        wss.clients.forEach((client) => {
+          client.send(
+            JSON.stringify({
+              RectangleID: rectangleId,
+              Manual_Status,
+            })
+          );
+        });
       } catch (err) {
         console.error(err);
         res.status(500).send("Failed to update manual status");
       }
     });
-
     const storage = multer.diskStorage({
       destination: function (req, file, cb) {
         cb(null, "./images"); // Store uploaded images in the 'images' directory

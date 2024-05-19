@@ -11,6 +11,9 @@ import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { MaterialSymbolsDelete } from "../../assets/icons/delete";
 import { UilSave } from "../../assets/icons/save";
+import io from "socket.io-client";
+
+// const socket = io.connect("http://localhost:3001");
 
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
@@ -71,6 +74,32 @@ export default function Table({
     console.log("Manual Status Map:", newMap); // Debugging
     setManualStatusMap(newMap);
   }, [data]);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000");
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log("Received:", message);
+      // Handle the received message
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.RectangleID;
