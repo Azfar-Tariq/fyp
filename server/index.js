@@ -6,40 +6,13 @@ const multer = require("multer");
 const path = require("path");
 const app = express();
 const { Server } = require("socket.io");
+const server = http.createServer(app);
 const WebSocket = require("ws");
 
 app.use(express.json());
 app.use(cors());
 
-const server = http.createServer(app); // Create HTTP server
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: "http://127.0.0.1:5173", // Update to your React app's URL
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//   },
-// });
-
-const wss = new WebSocket.Server({ port: 3000 });
-
-wss.on("connection", (ws) => {
-  console.log("New client connected");
-
-  ws.on("message", (message) => {
-    console.log("Received message:", message);
-  });
-
-  ws.on("close", () => {
-    console.log("Client disconnected");
-  });
-
-  ws.send("Hello! You are connected.");
-});
-// const io = require("socket.io")(server, {
-//   cors: {
-//     origin: "*",
-//   },
-// });
+// Create HTTP server
 
 // SQL Server configuration
 const config = {
@@ -55,6 +28,18 @@ const config = {
   },
 };
 
+// wss.on("connection", (ws) => {
+//   console.log("Client connected");
+
+//   ws.on("message", (message) => {
+//     // Handle messages from the client
+//   });
+
+//   ws.on("close", () => {
+//     console.log("Client disconnected");
+//   });
+// });
+
 // SQL Server connection pool
 const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
@@ -62,6 +47,14 @@ const poolConnect = pool.connect();
 poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
+    const wss = new WebSocket.Server({ server });
+
+    wss.on("connection", (ws) => {
+      console.log("New client connected");
+      ws.on("close", () => {
+        console.log("Client disconnected");
+      });
+    });
 
     //....................................User Login and Logout Endpoints................................
 
@@ -956,21 +949,18 @@ poolConnect
 
       try {
         const request = pool.request();
-        const result = await request.query(`
+        await request.query(`
           UPDATE IoTDevices
           SET Manual_Status = ${Manual_Status}
           WHERE RectangleID = ${rectangleId}
         `);
         res.status(200).send("Manual status updated successfully");
 
-        // Broadcast changes to connected clients
+        // Send a message to all connected WebSocket clients
         wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              RectangleID: rectangleId,
-              Manual_Status,
-            })
-          );
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "update" }));
+          }
         });
       } catch (err) {
         console.error(err);

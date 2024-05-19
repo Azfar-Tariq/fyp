@@ -13,8 +13,6 @@ import { MaterialSymbolsDelete } from "../../assets/icons/delete";
 import { UilSave } from "../../assets/icons/save";
 import io from "socket.io-client";
 
-// const socket = io.connect("http://localhost:3001");
-
 function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
   const ref = useRef(null);
 
@@ -48,6 +46,7 @@ export default function Table({
   const [editableData, setEditableData] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [manualStatusMap, setManualStatusMap] = useState(new Map());
+  // const ws = new WebSocket("ws://localhost:3002");
 
   useEffect(() => {
     setLoading(true);
@@ -74,33 +73,20 @@ export default function Table({
     console.log("Manual Status Map:", newMap); // Debugging
     setManualStatusMap(newMap);
   }, [data]);
-
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3000");
-
-    ws.onopen = () => {
-      console.log("Connected to WebSocket server");
-    };
+    const ws = new WebSocket("ws://localhost:3001");
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("Received:", message);
-      // Handle the received message
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      if (message.type === "update") {
+        fetchData();
+      }
     };
 
     return () => {
       ws.close();
     };
   }, []);
-
   const handleRowSelectionChange = (row) => {
     const newSelectedRowId = row.original.RectangleID;
     setSelectedRowId((prevSelectedRowId) =>
@@ -116,7 +102,6 @@ export default function Table({
       Manual_Status: newManualStatus ? 1 : 0,
     })
       .then((response) => {
-        console.log(response.data);
         const newMap = new Map(manualStatusMap);
         newMap.set(rectangleId, newManualStatus);
         setManualStatusMap(newMap);
@@ -125,7 +110,6 @@ export default function Table({
         console.error("Failed to update manual status:", error);
       });
   };
-
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
       Axios.delete(
@@ -294,8 +278,8 @@ export default function Table({
             />
           </button>
           {manualStatusMap.get(row.original.RectangleID)
-            ? "Manual"
-            : "Automatic"}
+            ? "Automatic"
+            : "Manual"}
         </div>
       ),
     },
