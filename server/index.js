@@ -984,6 +984,77 @@ poolConnect
         res.status(404).send("Image not found");
       }
     });
+
+    // get device status from database
+    app.get("/recvStatus/:DeviceID", async (req, res) => {
+      const { DeviceID } = req.params;
+
+      if (DeviceID === undefined) {
+        return res.status(400).json({ message: "DeviceID is required" });
+      }
+
+      try {
+        const pool = await sql.connect(config);
+        const result = await pool
+          .request()
+          .input("DeviceID", sql.Int, DeviceID)
+          .query("SELECT Status FROM IoTDevices WHERE DeviceID = @DeviceID");
+
+        if (result.recordset.length === 0) {
+          return res.status(404).json({ message: "Device not found" });
+        }
+
+        const status = result.recordset[0].Status;
+        res.status(200).json({ Status: status });
+      } catch (err) {
+        console.error("Failed to fetch device status", err);
+        res.status(500).json({ message: "Failed to fetch device status" });
+      }
+    });
+
+    // update device status in database
+    app.put("/sendStats", async (req, res) => {
+      const { DevID, Amp, Vol, Power } = req.body;
+
+      // Validate input data
+      if (
+        DevID === undefined ||
+        Amp === undefined ||
+        Vol === undefined ||
+        Power === undefined
+      ) {
+        return res.status(400).json({
+          message: "All fields (DevID, Amp, Vol, and Power) are required",
+        });
+      }
+
+      try {
+        await sql.connect(config);
+
+        // Create a new request using the connection pool
+        const request = new sql.Request();
+        const result = await request
+          .input("DevID", sql.Int, DevID)
+          .input("Amp", sql.Float, Amp)
+          .input("Volt", sql.Float, Vol)
+          .input("Power", sql.Float, Power).query(`
+        UPDATE EnergyConsumption
+        SET ElectricCurrent = @Amp,
+            Voltage = @Volt,
+            Power = @Power
+        WHERE DeviceID = @DevID
+      `);
+
+        if (result.rowsAffected[0] === 0) {
+          return res.status(404).json({ message: "Device not found" });
+        }
+
+        res.status(200).json({ message: "Device data updated successfully" });
+      } catch (err) {
+        console.error("Failed to update device data", err);
+        res.status(500).json({ message: "Failed to update device data" });
+      }
+    });
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);

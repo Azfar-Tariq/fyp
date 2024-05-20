@@ -21,7 +21,6 @@ function ImageAnnotator({
   // imageData,
 }) {
   const [data, setData] = useState([]);
-  // const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -37,112 +36,10 @@ function ImageAnnotator({
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
   // const [imageData, setImageData] = useState(null);
-  // const [picture, setPicture] = useState();
 
   useEffect(() => {
     fetchData();
   });
-
-  // useEffect(() => {
-  //   downloadImage();
-  // }, []); // Empty dependency array ensures useEffect runs only once
-
-  // const downloadImage = () => {
-  //   const apiUrl = "http://10.112.71.52:5000/get_room_image";
-
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.blob();
-  //     })
-  //     .then((blob) => {
-  //       // Convert the blob to a data URL
-  //       const reader = new FileReader();
-  //       reader.readAsDataURL(blob);
-  //       reader.onloadend = () => {
-  //         const dataUrl = reader.result;
-  //         // Set the image data in state
-  //         setImageData(dataUrl);
-  //       };
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching image:", error);
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   downloadImage();
-  // }, []); // Empty dependency array ensures useEffect runs only once
-
-  // const downloadImage = () => {
-  //   const apiUrl = "http://10.112.71.52:5000/get_room_image";
-
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.blob();
-  //     })
-  //     .then((blob) => {
-  //       // Convert the blob to a data URL
-  //       const reader = new FileReader();
-  //       reader.readAsDataURL(blob);
-  //       reader.onloadend = () => {
-  //         const dataUrl = reader.result;
-  //         // Set the image data in state
-  //         setImageData(dataUrl);
-  //       };
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching image:", error);
-  //     });
-  // };
-
-  // const downloadImage = () => {
-  //   const apiUrl = "http://10.120.141.94:5000/get_room_image";
-
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.blob();
-  //     })
-  //     .then((blob) => {
-  //       // Create a temporary URL for the blob
-  //       const url = window.URL.createObjectURL(blob);
-
-  //       // Create a temporary link element
-  //       const link = document.createElement("a");
-  //       link.href = url;
-  //       link.download = "camera_image.jpg"; // Set the download attribute
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       // Revoke the temporary URL
-  //       window.URL.revokeObjectURL(url);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching image:", error);
-  //     });
-  // };
-
-  // const fetchImage = async () => {
-  //   try {
-  //     const response = await Axios.get("http://10.120.141.94/getImage", {
-  //       responseType: "blob", // Set response type to blob
-  //     });
-  //     const imageUrl = URL.createObjectURL(response.data); // Create object URL for blob data
-  //     setPicture(imageUrl); // Set image state with URL
-  //     console.log("Image fetched successfully");
-  //   } catch (error) {
-  //     console.error("Failed to fetch image:", error);
-  //   }
-  // };
 
   const fetchData = async () => {
     try {
@@ -150,16 +47,6 @@ function ImageAnnotator({
         `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       );
       setData(response.data);
-      // const extractedData = data.map((rectangle) => ({
-      //   // id: rectangle.id,
-      //   x1: rectangle.x1,
-      //   y1: rectangle.y1,
-      //   x2: rectangle.x2,
-      //   y2: rectangle.y2,
-      // }));
-
-      // Store the extracted data in the new state
-      // setBoundedRectanglesData(extractedData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
@@ -380,23 +267,10 @@ function ImageAnnotator({
     }
   };
 
-  // useEffect(() => {
-  //   console.log("data", data);
-  //   // Extract xi, y1, x2, y2, and id from each bounded rectangle in data
-  //   const extractedData = data.map((rectangle) => ({
-  //     // id: rectangle.id,
-  //     x1: rectangle.x1,
-  //     y1: rectangle.y1,
-  //     x2: rectangle.x2,
-  //     y2: rectangle.y2,
-  //   }));
-
-  //   // Store the extracted data in the new state
-  //   setBoundedRectanglesData(extractedData);
-  // }, []);
-
   const handleSaveButtonClick = async () => {
     try {
+      // change rectangleId to null after deleting the rectangle
+      console.log("Selected Rectangle ID:", selectedRectangleId);
       if (selectedRectangleId) {
         handleSaveChanges();
       } else {
