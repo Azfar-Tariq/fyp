@@ -1055,6 +1055,20 @@ poolConnect
         res.status(500).json({ message: "Failed to update device data" });
       }
     });
+
+    // api to recieve stats for frontend
+    app.get("/recvStats", async (req, res) => {
+      try {
+        await sql.connect(config);
+        const request = new sql.Request();
+        const result = await request.query("SELECT * FROM EnergyConsumption");
+
+        res.status(200).json(result.recordset);
+      } catch (err) {
+        console.error("Failed to fetch device stats", err);
+        res.status(500).json({ message: "Failed to fetch device stats" });
+      }
+    });
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
