@@ -898,7 +898,7 @@ poolConnect
       }
     });
     app.get(
-      "/camera/:cameraId/boundedRectanglesWithDevices",
+      "/camera/:cameraId/boundedRectanglesWithDeviceID",
       async (req, res) => {
         const cameraId = req.params.cameraId;
 
