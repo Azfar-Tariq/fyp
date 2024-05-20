@@ -897,6 +897,34 @@ poolConnect
           .send("Failed to update Bounded Rectangle in the database");
       }
     });
+    app.get(
+      "/camera/:cameraId/boundedRectanglesWithDevices",
+      async (req, res) => {
+        const cameraId = req.params.cameraId;
+
+        try {
+          const request = pool.request();
+          const result = await request.query(`
+          SELECT 
+            BR.x1, BR.y1, BR.x2, BR.y2, IOT.DeviceID
+          FROM 
+            BoundedRectangle BR
+          LEFT JOIN 
+            IoTDevices IOT ON BR.RectangleID = IOT.RectangleID
+          WHERE 
+            BR.CameraID = ${cameraId}
+        `);
+          res.status(200).json(result.recordset);
+        } catch (err) {
+          console.log(err);
+          res
+            .status(500)
+            .send(
+              "Failed to get Bounded Rectangles and IoT Devices from the database"
+            );
+        }
+      }
+    );
 
     // delete data from database
     app.delete("/deleteBoundedRectangle/:rectangleId", async (req, res) => {
