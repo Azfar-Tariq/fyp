@@ -47,18 +47,18 @@ const poolConnect = pool.connect();
 poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
-    const wss = new WebSocket.Server({ server });
+    // const wss = new WebSocket.Server({ server });
 
-    wss.on("connection", (ws) => {
-      console.log("New client connected");
-      ws.on("close", () => {
-        console.log("Client disconnected");
-      });
-    });
+    // wss.on("connection", (ws) => {
+    //   console.log("New client connected");
+    //   ws.on("close", () => {
+    //     console.log("Client disconnected");
+    //   });
+    // });
 
     //....................................User Login and Logout Endpoints................................
 
-    // ---------------login endpoint-----------------
+    // ---------------user login endpoint-----------------
     app.post("/login", async (req, res) => {
       const { email, password } = req.body;
 
@@ -98,7 +98,7 @@ poolConnect
       }
     });
 
-    //   --------------Logout endpoint-----------------
+    //   --------------user Logout endpoint-----------------
     app.post("/logout", async (req, res) => {
       try {
         const { email } = req.body;
@@ -205,6 +205,7 @@ poolConnect
     });
 
     // -------------User details endpoint--------------------
+    //displaying all users
     app.get("/user-details", async (req, res) => {
       try {
         const { email } = req.query;
@@ -225,6 +226,7 @@ poolConnect
       }
     });
 
+    //add new user to database
     app.post("/addUser", async (req, res) => {
       const { email, password, name, role, employeeID, phone } = req.body;
 
@@ -248,7 +250,7 @@ poolConnect
       }
     });
 
-    // Edit an existing user
+    // Edit an existing user based on userid
     app.put("/editUser/:id", async (req, res) => {
       const { email, password, name, role, employeeID, phone } = req.body;
       const id = req.params.id;
@@ -289,7 +291,7 @@ poolConnect
       }
     });
 
-    // Remove an existing user
+    // Remove an existing user based on userid
     app.delete("/removeUser/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -314,7 +316,7 @@ poolConnect
       }
     });
 
-    // ----------Get  All Users for Users.js in Admin Dashboard endpoint-------------
+    // ----------Show All Users for Users.jsx page in Admin Dashboard -------------
     app.get("/users", async (req, res) => {
       try {
         const request = pool.request();
@@ -498,8 +500,8 @@ poolConnect
     //       }
     //     });
 
-    // -------- Area Data Endpoints --------
-    // send data to database
+    // -------- ----------------------------------------Area Data Endpoints ----------------------------------------
+    // add new areas into database
     app.post("/insertArea", async (req, res) => {
       const { areaName, description, address, focalPerson, contact } = req.body;
 
@@ -526,7 +528,7 @@ poolConnect
       }
     });
 
-    // get data from database
+    // read all areas
     app.get("/readArea", async (req, res) => {
       try {
         const request = pool.request();
@@ -540,6 +542,7 @@ poolConnect
       }
     });
 
+    //read area based on area id
     app.get("/readArea/:id", async (req, res) => {
       try {
         const request = pool.request();
@@ -553,7 +556,7 @@ poolConnect
       }
     });
 
-    // edit data from database
+    // edit data from database based on area id
     app.put("/updateArea/:id", async (req, res) => {
       const { areaName, description, address, focalPerson, contact } = req.body;
       const id = parseInt(req.params.id, 10);
@@ -600,7 +603,7 @@ poolConnect
       }
     });
 
-    // delete data from database
+    // delete data from database based on area id
     app.delete("/deleteArea/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -626,7 +629,7 @@ poolConnect
       }
     });
 
-    //  -------------------Camera Endpoints--------------------
+    //  ----------------------------------------------Camera Endpoints-------------------------------------------
     // Send camera data to database
     app.get("/cameras", async (req, res) => {
       try {
@@ -802,7 +805,7 @@ poolConnect
       }
     });
 
-    // -------- Bounded Rectangle Data Endpoints --------
+    // -------- -----------------------------Bounded Rectangle Data Endpoints -------------------------------
     // send data to database
     app.post("/readCamera/:cameraId/addBoundedRectangle", async (req, res) => {
       const cameraId = req.params.cameraId;
@@ -897,6 +900,8 @@ poolConnect
           .send("Failed to update Bounded Rectangle in the database");
       }
     });
+
+    //update bounded rectangles based on rectangle id
     app.get(
       "/camera/:cameraId/boundedRectanglesWithDeviceID",
       async (req, res) => {
@@ -927,32 +932,7 @@ poolConnect
       }
     );
 
-    app.put("/ChangeDeviceStatus/:deviceId", async (req, res) => {
-      const deviceId = req.params.deviceId;
-      const { status } = req.body;
-
-      try {
-        const request = pool.request();
-        request.input("DeviceID", deviceId);
-        request.input("Status", status);
-        const result = await request.query(`
-          UPDATE IoTDevices
-          SET Status = @Status
-          WHERE DeviceID = @DeviceID
-        `);
-
-        if (result.rowsAffected[0] > 0) {
-          res.status(200).send("Device status updated successfully");
-        } else {
-          res.status(404).send("Device not found");
-        }
-      } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to update device status in the database");
-      }
-    });
-
-    // delete data from database
+    // delete bounded rectangles based on rectangle id from database
     app.delete("/deleteBoundedRectangle/:rectangleId", async (req, res) => {
       const rectangleId = req.params.rectangleId;
 
@@ -997,6 +977,7 @@ poolConnect
       }
     );
 
+    //update dece automation status based on device id
     app.put("/updateManualStatus/:deviceId", async (req, res) => {
       const deviceId = req.params.deviceId;
       const { Manual_Status } = req.body;
@@ -1027,6 +1008,7 @@ poolConnect
       }
     });
 
+    //get iot device automation status based on device id
     app.get("/getAutomationStatus/:deviceId", async (req, res) => {
       const deviceId = req.params.deviceId;
 
@@ -1053,6 +1035,31 @@ poolConnect
       }
     });
 
+    //change iot device on off status based on device id
+    app.put("/ChangeDeviceStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
+      const { status } = req.body;
+
+      try {
+        const request = pool.request();
+        request.input("DeviceID", deviceId);
+        request.input("Status", status);
+        const result = await request.query(`
+          UPDATE IoTDevices
+          SET Status = @Status
+          WHERE DeviceID = @DeviceID
+        `);
+
+        if (result.rowsAffected[0] > 0) {
+          res.status(200).send("Device status updated successfully");
+        } else {
+          res.status(404).send("Device not found");
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update device status in the database");
+      }
+    });
     const storage = multer.diskStorage({
       destination: function (req, file, cb) {
         cb(null, "./images"); // Store uploaded images in the 'images' directory
@@ -1079,6 +1086,8 @@ poolConnect
     //   }
     // });
     const upload = multer({ storage: multer.memoryStorage() });
+
+    // send image to database from raspberry pi based on camera id
     app.post(
       "/send-image/:cameraId",
       upload.single("image"),
@@ -1117,6 +1126,8 @@ poolConnect
         }
       }
     );
+
+    // get image from database based on camera id
     app.get("/read-image/:cameraId", async (req, res) => {
       const cameraId = req.params.cameraId;
 
