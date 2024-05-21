@@ -148,13 +148,17 @@ function AnalyticsGraph() {
           const chart = chartRef.current;
           if (chart) {
             const now = new Date().toLocaleTimeString();
-            if (chart.data.labels.length < DATA_LIMIT) {
-              chart.data.labels.push(now);
-              chart.data.datasets[0].data.push(ElectricCurrent);
-              chart.data.datasets[1].data.push(Voltage);
-              chart.data.datasets[2].data.push(Power);
-              chart.update();
+            if (chart.data.labels.length >= DATA_LIMIT) {
+              chart.data.labels.shift(); // Remove oldest label
+              chart.data.datasets[0].data.shift(); // Remove oldest data point for Electric Current
+              chart.data.datasets[1].data.shift(); // Remove oldest data point for Voltage
+              chart.data.datasets[2].data.shift(); // Remove oldest data point for Power
             }
+            chart.data.labels.push(now);
+            chart.data.datasets[0].data.push(ElectricCurrent);
+            chart.data.datasets[1].data.push(Voltage);
+            chart.data.datasets[2].data.push(Power);
+            chart.update();
           }
         })
         .catch((err) => {

@@ -39,6 +39,10 @@ poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
 
+    app.get("/checkServerStatus", (req, res) => {
+      res.status(200).json({ serverStatus: true });
+    });
+
     //....................................User Login and Logout Endpoints................................
 
     // ---------------login endpoint-----------------
@@ -1095,6 +1099,112 @@ poolConnect
       } catch (err) {
         console.error("Failed to fetch device stats", err);
         res.status(500).json({ message: "Failed to fetch device stats" });
+      }
+    });
+
+    app.get(
+      "/readCameraWithManualStatus/:cameraId/readBoundedRectangles",
+      async (req, res) => {
+        const cameraId = req.params.cameraId;
+
+        try {
+          const request = pool.request();
+          const result = await request.query(`
+          SELECT BR.RectangleID, BR.x1, BR.y1, BR.x2, BR.y2, BR.Status, ID.Manual_Status
+          FROM BoundedRectangle BR
+          INNER JOIN IoTDevices ID ON BR.RectangleID = ID.RectangleID
+          WHERE BR.CameraID = ${cameraId}
+        `);
+          res.status(200).json(result.recordset);
+        } catch (err) {
+          console.error(err);
+          res
+            .status(500)
+            .send(
+              "Failed to get Bounded Rectangles with manual status from the database"
+            );
+        }
+      }
+    );
+
+    app.put("/updateManualStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
+      const { Manual_Status } = req.body;
+      console.log(req.body);
+
+      try {
+        const request = pool.request();
+        // Using parameterized queries to prevent SQL injection
+        await request
+          .input("Manual_Status", sql.Int, Manual_Status)
+          .input("DeviceID", sql.Int, deviceId).query(`
+            UPDATE IoTDevices
+            SET Manual_Status = @Manual_Status
+            WHERE DeviceID = @DeviceID
+          `);
+
+        res.status(200).send("Manual status updated successfully");
+
+        // Send a message to all connected WebSocket clients
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "update" }));
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to update manual status");
+      }
+    });
+
+    app.get("/getAutomationStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
+
+      try {
+        const request = pool.request();
+        // Use parameterized queries to prevent SQL injection
+        const result = await request.input("DeviceID", sql.Int, deviceId)
+          .query(`
+            SELECT Manual_Status
+            FROM IoTDevices
+            WHERE DeviceID = @DeviceID
+          `);
+
+        if (result.recordset.length > 0) {
+          res
+            .status(200)
+            .json({ Manual_Status: result.recordset[0].Manual_Status });
+        } else {
+          res.status(404).send("Device not found");
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to retrieve manual status");
+      }
+    });
+
+    app.put("/ChangeDeviceStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
+      const { status } = req.body;
+
+      try {
+        const request = pool.request();
+        request.input("DeviceID", deviceId);
+        request.input("Status", status);
+        const result = await request.query(`
+          UPDATE IoTDevices
+          SET Status = @Status
+          WHERE DeviceID = @DeviceID
+        `);
+
+        if (result.rowsAffected[0] > 0) {
+          res.status(200).send("Device status updated successfully");
+        } else {
+          res.status(404).send("Device not found");
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update device status in the database");
       }
     });
   })

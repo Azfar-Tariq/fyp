@@ -33,6 +33,7 @@ function ImageAnnotator({
   });
   const [selectedRectangleId, setSelectedRectangleId] = useState(null);
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [cacheBuster] = useState(Date.now());
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
   // const [imageData, setImageData] = useState(null);
@@ -216,7 +217,7 @@ function ImageAnnotator({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = image;
+    img.src = `${image}?${cacheBuster}`;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -336,7 +337,7 @@ function ImageAnnotator({
     const ctx = canvas.getContext("2d");
 
     const img = new Image();
-    img.src = image;
+    img.src = `${image}?${cacheBuster}`;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -385,6 +386,7 @@ function ImageAnnotator({
     data,
     selectedRectangle,
     selectedRectangleId,
+    cacheBuster,
   ]);
 
   return (
@@ -397,7 +399,7 @@ function ImageAnnotator({
         style={{
           border: "1px solid #ccc",
           display: "block",
-          background: `url(${image})`,
+          background: `url(${image}?${cacheBuster})`,
           backgroundSize: "100% 100%",
         }}
         onMouseDown={handleMouseDown}

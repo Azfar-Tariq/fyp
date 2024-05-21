@@ -231,10 +231,6 @@ export default function Table({
       },
     },
     {
-      header: "Occupancy",
-      accessorKey: "Status",
-    },
-    {
       header: "Automation Type",
       accessorKey: "Manual_Status",
       cell: ({ row }) => (

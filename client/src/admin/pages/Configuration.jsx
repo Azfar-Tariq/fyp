@@ -24,7 +24,11 @@ export default function Configuration() {
   }, []); // Empty dependency array ensures useEffect runs only once
 
   const downloadImage = () => {
-    const apiUrl = `${RASPBERRY_IP}:${RASPBERRY_PORT}/get_room_image`;
+    // const apiUrl = `${RASPBERRY_IP}:${RASPBERRY_PORT}/get_room_image`;
+    // const apiUrl = "10.120.171.170/get_room_image";
+    // replace with raspberry pi or other pc ip address
+    // const apiUrl = "10.120.171.170/get_room_image";
+    const apiUrl = `${HOST_ADDRESS}/get_room_image`;
 
     fetch(apiUrl)
       .then((response) => {
