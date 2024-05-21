@@ -1,6 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Axios from "axios";
 import { ToastContainer } from "react-toastify";
 
@@ -33,8 +31,8 @@ export default function Select({
       });
   };
 
-  const fetchCameras = () => {
-    Axios.get(`http://localhost:3001/readArea/${selectedArea}/readCamera`)
+  const fetchCameras = (areaId) => {
+    Axios.get(`http://localhost:3001/readArea/${areaId}/readCamera`)
       .then((response) => {
         setCameras(response.data);
       })

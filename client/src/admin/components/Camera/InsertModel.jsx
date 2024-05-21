@@ -4,8 +4,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UilSave } from "../../assets/icons/save";
 import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
+// import { fetchData } from "../../pages/Cameras"; // Import the fetchData function
 
-const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
+// const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
+const InsertModel = ({ isOpen, onClose }) => {
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState("");
   const [cameraName, setCameraName] = useState("");
@@ -13,46 +16,46 @@ const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
 
   useEffect(() => {
     // Fetch areas data when the component mounts
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`http://localhost:3001/readArea`)
       .then((response) => {
         setAreas(response.data);
+        // console.log(response.data)
       })
       .catch((error) => {
         console.error("Error fetching areas:", error);
       });
-
-    if (selectedCamera) {
-      // Fetch the selected camera's data when the component mounts or selectedCamera changes
-      Axios.get(`http://localhost:3001/getCamera/${selectedCamera}`)
-        .then((response) => {
-          const camera = response.data;
-          setSelectedArea(camera.areaId);
-          setCameraName(camera.cameraName);
-          setCameraDescription(camera.description);
-        })
-        .catch((error) => {
-          console.error("Error fetching camera data:", error);
-        });
-    }
-  }, [selectedCamera]);
+  }, []);
 
   const handleSave = () => {
     if (selectedArea === "") {
-      alert("Please select an area to update the camera.");
+      alert("Please select an area to add a new camera.");
       return;
     }
-    const updatedCamera = {
+    const newCamera = {
       areaId: selectedArea,
       cameraName: cameraName,
       description: cameraDescription,
     };
 
-    // Call the onSave function passed as a prop to save the updated camera
-    onSave(updatedCamera);
+    // console.log(selectedArea);
 
-    // Close the modal after saving
-    onClose();
-    toast.success("Camera Updated Successfully");
+    // Call the API to add a new camera
+    Axios.post(`http://localhost:3001/insertCamera`, newCamera)
+      .then((response) => {
+        console.log("Camera saved to database");
+        // Add the new camera to the data array
+        // const newData = [...data, response.data];
+        // setData(newData);
+
+        // Close the modal after saving
+        onClose();
+        toast.success("New Camera Added Successfully");
+        // Fetch updated data from the server
+        // fetchData(newData);
+      })
+      .catch((error) => {
+        console.error("Failed to save camera to the database:", error);
+      });
   };
 
   return (
@@ -63,7 +66,7 @@ const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
     >
       <div className="bg-background text-white rounded-lg p-4">
         <ToastContainer />
-        <h2 className="text-lg font-bold mb-2">Edit Camera</h2>
+        <h2 className="text-lg font-bold mb-2">Add Camera</h2>
         <form>
           <label className="block mb-2">
             Area Name:
@@ -101,7 +104,6 @@ const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
           </label>
           <div className="flex justify-center items-center gap-2">
             <button
-              type="button"
               className="flex p-2 gap-2 rounded bg-background text-white hover:bg-icon hover:text-black duration-150"
               onClick={handleSave}
             >
@@ -109,7 +111,6 @@ const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
               Save
             </button>
             <button
-              type="button"
               className="bg-background text-white flex p-2 gap-2 rounded hover:bg-icon hover:text-black duration-150"
               onClick={onClose}
             >
@@ -123,4 +124,4 @@ const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
   );
 };
 
-export default EditModel;
+export default InsertModel;

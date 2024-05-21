@@ -971,6 +971,7 @@ poolConnect
       }
     });
 
+    //------------------------------All Related to Manual Status and IoTDevices------------------------
     app.get(
       "/readCameraWithManualStatus/:cameraId/readBoundedRectangles",
       async (req, res) => {
@@ -996,18 +997,22 @@ poolConnect
       }
     );
 
-    app.put("/updateManualStatus/:rectangleId", async (req, res) => {
-      const rectangleId = req.params.rectangleId;
+    app.put("/updateManualStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
       const { Manual_Status } = req.body;
       console.log(req.body);
 
       try {
         const request = pool.request();
-        await request.query(`
-          UPDATE IoTDevices
-          SET Manual_Status = ${Manual_Status}
-          WHERE RectangleID = ${rectangleId}
-        `);
+        // Using parameterized queries to prevent SQL injection
+        await request
+          .input("Manual_Status", sql.Int, Manual_Status)
+          .input("DeviceID", sql.Int, deviceId).query(`
+            UPDATE IoTDevices
+            SET Manual_Status = @Manual_Status
+            WHERE DeviceID = @DeviceID
+          `);
+
         res.status(200).send("Manual status updated successfully");
 
         // Send a message to all connected WebSocket clients
@@ -1021,6 +1026,33 @@ poolConnect
         res.status(500).send("Failed to update manual status");
       }
     });
+
+    app.get("/getAutomationStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
+
+      try {
+        const request = pool.request();
+        // Use parameterized queries to prevent SQL injection
+        const result = await request.input("DeviceID", sql.Int, deviceId)
+          .query(`
+            SELECT Manual_Status
+            FROM IoTDevices
+            WHERE DeviceID = @DeviceID
+          `);
+
+        if (result.recordset.length > 0) {
+          res
+            .status(200)
+            .json({ Manual_Status: result.recordset[0].Manual_Status });
+        } else {
+          res.status(404).send("Device not found");
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to retrieve manual status");
+      }
+    });
+
     const storage = multer.diskStorage({
       destination: function (req, file, cb) {
         cb(null, "./images"); // Store uploaded images in the 'images' directory
@@ -1048,7 +1080,7 @@ poolConnect
     // });
     const upload = multer({ storage: multer.memoryStorage() });
     app.post(
-      "/fetch-image/:cameraId",
+      "/send-image/:cameraId",
       upload.single("image"),
       async (req, res) => {
         const cameraId = req.params.cameraId;
