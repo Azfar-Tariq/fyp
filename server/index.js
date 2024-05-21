@@ -904,15 +904,16 @@ poolConnect
 
         try {
           const request = pool.request();
+          request.input("CameraID", cameraId);
           const result = await request.query(`
           SELECT 
-            BR.x1, BR.y1, BR.x2, BR.y2, IOT.DeviceID
+            BR.x1, BR.y1, BR.x2, BR.y2, IOT.DeviceID, IOT.Manual_Status
           FROM 
             BoundedRectangle BR
           LEFT JOIN 
             IoTDevices IOT ON BR.RectangleID = IOT.RectangleID
           WHERE 
-            BR.CameraID = ${cameraId}
+            BR.CameraID = @CameraID
         `);
           res.status(200).json(result.recordset);
         } catch (err) {
@@ -925,6 +926,31 @@ poolConnect
         }
       }
     );
+
+    app.put("/ChangeDeviceStatus/:deviceId", async (req, res) => {
+      const deviceId = req.params.deviceId;
+      const { status } = req.body;
+
+      try {
+        const request = pool.request();
+        request.input("DeviceID", deviceId);
+        request.input("Status", status);
+        const result = await request.query(`
+          UPDATE IoTDevices
+          SET Status = @Status
+          WHERE DeviceID = @DeviceID
+        `);
+
+        if (result.rowsAffected[0] > 0) {
+          res.status(200).send("Device status updated successfully");
+        } else {
+          res.status(404).send("Device not found");
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update device status in the database");
+      }
+    });
 
     // delete data from database
     app.delete("/deleteBoundedRectangle/:rectangleId", async (req, res) => {
@@ -1004,35 +1030,104 @@ poolConnect
         cb(null, `${Date.now()}-${file.originalname}`);
       },
     });
-    const upload = multer({ storage: storage });
+    // const upload = multer({ storage: storage });
 
     // Route to receive and store the image
-    app.post("/fetch-image", upload.single("image"), (req, res) => {
-      try {
-        if (!req.file) {
-          return res.status(400).json({ error: "No file uploaded" });
+    // app.post("/fetch-image", upload.single("image"), (req, res) => {
+    //   try {
+    //     if (!req.file) {
+    //       return res.status(400).json({ error: "No file uploaded" });
+    //     }
+
+    //     const filename = req.file.filename;
+    //     res.json({ success: true, filename });
+    //   } catch (error) {
+    //     console.error("Error uploading image:", error);
+    //     res.status(500).json({ error: "An error occurred" });
+    //   }
+    // });
+    const upload = multer({ storage: multer.memoryStorage() });
+    app.post(
+      "/fetch-image/:cameraId",
+      upload.single("image"),
+      async (req, res) => {
+        const cameraId = req.params.cameraId;
+
+        try {
+          if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+          }
+
+          const imageBuffer = req.file.buffer;
+
+          const request = pool.request();
+          request.input("CameraID", sql.Int, cameraId);
+          request.input("CameraImage", sql.VarBinary, imageBuffer);
+          const result = await request.query(`
+          UPDATE Camera
+          SET CameraImage = @CameraImage
+          WHERE CameraID = @CameraID
+        `);
+
+          if (result.rowsAffected[0] > 0) {
+            res.json({
+              success: true,
+              message: "Image uploaded and stored in database",
+            });
+          } else {
+            res.status(404).json({ error: "Camera not found" });
+          }
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          res
+            .status(500)
+            .json({ error: "An error occurred while uploading the image" });
         }
-
-        const filename = req.file.filename;
-        res.json({ success: true, filename });
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        res.status(500).json({ error: "An error occurred" });
       }
-    });
+    );
+    app.get("/read-image/:cameraId", async (req, res) => {
+      const cameraId = req.params.cameraId;
 
-    // Route to serve the stored image
-    app.get("/read-image/:filename", (req, res) => {
       try {
-        const { filename } = req.params;
+        const request = pool.request();
+        request.input("CameraID", cameraId);
+        const result = await request.query(`
+          SELECT CameraImage 
+          FROM Camera
+          WHERE CameraID = @CameraID
+        `);
 
-        // Serve the image file from the local storage
-        res.sendFile(path.join(__dirname, "images", filename));
+        if (result.recordset.length > 0) {
+          const imageBuffer = result.recordset[0].CameraImage;
+          if (imageBuffer) {
+            res.writeHead(200, {
+              "Content-Type": "image/jpeg",
+              "Content-Length": imageBuffer.length,
+            });
+            res.end(imageBuffer);
+          } else {
+            res.status(404).send("Image not found");
+          }
+        } else {
+          res.status(404).send("Camera not found");
+        }
       } catch (error) {
         console.error("Error serving image:", error);
-        res.status(404).send("Image not found");
+        res.status(500).send("An error occurred while fetching the image");
       }
     });
+    // Route to serve the stored image
+    // app.get("/read-image/:filename", (req, res) => {
+    //   try {
+    //     const { filename } = req.params;
+
+    //     // Serve the image file from the local storage
+    //     res.sendFile(path.join(__dirname, "images", filename));
+    //   } catch (error) {
+    //     console.error("Error serving image:", error);
+    //     res.status(404).send("Image not found");
+    //   }
+    // });
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
