@@ -795,6 +795,12 @@ poolConnect
       const cameraId = req.params.cameraId;
       const { x1, y1, x2, y2, status } = req.body;
       const manualStatus = false;
+      const deviceType = 1;
+      const relay0 = 0;
+      const relay1 = 0;
+      const relay2 = 0;
+      const relay3 = 0;
+      const deviceStatus = 1;
 
       try {
         const request = pool.request();
@@ -826,9 +832,15 @@ poolConnect
         await request
           .input("rectangleId", sql.Int, newRectangleId)
           .input("manualStatus", sql.Bit, manualStatus)
+          .input("deviceType", sql.Bit, deviceType)
+          .input("relay0", sql.Bit, relay0)
+          .input("relay1", sql.Bit, relay1)
+          .input("relay2", sql.Bit, relay2)
+          .input("relay3", sql.Bit, relay3)
+          .input("status", sql.Bit, deviceStatus)
           .query(
-            `INSERT INTO IoTDevices (RectangleID, Manual_Status) 
-            VALUES (@rectangleId, @manualStatus)`
+            `INSERT INTO IoTDevices (RectangleID, Manual_Status, DeviceType, Relay0, Relay1, Relay2, Relay3, Status) 
+        VALUES (@rectangleId, @manualStatus, @deviceType, @relay0, @relay1, @relay2, @relay3, @status)`
           );
 
         res.status(200).send("Bounded Rectangle saved to database");
@@ -956,24 +968,6 @@ poolConnect
         }
       }
     );
-    app.put("/updateManualStatus/:rectangleId", async (req, res) => {
-      const rectangleId = req.params.rectangleId;
-      const { Manual_Status } = req.body;
-      console.log(req.body);
-
-      try {
-        const request = pool.request();
-        const result = await request.query(`
-        UPDATE IoTDevices
-        SET Manual_Status = ${Manual_Status}
-        WHERE RectangleID = ${rectangleId}
-      `);
-        res.status(200).send("Manual status updated successfully");
-      } catch (err) {
-        console.error(err);
-        res.status(500).send("Failed to update manual status");
-      }
-    });
 
     const storage = multer.diskStorage({
       destination: function (req, file, cb) {
@@ -1071,7 +1065,7 @@ poolConnect
           .input("Volt", sql.Float, Vol)
           .input("Power", sql.Float, Power).query(`
         UPDATE EnergyConsumption
-        SET ElectricCurrent = @Amp,
+        SET Ampere = @Amp,
             Voltage = @Volt,
             Power = @Power
         WHERE DeviceID = @DevID
@@ -1089,16 +1083,62 @@ poolConnect
     });
 
     // api to recieve stats for frontend
-    app.get("/recvStats", async (req, res) => {
-      try {
-        await sql.connect(config);
-        const request = new sql.Request();
-        const result = await request.query("SELECT * FROM EnergyConsumption");
+    app.put("/energydata", async (req, res) => {
+      const { BoardID, Amp, Vol, Power } = req.body;
 
-        res.status(200).json(result.recordset);
-      } catch (err) {
-        console.error("Failed to fetch device stats", err);
-        res.status(500).json({ message: "Failed to fetch device stats" });
+      // Check if all required fields are provided
+      if (
+        !BoardID ||
+        Amp === undefined ||
+        Vol === undefined ||
+        Power === undefined
+      ) {
+        return res.status(400).json({
+          Status: "FAILURE",
+          Response: 400,
+          Message: "Invalid input. BoardID, Amp, Vol, and Power are required.",
+        });
+      }
+
+      try {
+        const request = pool.request();
+        request.input("BoardID", sql.Int, BoardID);
+
+        // Check if the BoardID exists in the database
+        const boardCheckResult = await request.query(
+          "SELECT BoardID FROM BoardStatus WHERE BoardID = @BoardID"
+        );
+        if (boardCheckResult.recordset.length === 0) {
+          return res.status(501).json({
+            Status: "FAILURE",
+            Response: 501,
+            Message: "Board not found in DB",
+          });
+        }
+
+        // Update the values of Amp, Vol, and Power for the specified BoardID
+        request.input("Amp", sql.Real, Amp);
+        request.input("Vol", sql.Real, Vol);
+        request.input("Power", sql.Real, Power);
+
+        await request.query(`
+      UPDATE EnergyConsumption
+      SET Amp = @Amp, Vol = @Vol, Power = @Power
+      WHERE BoardID = @BoardID
+    `);
+
+        res.status(200).json({
+          Status: "SUCCESS",
+          Response: 200,
+          Message: "Record Updated",
+        });
+      } catch (error) {
+        console.error("Error updating record:", error);
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Internal Server Error",
+        });
       }
     });
 
@@ -1127,33 +1167,271 @@ poolConnect
       }
     );
 
-    app.put("/updateManualStatus/:deviceId", async (req, res) => {
+    app.get("/getDeviceData", async (req, res) => {
+      // app.get("/getDeviceData/:deviceId", async (req, res) => {
+      // const deviceId = req.params.deviceId;
+
+      try {
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        // request.input("deviceId", sql.Int, deviceId);
+        const result = await request.query(`
+      SELECT DeviceID, Relay0, Relay1, Relay2, Relay3, Manual_Status, Status
+      FROM IoTDevices
+      `);
+        // WHERE DeviceID = @deviceId
+
+        if (result.recordset.length > 0) {
+          const deviceStatus = result.recordset[0];
+
+          // Convert boolean to 0 or 1
+          const convertBitFields = (obj) => {
+            for (let key in obj) {
+              if (typeof obj[key] === "boolean") {
+                obj[key] = obj[key] ? 1 : 0;
+              }
+            }
+            return obj;
+          };
+
+          const convertedDeviceStatus = convertBitFields(deviceStatus);
+
+          res.status(200).json(convertedDeviceStatus);
+        } else {
+          res.status(404).send("Device not found");
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to get device status from the database");
+      }
+    });
+
+    app.get("/checkDevice/:deviceId", async (req, res) => {
+      console.log("Check");
       const deviceId = req.params.deviceId;
-      const { Manual_Status } = req.body;
-      console.log(req.body);
+
+      try {
+        // Connect to the database
+        await sql.connect(config);
+
+        // Create a new request using the connection pool
+        const request = new sql.Request();
+
+        // Query the database to check if the device exists
+        const result = await request
+          .input("DeviceID", sql.Int, deviceId)
+          .query(
+            "SELECT COUNT(*) AS DeviceCount FROM IoTDevices WHERE DeviceID = @DeviceID"
+          );
+
+        // Extract the device count from the query result
+        const deviceCount = result.recordset[0].DeviceCount;
+
+        // Return true if the device exists, otherwise return false
+        res.status(200).json({ exists: deviceCount > 0 });
+      } catch (err) {
+        console.error("Failed to check device existence:", err);
+        res.status(500).json({ error: "Failed to check device existence" });
+      }
+    });
+
+    // app.put("/updateManualStatus/:deviceId", async (req, res) => {
+    //   const deviceId = req.params.deviceId;
+    //   const { Manual_Status } = req.body;
+    //   console.log(req.params.deviceId);
+    //   console.log(req.body);
+
+    //   try {
+    //     const request = pool.request();
+    //     // Using parameterized queries to prevent SQL injection
+    //     await request
+    //       .input("Manual_Status", sql.Int, Manual_Status)
+    //       .input("DeviceID", sql.Int, deviceId).query(`
+    //         UPDATE IoTDevices
+    //         SET Manual_Status = @Manual_Status
+    //         WHERE DeviceID = @DeviceID
+    //       `);
+
+    //     res.status(200).send("Manual status updated successfully");
+    //   } catch (err) {
+    //     console.error(err);
+    //     res.status(500).send("Failed to update manual status");
+    //   }
+    // });
+
+    // app.put("/updateManualStatus/:deviceId", async (req, res) => {
+    //   const boardId = req.params.deviceId;
+    //   const { Manual_Status } = req.body; // get the the two fields
+    //   console.log(req.params.deviceId);
+    //   console.log(req.body);
+
+    //   try {
+    //     const request = pool.request();
+    //     // Using parameterized queries to prevent SQL injection
+    //     await request
+    //       .input("Manual_Status", sql.Int, Manual_Status)
+    //       .input("DeviceID", sql.Int, deviceId).query(`
+    //         UPDATE BoardStatus
+    //         SET Manual_Status = @Manual_Status
+    //         WHERE DeviceID = @DeviceID
+    //       `);
+
+    //     res.status(200).send("Manual status updated successfully");
+    //   } catch (err) {
+    //     console.error(err);
+    //     res.status(500).send("Failed to update manual status");
+    //   }
+    // });
+
+    // ***************  Desktop Agent APIs ***************
+    // desktop agent will update mode
+    app.put("/updateMode/:boardId", async (req, res) => {
+      const boardId = parseInt(req.params.boardId, 10);
+      const { Relay, Mode } = req.body;
+      console.log("Relay", Relay);
+      console.log("Mode", Mode);
+
+      // Validate the input
+      if (isNaN(boardId) || isNaN(Relay) || Mode === undefined) {
+        return res
+          .status(400)
+          .send("Invalid input. BoardID, Relay, and Mode are required.");
+      }
+
+      // Check if Relay is within the expected range
+      if (![1, 2, 3].includes(Relay)) {
+        return res.status(400).send("Invalid Relay. It should be 1, 2, or 3.");
+      }
+
+      // Construct the column name for the mode
+      const modeColumn = `Mode${Relay}`;
+      if (Mode !== 0 && Mode !== 1) {
+        return res.status(400).send("Invalid Mode. It should be 0 or 1.");
+      }
+      // const modeValue = Mode ? 1 : 0; // Ensuring the mode is either 0 or 1
+      // console.log("Mode Value", modeValue);
+
+      try {
+        await pool.connect();
+        const request = pool.request();
+        request.input("BoardID", sql.Int, boardId);
+        request.input("Mode", sql.Bit, Mode);
+
+        // SQL query to update the mode
+        const updateQuery = `
+      UPDATE BoardStatus
+      SET ${modeColumn} = @Mode
+      WHERE BoardID = @BoardID;
+    `;
+
+        await request.query(updateQuery);
+
+        res.status(200).send("Relay mode updated successfully");
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to update relay mode");
+      } finally {
+        pool.close();
+      }
+    });
+
+    // change all relay status on when manual
+    app.put("/changeDeviceStatus/:boardId", async (req, res) => {
+      const boardId = req.params.boardId;
+      const { status } = req.body;
 
       try {
         const request = pool.request();
-        // Using parameterized queries to prevent SQL injection
-        await request
-          .input("Manual_Status", sql.Int, Manual_Status)
-          .input("DeviceID", sql.Int, deviceId).query(`
-            UPDATE IoTDevices
-            SET Manual_Status = @Manual_Status
-            WHERE DeviceID = @DeviceID
-          `);
+        request.input("BoardID", boardId);
+        request.input("Status", status);
+        const result = await request.query(`
+          UPDATE BoardStatus
+          SET Relay1 = @Status, Relay2 = @Status, Relay3 = @Status
+          WHERE BoardID = @BoardID
+        `);
 
-        res.status(200).send("Manual status updated successfully");
-
-        // Send a message to all connected WebSocket clients
-        wss.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: "update" }));
-          }
-        });
+        if (result.rowsAffected[0] > 0) {
+          res.status(200).send("Board status updated successfully");
+        } else {
+          res.status(404).send("Board not found");
+        }
       } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update Board status in the database");
+      }
+    });
+
+    // tell desktop to shutdown on when occupancy status is none or 0
+    app.get("/occupancyStatus", async (req, res) => {
+      try {
+        // Query the database for all entries in the BoundedRectangle table
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        const result = await request.query(`
+      SELECT CAST(Status AS INT) AS Status
+      FROM BoundedRectangle
+    `);
+
+        // Convert the integer status to boolean
+        const response = result.recordset.map((record) => ({
+          ...record,
+          Status: record.Status === 1,
+        }));
+
+        // Send the response
+        res.status(200).json(response);
+      } catch (err) {
+        // If an error occurs during the query, return a failure response
+        console.error("Error fetching rectangle status:", err);
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Failed to fetch rectangle status from the database",
+        });
+      }
+    });
+
+    // ***************  Board APIs ***************
+    // send board data for requested board id
+    app.get("/boardStatus", async (req, res) => {
+      // Extract the BoardID from the request body
+      const { BoardID } = req.body;
+
+      try {
+        // Query the database for the board status based on BoardID
+        const request = pool.request();
+        request.input("BoardID", BoardID);
+        const result = await request.query(`
+      SELECT BoardID,
+             CAST(Relay1 AS INT) AS Relay1,
+             CAST(Mode1 AS INT) AS Mode1,
+             CAST(Relay2 AS INT) AS Relay2,
+             CAST(Mode2 AS INT) AS Mode2,
+             CAST(Relay3 AS INT) AS Relay3,
+             CAST(Mode3 AS INT) AS Mode3
+      FROM BoardStatus
+      WHERE BoardID = @BoardID
+    `);
+
+        // If no results are found, return a failure response
+        if (result.recordset.length === 0) {
+          return res.status(404).json({
+            Status: "FAILURE",
+            Response: 404,
+            Message: "BoardID not found in DB",
+          });
+        }
+
+        // If results are found, return the board status
+        res.status(200).json(result.recordset);
+      } catch (err) {
+        // If an error occurs during database query, return a failure response
         console.error(err);
-        res.status(500).send("Failed to update manual status");
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Failed to fetch board status from the database",
+        });
       }
     });
 
@@ -1183,30 +1461,30 @@ poolConnect
       }
     });
 
-    app.put("/ChangeDeviceStatus/:deviceId", async (req, res) => {
-      const deviceId = req.params.deviceId;
-      const { status } = req.body;
+    // app.put("/ChangeDeviceStatus/:deviceId", async (req, res) => {
+    //   const deviceId = req.params.deviceId;
+    //   const { status } = req.body;
 
-      try {
-        const request = pool.request();
-        request.input("DeviceID", deviceId);
-        request.input("Status", status);
-        const result = await request.query(`
-          UPDATE IoTDevices
-          SET Status = @Status
-          WHERE DeviceID = @DeviceID
-        `);
+    //   try {
+    //     const request = pool.request();
+    //     request.input("DeviceID", deviceId);
+    //     request.input("Status", status);
+    //     const result = await request.query(`
+    //       UPDATE IoTDevices
+    //       SET Status = @Status
+    //       WHERE DeviceID = @DeviceID
+    //     `);
 
-        if (result.rowsAffected[0] > 0) {
-          res.status(200).send("Device status updated successfully");
-        } else {
-          res.status(404).send("Device not found");
-        }
-      } catch (err) {
-        console.log(err);
-        res.status(500).send("Failed to update device status in the database");
-      }
-    });
+    //     if (result.rowsAffected[0] > 0) {
+    //       res.status(200).send("Device status updated successfully");
+    //     } else {
+    //       res.status(404).send("Device not found");
+    //     }
+    //   } catch (err) {
+    //     console.log(err);
+    //     res.status(500).send("Failed to update device status in the database");
+    //   }
+    // });
   })
   .catch((err) => {
     console.error("Failed to connect to SQL Server:", err);
