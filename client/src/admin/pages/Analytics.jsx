@@ -5,6 +5,8 @@ import { getAreaData } from "../components/Analytics/AnalyticsData";
 import PieChart from "../components/Analytics/PieChart";
 import Chart from "react-apexcharts";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 export default function Analytics() {
   const [areaList, setAreaList] = useState([]);
   const [selectedAreaId, setSelectedAreaId] = useState(null);
@@ -41,7 +43,7 @@ export default function Analytics() {
 
   useEffect(() => {
     setLoading(true);
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`${HOST_ADDRESS}/readArea`)
       .then((res) => {
         setAreaList(res.data);
         setLoading(false);
@@ -53,7 +55,7 @@ export default function Analytics() {
   }, []);
 
   const fetchAreaData = (areaId, areaName) => {
-    Axios.get(`http://localhost:3001/readArea/${areaId}`)
+    Axios.get(`${HOST_ADDRESS}/readArea/${areaId}`)
       .then((res) => {
         console.log(res.data);
         setChartData({

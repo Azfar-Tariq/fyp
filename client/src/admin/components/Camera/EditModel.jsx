@@ -3,6 +3,8 @@ import Axios from "axios";
 import { UilSave } from "../../assets/icons/save";
 import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
   const [cameraName, setCameraName] = useState(
     selectedCamera?.CameraName || ""
@@ -18,10 +20,7 @@ const EditModel = ({ isOpen, onClose, selectedCamera, onSave }) => {
     };
 
     // Call the API to update the camera
-    Axios.put(
-      `http://localhost:3001/updateCamera/${selectedCamera}`,
-      updatedCamera
-    )
+    Axios.put(`${HOST_ADDRESS}/updateCamera/${selectedCamera}`, updatedCamera)
       .then((response) => {
         onSave(updatedCamera); // Notify parent component about the updated camera
         onClose(); // Close the modal after saving

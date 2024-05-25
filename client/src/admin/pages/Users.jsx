@@ -6,6 +6,8 @@ import { MaterialSymbolsDelete } from "../assets/icons/delete";
 import Axios from "axios";
 import { MaterialSymbolsAddRounded } from "../assets/icons/add";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [manualControlRequests, setManualControlRequests] = useState([]);
@@ -62,7 +64,7 @@ const Users = () => {
 
   const addUser = async (userData) => {
     try {
-      await Axios.post("http://localhost:3001/addUser", userData);
+      await Axios.post(`${HOST_ADDRESS}/addUser`, userData);
       fetchUsers();
       toast.success("User added successfully!");
       setNewUser({
@@ -81,7 +83,7 @@ const Users = () => {
 
   const editUser = async (userId, userData) => {
     try {
-      await Axios.put(`http://localhost:3001/editUser/${userId}`, userData);
+      await Axios.put(`${HOST_ADDRESS}/editUser/${userId}`, userData);
       fetchUsers();
       toast.success("User updated successfully!");
     } catch (error) {
@@ -92,7 +94,7 @@ const Users = () => {
 
   const removeUser = async (userId) => {
     try {
-      await Axios.delete(`http://localhost:3001/removeUser/${userId}`);
+      await Axios.delete(`${HOST_ADDRESS}/removeUser/${userId}`);
       fetchUsers();
       toast.success("User removed successfully!");
     } catch (error) {
@@ -102,7 +104,7 @@ const Users = () => {
   };
 
   const fetchUsers = () => {
-    Axios.get("http://localhost:3001/users")
+    Axios.get(`${HOST_ADDRESS}/users`)
       .then((response) => {
         console.log("Fetched users:", response.data);
         setUsers(response.data);
@@ -116,7 +118,7 @@ const Users = () => {
     fetchUsers();
 
     // Fetch manual control requests
-    Axios.get("http://localhost:3001/manual-control-requests")
+    Axios.get(`${HOST_ADDRESS}/manual-control-requests`)
       .then((response) => setManualControlRequests(response.data))
       .catch((error) =>
         console.error("Failed to fetch manual control requests:", error)
@@ -126,9 +128,7 @@ const Users = () => {
   const handleGrantRequest = async (requestId) => {
     try {
       // Code for granting manual control request
-      await Axios.put(
-        `http://localhost:3001/grant-manual-control/${requestId}`
-      );
+      await Axios.put(`${HOST_ADDRESS}/grant-manual-control/${requestId}`);
 
       // Remove the granted request from the list
       setManualControlRequests(
@@ -147,7 +147,7 @@ const Users = () => {
   const handleDenyRequest = async (requestId) => {
     try {
       // Code for denying manual control request
-      await Axios.put(`http://localhost:3001/deny-manual-control/${requestId}`);
+      await Axios.put(`${HOST_ADDRESS}/deny-manual-control/${requestId}`);
 
       // Remove the denied request from the list
       setManualControlRequests(

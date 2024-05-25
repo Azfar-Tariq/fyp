@@ -6,6 +6,8 @@ import { UilSave } from "../../assets/icons/save";
 import { MaterialSymbolsBackspaceRounded } from "../../assets/icons/clear";
 // import { fetchData } from "../../pages/Cameras"; // Import the fetchData function
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 const InsertModel = ({ isOpen, onClose }) => {
   const [areas, setAreas] = useState([]);
   const [selectedArea, setSelectedArea] = useState("");
@@ -14,7 +16,7 @@ const InsertModel = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     // Fetch areas data when the component mounts
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`${HOST_ADDRESS}/readArea`)
       .then((response) => {
         setAreas(response.data);
         // console.log(response.data)
@@ -38,7 +40,7 @@ const InsertModel = ({ isOpen, onClose }) => {
     // console.log(selectedArea);
 
     // Call the API to add a new camera
-    Axios.post("http://localhost:3001/insertCamera", newCamera)
+    Axios.post(`${HOST_ADDRESS}/insertCamera`, newCamera)
       .then((response) => {
         console.log("Camera saved to database");
         // Add the new camera to the data array

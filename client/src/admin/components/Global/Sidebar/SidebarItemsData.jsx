@@ -31,11 +31,11 @@ const sidebarItems = [
     img: <MaterialSymbolsAndroidCamera />,
     dest: "/admin/cameras",
   },
-  {
-    name: "Users",
-    img: <PhUsersBold />,
-    dest: "/admin/users",
-  },
+  // {
+  //   name: "Users",
+  //   img: <PhUsersBold />,
+  //   dest: "/admin/users",
+  // },
   {
     name: "Profile",
     img: <MaterialSymbolsAccountCircle />,

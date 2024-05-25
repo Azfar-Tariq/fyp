@@ -1,5 +1,5 @@
 import { IoSettings } from "react-icons/io5";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoPeople } from "react-icons/io5";
 import { MaterialSymbolsArrowForwardIosRounded } from "../../assets/icons/forward";
 import { MaterialSymbolsAndroidCamera } from "../../assets/icons/camera";
@@ -8,53 +8,15 @@ import { MajesticonsMapMarkerArea } from "../../assets/icons/area";
 import { Link } from "react-router-dom";
 import Axios from "axios";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 export default function DashboardStatsGrid() {
   const [users, setUsers] = useState(0);
   const [areas, setAreas] = useState(0);
   const [cameras, setCameras] = useState(0);
 
   useEffect(() => {
-    // Dummy data for the line graph
-    const data = {
-      labels: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-      datasets: [
-        {
-          label: "Electricity Usage",
-          data: [12, 19, 3, 5, 2, 3, 15, 17, 8, 2, 10, 15],
-          fill: false,
-          borderColor: "rgb(75, 192, 192)",
-          tension: 0.1,
-        },
-      ],
-    };
-
-    // Creating the line graph
-    const ctx = document.getElementById("analyticsChart");
-    let chartInstance = new Chart(ctx, {
-      type: "line",
-      data: data,
-    });
-
-    return () => {
-      chartInstance.destroy(); // Destroy the chart instance when the component unmounts
-    };
-  }, []);
-
-  useEffect(() => {
-    Axios.get("http://localhost:3001/users")
+    Axios.get(`${HOST_ADDRESS}/users`)
       .then((res) => {
         setUsers(res.data.length);
       })
@@ -62,7 +24,7 @@ export default function DashboardStatsGrid() {
         console.error("Failed to get Users:", err);
       });
 
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`${HOST_ADDRESS}/readArea`)
       .then((res) => {
         setAreas(res.data.length);
       })
@@ -70,7 +32,7 @@ export default function DashboardStatsGrid() {
         console.error("Failed to get Areas:", err);
       });
 
-    Axios.get("http://localhost:3001/readAllCameras")
+    Axios.get(`${HOST_ADDRESS}/readAllCameras`)
       .then((res) => {
         setCameras(res.data.length);
       })
@@ -81,15 +43,15 @@ export default function DashboardStatsGrid() {
 
   return (
     <div className="bg-primary">
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-        <DashboardBox
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        {/* <DashboardBox
           icon={<IoPeople className="text-6xl p-0 m-0 text-icon" />}
           title="Users"
           value={users}
           link="/admin/users"
           color="bg-background"
           description="Manage user accounts and permissions."
-        />
+        /> */}
         <DashboardBox
           icon={
             <MajesticonsMapMarkerArea
@@ -132,28 +94,96 @@ export default function DashboardStatsGrid() {
 }
 
 function AnalyticsGraph() {
-  const [selectedInterval, setSelectedInterval] = useState("daily");
+  const chartRef = useRef(null);
+  const DATA_LIMIT = 10;
 
-  // Function to handle interval change
-  const handleIntervalChange = (event) => {
-    setSelectedInterval(event.target.value);
-  };
+  useEffect(() => {
+    const ctx = document.getElementById("analyticsChart").getContext("2d");
+    const initialData = {
+      labels: [], // This will be updated dynamically
+      datasets: [
+        {
+          label: "Electric Current",
+          data: [],
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+          fill: false,
+        },
+        {
+          label: "Voltage",
+          data: [],
+          borderColor: "rgb(255, 99, 132)",
+          tension: 0.1,
+          fill: false,
+        },
+        {
+          label: "Power",
+          data: [],
+          borderColor: "rgb(54, 162, 235)",
+          tension: 0.1,
+          fill: false,
+        },
+      ],
+    };
+
+    const chartInstance = new Chart(ctx, {
+      type: "line",
+      data: initialData,
+    });
+
+    chartRef.current = chartInstance;
+
+    return () => {
+      chartInstance.destroy(); // Clean up chart instance on component unmount
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchData = () => {
+      Axios.get(`${HOST_ADDRESS}/recvStats`)
+        .then((res) => {
+          const dataPoints = res.data;
+
+          const chart = chartRef.current;
+          if (chart) {
+            dataPoints.forEach((point) => {
+              const timestamp = point.TimeStamp
+                ? new Date(point.TimeStamp).toLocaleTimeString()
+                : new Date().toLocaleTimeString();
+
+              if (chart.data.labels.length >= DATA_LIMIT) {
+                chart.data.labels.shift(); // Remove oldest label
+                chart.data.datasets[0].data.shift(); // Remove oldest data point for Amp
+                chart.data.datasets[1].data.shift(); // Remove oldest data point for Vol
+                chart.data.datasets[2].data.shift(); // Remove oldest data point for Power
+              }
+
+              chart.data.labels.push(timestamp);
+              chart.data.datasets[0].data.push(point.Amp);
+              chart.data.datasets[1].data.push(point.Vol);
+              chart.data.datasets[2].data.push(point.Power);
+            });
+
+            chart.update();
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch data:", err);
+        });
+    };
+
+    const intervalId = setInterval(fetchData, 10000); // Fetch data every 10 seconds
+
+    // Initial fetch
+    fetchData();
+
+    return () => clearInterval(intervalId); // Clean up on unmount
+  }, []);
 
   return (
     <div className="bg-gray-800 w-full col-span-4 rounded-lg p-6 text-white">
       <h2 className="text-xl font-semibold mb-2">Analytics</h2>
       <canvas id="analyticsChart" width="400" height="200"></canvas>
-      <div className="mt-4">
-        <select
-          value={selectedInterval}
-          onChange={handleIntervalChange}
-          className="text-white bg-gray-700 px-3 py-1 rounded-md"
-        >
-          <option value="daily">Daily</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-      </div>
       <Link to="/admin/analytics" className="text-sm mt-2">
         Click to navigate
       </Link>

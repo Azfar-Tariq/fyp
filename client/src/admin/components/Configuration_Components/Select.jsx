@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import Axios from "axios";
 import { ToastContainer } from "react-toastify";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 export default function Select({
   selectedArea,
   selectedCamera,
@@ -24,7 +26,7 @@ export default function Select({
   }, [selectedArea]);
 
   const fetchAreas = () => {
-    Axios.get("http://localhost:3001/readArea")
+    Axios.get(`${HOST_ADDRESS}/readArea`)
       .then((response) => {
         setAreas(response.data);
       })
@@ -34,7 +36,7 @@ export default function Select({
   };
 
   const fetchCameras = () => {
-    Axios.get(`http://localhost:3001/readArea/${selectedArea}/readCamera`)
+    Axios.get(`${HOST_ADDRESS}/readArea/${selectedArea}/readCamera`)
       .then((response) => {
         setCameras(response.data);
       })

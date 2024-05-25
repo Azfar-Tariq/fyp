@@ -4,6 +4,8 @@ import { Popover, Transition } from "@headlessui/react";
 import { HiOutlineBell, HiSearch } from "react-icons/hi";
 import classNames from "classnames";
 
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 export default function Header({ pageTitle }) {
   const [user, setUser] = useState(null);
 
@@ -17,7 +19,7 @@ export default function Header({ pageTitle }) {
       }
 
       const response = await fetch(
-        `http://localhost:3001/admin-details?email=${email}`,
+        `${HOST_ADDRESS}/admin-details?email=${email}`,
         {
           headers: {
             "Content-Type": "application/json",

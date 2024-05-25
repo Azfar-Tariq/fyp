@@ -7,47 +7,24 @@ import {
   getFilteredRowModel,
 } from "@tanstack/react-table";
 import Axios from "axios";
-import { useRef } from "react";
 import { useEffect, useState } from "react";
-import { MaterialSymbolsDelete } from "./../assets/icons/delete";
 
-function IndeterminateCheckbox({ indeterminate, className = "", ...rest }) {
-  const ref = useRef(null);
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
 
-  useEffect(() => {
-    if (typeof indeterminate === "boolean") {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [ref, indeterminate, rest.checked]);
-
-  return (
-    <input
-      type="checkbox"
-      ref={ref}
-      className={className + " cursor-pointer"}
-      {...rest}
-    />
-  );
-}
-
-export default function Table({
-  selectedCamera,
-  onSelectedRectangleChange,
-  onDeleteRectangle,
-}) {
+export default function Table({ selectedCamera }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sorting, setSorting] = useState([]);
   const [filtering, setFiltering] = useState("");
-  const [rowSelection, setRowSelection] = useState([]);
-  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [manualStatusMap, setManualStatusMap] = useState(new Map());
 
   useEffect(() => {
     setLoading(true);
     Axios.get(
-      `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+      `${HOST_ADDRESS}/readCameraWithManualStatus/${selectedCamera}/readBoundedRectangles`
     )
       .then((response) => {
+        console.log(response.data);
         setData(response.data);
         setLoading(false);
       })
@@ -57,48 +34,31 @@ export default function Table({
       });
   }, [selectedCamera]);
 
-  const handleRowSelectionChange = (row) => {
-    // setSelectedRowId(row.original.RectangleID);
-    // onSelectedRectangleChange(row.original.RectangleID);
-    const newSelectedRowId = row.original.RectangleID;
-    setSelectedRowId((prevSelectedRowId) =>
-      prevSelectedRowId === newSelectedRowId ? null : newSelectedRowId
-    );
-    onSelectedRectangleChange(
-      selectedRowId === newSelectedRowId ? null : newSelectedRowId
-    );
-  };
+  useEffect(() => {
+    const newMap = new Map();
+    data.forEach((row) => {
+      newMap.set(row.RectangleID, !!row.Manual_Status);
+    });
+    console.log("Manual Status Map:", newMap); // Debugging
+    setManualStatusMap(newMap);
+  }, [data]);
 
-  const handleDeleteSelectedRow = () => {
-    if (selectedRowId) {
-      console.log(selectedRowId);
-      Axios.delete(
-        `http://localhost:3001/deleteBoundedRectangle/${selectedRowId}`
-      )
-        .then((response) => {
-          console.log(response);
-          setData((prevData) =>
-            prevData.filter((row) => row.RectangleID !== selectedRowId)
-          );
-          setSelectedRowId(null);
-          onDeleteRectangle();
-        })
-        .catch((error) => {
-          console.error(`Error deleting rectangle ${selectedRowId}`, error);
-        });
-    }
+  const updateManualStatus = (rectangleId, newManualStatus) => {
+    Axios.put(`${HOST_ADDRESS}/updateManualStatus/${rectangleId}`, {
+      Manual_Status: newManualStatus ? 1 : 0,
+    })
+      .then((response) => {
+        console.log(response.data);
+        const newMap = new Map(manualStatusMap);
+        newMap.set(rectangleId, newManualStatus);
+        setManualStatusMap(newMap);
+      })
+      .catch((error) => {
+        console.error("Failed to update manual status:", error);
+      });
   };
 
   const columns = [
-    {
-      id: "select",
-      cell: ({ row }) => (
-        <IndeterminateCheckbox
-          checked={selectedRowId === row.original.RectangleID}
-          onChange={() => handleRowSelectionChange(row)}
-        />
-      ),
-    },
     {
       header: "Rectangle ID",
       accessorKey: "RectangleID",
@@ -120,8 +80,37 @@ export default function Table({
       accessorKey: "y2",
     },
     {
-      header: "Status",
-      accessorKey: "Status",
+      header: "Automation Type",
+      accessorKey: "Manual_Status",
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={`${
+              manualStatusMap.get(row.original.RectangleID)
+                ? "bg-green-500"
+                : "bg-gray-300"
+            } w-12 h-6 rounded-full focus:outline-none`}
+            onClick={() =>
+              updateManualStatus(
+                row.original.RectangleID,
+                !manualStatusMap.get(row.original.RectangleID)
+              )
+            }
+          >
+            <span
+              className={`${
+                manualStatusMap.get(row.original.RectangleID)
+                  ? "translate-x-3"
+                  : "-translate-x-3"
+              } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
+            />
+          </button>
+          {manualStatusMap.get(row.original.RectangleID)
+            ? "Manual"
+            : "Automatic"}
+        </div>
+      ),
     },
   ];
 
@@ -135,12 +124,9 @@ export default function Table({
     state: {
       sorting: sorting,
       globalFilter: filtering,
-      rowSelection,
     },
     onSortingChange: setSorting,
     onFilteringChange: setFiltering,
-    onRowSelectionChange: setRowSelection,
-    enableRowSelection: true,
   });
 
   return (
@@ -153,23 +139,17 @@ export default function Table({
           <input
             id="filter"
             type="text"
-            className="bg-purple-50 border border-gray-300 py-2 px-4 rounded focus:outline-none focus:border-purple-400"
+            className="bg-background text-white py-2 px-4 rounded focus:outline-none"
             placeholder="Search..."
             value={filtering}
             onChange={(e) => setFiltering(e.target.value)}
           />
         </div>
-        <button
-          onClick={handleDeleteSelectedRow}
-          className="bg-purple-500 p-2 rounded-full hover:bg-purple-700 transition duration-100 ease-in-out focus:outline-none"
-        >
-          <MaterialSymbolsDelete />
-        </button>
       </div>
       {loading ? (
-        <div>Loading ...</div>
+        <div>Loading...</div>
       ) : (
-        <table className="w3-table-all">
+        <table className="w-full table-auto bg-background text-white">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -177,6 +157,7 @@ export default function Table({
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
+                    className="py-2 px-4 cursor-pointer text-left"
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -197,7 +178,7 @@ export default function Table({
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
+                  <td key={cell.id} className="py-2 px-4">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -209,27 +190,27 @@ export default function Table({
       <div className="flex justify-center items-center gap-4 mt-2">
         <button
           onClick={() => table.setPageIndex(0)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           First Page
         </button>
         <button
           disabled={!table.getCanPreviousPage()}
           onClick={() => table.previousPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Previous Page
         </button>
         <button
           disabled={!table.getCanNextPage()}
           onClick={() => table.nextPage()}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Next Page
         </button>
         <button
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-full select-none hover:bg-gray-900/10 active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-white uppercase align-middle transition-all rounded-full select-none bg-background hover:bg-icon hover:text-black active:bg-gray-900/20 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
         >
           Last Page
         </button>

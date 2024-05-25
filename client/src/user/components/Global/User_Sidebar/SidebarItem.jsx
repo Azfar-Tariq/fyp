@@ -1,20 +1,22 @@
-function SidebarItem({ item,active, onClick, ...rest }) {
-    return (
-      <li onClick={onClick} {...rest}
-        className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${
-          active
-            ? "bg-gradient-to-tr from-indigo-200 to-indigo-100 text-indigo-800"
-            : "hover:bg-indigo-50 text-gray-600"
-        }`}
+function SidebarItem({ item, active, onClick, ...rest }) {
+  return (
+    <li
+      onClick={onClick}
+      {...rest}
+      className={`relative flex items-center py-2 px-3 gap-4 my-1 font-medium rounded-md cursor-pointer transition-all duration-100 group ${
+        active
+          ? "bg-icon text-background text-lg"
+          : "hover:bg-icon hover:text-background text-white hover:text-lg"
+      }`}
+    >
+      {item.img}
+      <span
+        className={`overflow-hidden text-md font-medium transition-all duration-100`}
       >
-        {item.img}
-        <span
-          className={`overflow-hidden transition-all `}
-        >
-          {item.name}
-        </span>
-      </li>
-    );
-  }
+        {item.name}
+      </span>
+    </li>
+  );
+}
 
-  export default SidebarItem
+export default SidebarItem;

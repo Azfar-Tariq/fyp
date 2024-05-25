@@ -5,16 +5,12 @@ const sql = require("mssql");
 const multer = require("multer");
 const path = require("path");
 const app = express();
+require("dotenv").config();
 
 app.use(express.json());
 app.use(cors());
 
 const server = http.createServer(app); // Create HTTP server
-// const io = require("socket.io")(server, {
-//   cors: {
-//     origin: "*",
-//   },
-// });
 
 // SQL Server configuration
 const config = {
@@ -37,6 +33,10 @@ const poolConnect = pool.connect();
 poolConnect
   .then(() => {
     console.log("Connected to SQL Server");
+
+    app.get("/checkServerStatus", (req, res) => {
+      res.status(200).json({ serverStatus: true });
+    });
 
     //....................................User Login and Logout Endpoints................................
 
@@ -309,176 +309,6 @@ poolConnect
         res.status(500).json({ message: "Internal server error" });
       }
     });
-
-    // Endpoint to grant manual control access
-    // app.put("/grant-manual-control/:requestId", async (req, res) => {
-    //   try {
-    //     const { requestId } = req.params;
-    //     const result = await pool
-    //       .request()
-    //       .input("requestId", sql.Int, requestId)
-    //       .query(
-    //         "SELECT teacherId FROM ManualControlRequests WHERE id = @requestId"
-    //       );
-    //     const teacherId = result.recordset[0].teacherId;
-    //     const emailResult = await pool
-    //       .request()
-    //       .input("teacherId", sql.Int, teacherId)
-    //       .query("SELECT email FROM users WHERE id = @teacherId");
-
-    //     const loggedInEmail = emailResult.recordset[0].email;
-    //     console.log(loggedInEmail);
-
-    //     // Emit a Socket.IO event to notify the user
-    //     io.to(loggedInEmail).emit("manualControlNotification", {
-    //       status: "Granted",
-    //       email: loggedInEmail,
-    //     });
-
-    //     console.log(requestId);
-    //     // Fetch the teacherId associated with the requestId
-
-    //     // Update the request status in the database (you may want to implement notification logic here)
-    //     await Promise.all([
-    //       pool
-    //         .request()
-    //         .input("requestId", sql.Int, requestId)
-    //         .query(
-    //           "UPDATE ManualControlRequests SET status = 'Granted' WHERE id = @requestId"
-    //         ),
-    //       pool
-    //         .request()
-    //         .input("teacherId", sql.Int, teacherId)
-    //         .query(
-    //           "UPDATE users SET manualControlRequested = '2' WHERE id = @teacherId"
-    //         ),
-    //     ]);
-
-    //     res.status(200).json({ message: "Access granted successfully!" });
-    //   } catch (error) {
-    //     console.error("Error granting manual control access:", error);
-    //     res.status(500).json({ message: "Internal server error." });
-    //   }
-    // });
-
-    // Endpoint to deny manual control access
-    // app.put("/deny-manual-control/:requestId", async (req, res) => {
-    //   try {
-    //     const { requestId } = req.params;
-    //     const loggedInEmail = req.body.loggedInEmail;
-
-    //     // Emit a Socket.IO event to notify the user
-    //     io.to(loggedInEmail).emit("manualControlNotification", {
-    //       status: "Denied",
-    //       email: loggedInEmail,
-    //     });
-    //     const result = await pool
-    //       .request()
-    //       .input("requestId", sql.Int, requestId)
-    //       .query(
-    //         "SELECT teacherId FROM ManualControlRequests WHERE id = @requestId"
-    //       );
-
-    //     const teacherId = result.recordset[0].teacherId;
-
-    //     // Update the request status and manualControlRequested in the database
-    //     await Promise.all([
-    //       pool
-    //         .request()
-    //         .input("requestId", sql.Int, requestId)
-    //         .query(
-    //           "UPDATE ManualControlRequests SET status = 'Denied' WHERE id = @requestId"
-    //         ),
-    //       await pool
-    //         .request()
-    //         .input("teacherId", sql.Int, teacherId)
-    //         .query(
-    //           "UPDATE users SET manualControlRequested = '0' WHERE id = @teacherId"
-    //         ),
-    //     ]);
-
-    //     res.status(200).json({ message: "Access denied successfully!" });
-    //   } catch (error) {
-    //     console.error("Error denying manual control access:", error);
-    //     res.status(500).json({ message: "Internal server error." });
-    //   }
-    // });
-
-    // Endpoint to handle manual control request
-    //     app.post("/request-manual-control", async (req, res) => {
-    //       try {
-    //         const { teacherEmail, labId, buildingId } = req.body;
-
-    //         // Fetch teacher details using email from the users table
-    //         const requestUser = await pool
-    //           .request()
-    //           .input("email", sql.NVarChar, teacherEmail)
-    //           .query("SELECT id, name FROM users WHERE email = @email");
-
-    //         if (requestUser.recordset.length === 0) {
-    //           console.error("User not found with the provided email.");
-    //           res.status(404).json({ message: "User not found." });
-    //           return;
-    //         }
-
-    //         const teacherId = requestUser.recordset[0].id;
-    //         const teacherName = requestUser.recordset[0].name;
-
-    //         // Update the 'manualControlRequested' status for the user
-    //         const updateRequest = pool.request();
-    //         await updateRequest
-    //           .input("teacherId", sql.Int, teacherId)
-    //           .query(
-    //             "UPDATE users SET manualControlRequested = 1 WHERE id = @teacherId"
-    //           );
-
-    //         // Store the request in the database
-    //         const insertRequest = pool.request();
-    //         await insertRequest
-    //           .input("teacherId", sql.Int, teacherId)
-    //           .input("labId", sql.Int, labId)
-    //           .input("buildingId", sql.Int, buildingId)
-    //           .query(
-    //             "INSERT INTO ManualControlRequests (teacherId, labId, buildingId, status, timestamp) VALUES (@teacherId, @labId, @buildingId, 'Pending', GETDATE())"
-    //           );
-
-    //         // Return the details of the manual control request, including teacher's name
-    //         res.status(200).json({
-    //           message: "Request sent successfully!",
-    //           teacherName: teacherName,
-    //           labId: labId,
-    //           buildingId: buildingId,
-    //         });
-    //       } catch (error) {
-    //         console.error("Error processing manual control request:", error);
-    //         res.status(500).json({ message: "Internal server error." });
-    //       }
-    //     });
-
-    //     // Endpoint to get manual control requests
-    //     app.get("/manual-control-requests", async (req, res) => {
-    //       try {
-    //         const request = pool.request();
-    //         const result = await request.query(`
-    //     SELECT MCR.*, U.name AS teacherName, L.labName, B.buildingName
-    //     FROM ManualControlRequests MCR
-    //     JOIN users U ON MCR.teacherId = U.id
-    //     JOIN Lab L ON MCR.labId = L.id
-    //     JOIN BuildingData B ON MCR.buildingId = B.id
-    //     WHERE MCR.status = 'Pending'
-    // `);
-
-    //         if (result.recordset.length > 0) {
-    //           const manualRequests = result.recordset;
-    //           res.status(200).json(manualRequests);
-    //         } else {
-    //           res.status(404).json({ message: "No manual control requests found" });
-    //         }
-    //       } catch (error) {
-    //         console.error("Error fetching manual control requests:", error);
-    //         res.status(500).json({ message: "Internal Server Error" });
-    //       }
-    //     });
 
     // -------- Area Data Endpoints --------
     // send data to database
@@ -789,7 +619,13 @@ poolConnect
     app.post("/readCamera/:cameraId/addBoundedRectangle", async (req, res) => {
       const cameraId = req.params.cameraId;
       const { x1, y1, x2, y2, status } = req.body;
-      const manualStatus = false;
+      const BoardID = 1;
+      const Relay1 = 1;
+      const Mode1 = 1;
+      const Relay2 = 1;
+      const Mode2 = 1;
+      const Relay3 = 1;
+      const Mode3 = 1;
 
       try {
         const request = pool.request();
@@ -819,11 +655,17 @@ poolConnect
         const newRectangleId = result.recordset[0].RectangleID;
 
         await request
-          .input("rectangleId", sql.Int, newRectangleId)
-          .input("manualStatus", sql.Bit, manualStatus)
+          .input("BoardID", sql.Int, BoardID)
+          .input("RectangleID", sql.Int, newRectangleId)
+          .input("Relay1", sql.Bit, Relay1)
+          .input("Mode1", sql.Bit, Mode1)
+          .input("Relay2", sql.Bit, Relay2)
+          .input("Mode2", sql.Bit, Mode2)
+          .input("Relay3", sql.Bit, Relay3)
+          .input("Mode3", sql.Bit, Mode3)
           .query(
-            `INSERT INTO IoTDevices (RectangleID, Manual_Status) 
-            VALUES (@rectangleId, @manualStatus)`
+            `INSERT INTO BoardStatus (BoardID, RectangleID, Relay1, Mode1, Relay2, Mode2, Relay3, Mode3) 
+            VALUES (@BoardID, @RectangleID, @Relay1, @Mode1, @Relay2, @Mode2, @Relay3, @Mode3)`
           );
 
         res.status(200).send("Bounded Rectangle saved to database");
@@ -852,6 +694,34 @@ poolConnect
           .send("Failed to get Bounded Rectangles from the database");
       }
     });
+    app.get(
+      "/camera/:cameraId/boundedRectanglesWithDeviceID",
+      async (req, res) => {
+        const cameraId = req.params.cameraId;
+
+        try {
+          const request = pool.request();
+          const result = await request.query(`
+          SELECT 
+            BR.x1, BR.y1, BR.x2, BR.y2, IOT.DeviceID
+          FROM 
+            BoundedRectangle BR
+          LEFT JOIN 
+            IoTDevices IOT ON BR.RectangleID = IOT.RectangleID
+          WHERE 
+            BR.CameraID = ${cameraId}
+        `);
+          res.status(200).json(result.recordset);
+        } catch (err) {
+          console.log(err);
+          res
+            .status(500)
+            .send(
+              "Failed to get Bounded Rectangles and IoT Devices from the database"
+            );
+        }
+      }
+    );
 
     // edit data from database
     app.put("/updateBoundedRectangle/:rectangleId", async (req, res) => {
@@ -906,13 +776,36 @@ poolConnect
 
         try {
           const request = pool.request();
+          request.input("CameraID", sql.Int, cameraId);
           const result = await request.query(`
-        SELECT BR.RectangleID, BR.x1, BR.y1, BR.x2, BR.y2, BR.Status, ID.Manual_Status
-        FROM BoundedRectangle BR
-        INNER JOIN IoTDevices ID ON BR.RectangleID = ID.RectangleID
-        WHERE BR.CameraID = ${cameraId}
+        SELECT 
+          BR.RectangleID, 
+          BR.x1, 
+          BR.y1, 
+          BR.x2, 
+          BR.y2, 
+          BS.Mode1,
+          BS.Mode2,
+          BS.Mode3
+        FROM 
+          BoundedRectangle BR
+        INNER JOIN 
+          BoardStatus BS ON BR.RectangleID = BS.RectangleID
+        WHERE 
+          BR.CameraID = @CameraID
       `);
-          res.status(200).json(result.recordset);
+
+          // console.log(result.recordset);
+          // Convert Mode1, Mode2, and Mode3 from BIT to boolean
+          const response = result.recordset.map((record) => ({
+            ...record,
+            Mode1: record.Mode1 === 1,
+            Mode2: record.Mode2 === 1,
+            Mode3: record.Mode3 === 1,
+          }));
+          // console.log(response);
+
+          res.status(200).json(response);
         } catch (err) {
           console.error(err);
           res
@@ -923,22 +816,407 @@ poolConnect
         }
       }
     );
-    app.put("/updateManualStatus/:rectangleId", async (req, res) => {
-      const rectangleId = req.params.rectangleId;
-      const { Manual_Status } = req.body;
-      console.log(req.body);
+
+    const storage = multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, "./images"); // Store uploaded images in the 'images' directory
+      },
+      filename: function (req, file, cb) {
+        // Generate a unique filename for the image
+        const ext = path.extname(file.originalname);
+        cb(null, `lab_image${ext}`);
+      },
+    });
+    const upload = multer({ storage: storage });
+
+    // Route to receive and store the image
+    app.post("/fetch-image", upload.single("image"), (req, res) => {
+      console.log("API Called");
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        const filename = req.file.filename;
+        res.json({ success: true, filename });
+        console.log("API success");
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        res.status(500).json({ error: "An error occurred" });
+      }
+    });
+
+    // Route to serve the stored image
+    app.get("/read-image/:filename", (req, res) => {
+      try {
+        const { filename } = req.params;
+
+        // Serve the image file from the local storage
+        res.sendFile(path.join(__dirname, "images", filename));
+      } catch (error) {
+        console.error("Error serving image:", error);
+        res.status(404).send("Image not found");
+      }
+    });
+
+    // api to recieve stats for frontend
+    app.put("/energydata", async (req, res) => {
+      const { BoardID, Amp, Vol, Power } = req.body;
+      console.log(BoardID);
+      console.log(Amp);
+      console.log(Vol);
+      console.log(Power);
+
+      // Check if all required fields are provided
+      if (
+        !BoardID ||
+        Amp === undefined ||
+        Vol === undefined ||
+        Power === undefined
+      ) {
+        return res.status(400).json({
+          Status: "FAILURE",
+          Response: 400,
+          Message: "Invalid input. BoardID, Amp, Vol, and Power are required.",
+        });
+      }
 
       try {
         const request = pool.request();
+        request.input("BoardID", sql.Int, BoardID);
+
+        // Check if the BoardID exists in the database
+        const boardCheckResult = await request.query(
+          "SELECT BoardID FROM BoardStatus WHERE BoardID = @BoardID"
+        );
+        if (boardCheckResult.recordset.length === 0) {
+          return res.status(501).json({
+            Status: "FAILURE",
+            Response: 501,
+            Message: "Board not found in DB",
+          });
+        }
+
+        // Update the values of Amp, Vol, and Power for the specified BoardID
+        // request.input("BoardID", sql.Int, BoardID);
+        request.input("Amp", sql.Real, Amp);
+        request.input("Vol", sql.Real, Vol);
+        request.input("Power", sql.Real, Power);
+        request.input("Timestamp", sql.DateTime, new Date());
+
+        await request.query(`
+      INSERT INTO EnergyConsumption (BoardID, Amp, Vol, Power, Timestamp)
+      VALUES (@BoardID, @Amp, @Vol, @Power, @Timestamp)
+    `);
+
+        res.status(200).json({
+          Status: "SUCCESS",
+          Response: 200,
+          Message: "Record Updated",
+        });
+      } catch (error) {
+        console.error("Error updating record:", error);
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Internal Server Error",
+        });
+      }
+    });
+
+    // Create an endpoint to retrieve energy data
+    app.get("/recvStats", async (req, res) => {
+      try {
+        const pool = await sql.connect(config);
+        const result = await pool
+          .request()
+          .query("SELECT Amp, Vol, Power, Timestamp FROM EnergyConsumption");
+
+        // Format the data to the required structure
+        const formattedData = result.recordset.map((row) => ({
+          Amp: row.Amp,
+          Vol: row.Vol,
+          Power: row.Power,
+          TimeStamp: row.Timestamp,
+        }));
+
+        res.status(200).json(formattedData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Internal Server Error",
+        });
+      }
+    });
+
+    // ***************  Desktop Agent APIs ***************
+    // send mode of relay requested by desktop agent
+    app.get("/getMode/:relayId", async (req, res) => {
+      const relayId = parseInt(req.params.relayId);
+      console.log("Relay", relayId);
+
+      // Validate the input
+      if (isNaN(relayId)) {
+        return res.status(400).send("Invalid input. Relay ID are required.");
+      }
+
+      // Check if Relay is within the expected range
+      if (![1, 2, 3].includes(relayId)) {
+        return res.status(400).send("Invalid Relay. This relay does not exist");
+      }
+
+      try {
+        // Query the database for the mode of the relay
+        const request = pool.request();
         const result = await request.query(`
-        UPDATE IoTDevices
-        SET Manual_Status = ${Manual_Status}
-        WHERE RectangleID = ${rectangleId}
-      `);
-        res.status(200).send("Manual status updated successfully");
+      SELECT Mode${relayId} AS Mode
+      FROM BoardStatus
+    `);
+
+        // If no results are found, return a failure response
+        if (result.recordset.length === 0) {
+          return res.status(404).json({
+            Status: "FAILURE",
+            Response: 404,
+            Message: `Mode for Relay ${relayId} not found in DB`,
+          });
+        }
+
+        // If results are found, return the mode of the relay
+        res.status(200).json({
+          Mode: result.recordset[0].Mode, // Assuming only one row is returned
+        });
+      } catch (err) {
+        // If an error occurs during database query, return a failure response
+        console.error(err);
+        res.status(500).send("Failed to get mode of relay from the database");
+      }
+    });
+
+    // desktop agent will update mode
+    app.put("/updateMode/:boardId", async (req, res) => {
+      const boardId = parseInt(req.params.boardId, 10);
+      const { Relay, Mode } = req.body;
+      console.log("Relay", Relay);
+      console.log("Mode", Mode);
+
+      // Validate the input
+      if (isNaN(boardId) || isNaN(Relay) || Mode === undefined) {
+        return res
+          .status(400)
+          .send("Invalid input. BoardID, Relay, and Mode are required.");
+      }
+
+      // Check if Relay is within the expected range
+      if (![1, 2, 3].includes(Relay)) {
+        return res.status(400).send("Invalid Relay. It should be 1, 2, or 3.");
+      }
+
+      // Construct the column name for the mode
+      const modeColumn = `Mode${Relay}`;
+      if (Mode !== 0 && Mode !== 1) {
+        return res.status(400).send("Invalid Mode. It should be 0 or 1.");
+      }
+      // const modeValue = Mode ? 1 : 0; // Ensuring the mode is either 0 or 1
+      // console.log("Mode Value", modeValue);
+
+      try {
+        await pool.connect();
+        const request = pool.request();
+        request.input("BoardID", sql.Int, boardId);
+        request.input("Mode", sql.Bit, Mode);
+
+        // SQL query to update the mode
+        const updateQuery = `
+      UPDATE BoardStatus
+      SET ${modeColumn} = @Mode
+      WHERE BoardID = @BoardID;
+    `;
+
+        await request.query(updateQuery);
+
+        res.status(200).send("Relay mode updated successfully");
       } catch (err) {
         console.error(err);
-        res.status(500).send("Failed to update manual status");
+        res.status(500).send("Failed to update relay mode");
+      }
+    });
+
+    app.get("/getRectangleData/:cameraId", async (req, res) => {
+      const { cameraId } = req.params;
+      try {
+        const sqlRequest = pool.request();
+        sqlRequest.input("CameraID", sql.Int, cameraId);
+
+        const result = await sqlRequest.query(`
+          SELECT RectangleID, x1, y1, x2, y2 FROM BoundedRectangle WHERE CameraID = @CameraID
+        `);
+
+        if (result.recordset.length > 0) {
+          const rectangles = result.recordset.map((rectangle) => {
+            return {
+              RectangleID: rectangle.RectangleID,
+              x1: rectangle.x1,
+              y1: rectangle.y1,
+              x2: rectangle.x2,
+              y2: rectangle.y2,
+            };
+          });
+          res.status(200).json(rectangles);
+        } else {
+          res
+            .status(404)
+            .json({ message: "No rectangles found for the specified camera" });
+        }
+      } catch (err) {
+        console.error("SQL error:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.put("/updateBoardStatus/:rectangleId", async (req, res) => {
+      console.log("Board Status Updated");
+      const { rectangleId } = req.params;
+      const { status } = req.body;
+      console.log("RectangleId", rectangleId);
+      console.log("Status", status);
+      try {
+        const sqlRequest = pool.request(); // Changed variable name from 'request' to 'sqlRequest'
+        sqlRequest.input("status", status); // Renamed 'request' to 'sqlRequest' here
+        sqlRequest.input("RectangleID", sql.Int, rectangleId);
+
+        // Check Mode2 and Mode3
+        const result = await sqlRequest.query(`
+          SELECT Mode1, Mode2 FROM BoardStatus WHERE RectangleID = @RectangleID AND BoardID = 1
+        `);
+
+        if (result.recordset.length > 0) {
+          const { Mode1, Mode2 } = result.recordset[0];
+          // console.log(Mode2, Mode3);
+
+          if (Mode1 === true && Mode2 === true) {
+            // Update Relay2 and Relay3 to 0
+            await sqlRequest.query(`
+              UPDATE BoardStatus
+              SET Relay1 = @status, Relay2 = @status
+              WHERE RectangleID = @RectangleID AND BoardID = 1
+            `);
+
+            res.status(200).json({ message: `Relays updated to ${status}` });
+          } else {
+            res.status(200).json({ message: "No update needed" });
+          }
+        } else {
+          res.status(404).json({ message: "RectangleID not found" });
+        }
+      } catch (err) {
+        console.error("SQL error:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    // change all relay status on when manual
+    app.put("/changeDeviceStatus/:boardId", async (req, res) => {
+      const boardId = req.params.boardId;
+      const { status } = req.body;
+
+      try {
+        const request = pool.request();
+        request.input("BoardID", boardId);
+        request.input("Status", status);
+        const result = await request.query(`
+          UPDATE BoardStatus
+          SET Relay1 = @Status, Relay2 = @Status, Relay3 = @Status
+          WHERE BoardID = @BoardID
+        `);
+
+        if (result.rowsAffected[0] > 0) {
+          res.status(200).send("Board status updated successfully");
+        } else {
+          res.status(404).send("Board not found");
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).send("Failed to update Board status in the database");
+      }
+    });
+
+    // tell desktop to shutdown on when occupancy status is none or 0
+    app.get("/occupancyStatus", async (req, res) => {
+      console.log("Occupancy Status API Called");
+      try {
+        // Query the database for all entries in the BoundedRectangle table
+        const pool = await sql.connect(config);
+        const request = pool.request();
+        const result = await request.query(`
+      SELECT CAST(Status AS INT) AS Status
+      FROM BoundedRectangle
+    `);
+
+        // Convert the integer status to boolean
+        const response = result.recordset.map((record) => ({
+          ...record,
+          Status: record.Status === 1,
+        }));
+
+        // Send the response
+        res.status(200).json(response);
+        console.log(response);
+      } catch (err) {
+        // If an error occurs during the query, return a failure response
+        console.error("Error fetching rectangle status:", err);
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Failed to fetch rectangle status from the database",
+        });
+      }
+    });
+
+    // ***************  Board APIs ***************
+    // send board data for requested board id
+    app.post("/boardStatus", async (req, res) => {
+      // Extract the BoardID from the request body
+      const { BoardID } = req.body;
+      console.log("BoardID: ", BoardID);
+
+      try {
+        // Query the database for the board status based on BoardID
+        const request = pool.request();
+        request.input("BoardID", BoardID);
+        const result = await request.query(`
+      SELECT BoardID,
+             CAST(Relay1 AS INT) AS Relay1,
+             CAST(Mode1 AS INT) AS Mode1,
+             CAST(Relay2 AS INT) AS Relay2,
+             CAST(Mode2 AS INT) AS Mode2,
+             CAST(Relay3 AS INT) AS Relay3,
+             CAST(Mode3 AS INT) AS Mode3
+      FROM BoardStatus
+      WHERE BoardID = @BoardID
+    `);
+
+        // If no results are found, return a failure response
+        if (result.recordset.length === 0) {
+          return res.status(404).json({
+            Status: "FAILURE",
+            Response: 404,
+            Message: `BoardID not found in DB. BoardID= ${BoardID}`,
+          });
+        }
+
+        // If results are found, return the board status
+        res.status(200).json(result.recordset);
+      } catch (err) {
+        // If an error occurs during database query, return a failure response
+        console.error(err);
+        res.status(500).json({
+          Status: "FAILURE",
+          Response: 500,
+          Message: "Failed to fetch board status from the database",
+        });
       }
     });
 

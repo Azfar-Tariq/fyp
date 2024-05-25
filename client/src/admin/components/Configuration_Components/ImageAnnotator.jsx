@@ -4,20 +4,23 @@ import { MaterialSymbolsEditOutlineRounded } from "../../assets/icons/edit";
 import { UilSave } from "../../assets/icons/save";
 // import image2 from "../../assets/images/labs/lab8.jpg";
 // import image from "../../assets/images/labfetched/camera_image.jpg";
+import image from "../../../../../server/images/lab_image.jpg";
 import Axios from "axios";
 
 const MINIMUM_SHAPE_SIZE = 10;
 const DEFAULT_RECTANGLE_COLOR = "red";
 const HIGHLIGHTED_RECTANGLE_COLOR = "blue";
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+const RASPBERRY_IP = import.meta.env.VITE_RASPBERRY_PI_IP;
+const RASPBERRY_PORT = import.meta.env.VITE_RASPBERRY_PI_PORT;
 
 function ImageAnnotator({
   selectedRectangle,
   selectedCamera,
   onSave,
-  imageData,
+  // imageData,
 }) {
   const [data, setData] = useState([]);
-  // const [boundedRectanglesData, setBoundedRectanglesData] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [drawing, setDrawing] = useState(false);
@@ -30,132 +33,21 @@ function ImageAnnotator({
   });
   const [selectedRectangleId, setSelectedRectangleId] = useState(null);
   const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [cacheBuster] = useState(Date.now());
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
   // const [imageData, setImageData] = useState(null);
-  // const [picture, setPicture] = useState();
 
   useEffect(() => {
     fetchData();
   });
 
-  // useEffect(() => {
-  //   downloadImage();
-  // }, []); // Empty dependency array ensures useEffect runs only once
-
-  // const downloadImage = () => {
-  //   const apiUrl = "http://10.112.71.52:5000/get_room_image";
-
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.blob();
-  //     })
-  //     .then((blob) => {
-  //       // Convert the blob to a data URL
-  //       const reader = new FileReader();
-  //       reader.readAsDataURL(blob);
-  //       reader.onloadend = () => {
-  //         const dataUrl = reader.result;
-  //         // Set the image data in state
-  //         setImageData(dataUrl);
-  //       };
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching image:", error);
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   downloadImage();
-  // }, []); // Empty dependency array ensures useEffect runs only once
-
-  // const downloadImage = () => {
-  //   const apiUrl = "http://10.112.71.52:5000/get_room_image";
-
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.blob();
-  //     })
-  //     .then((blob) => {
-  //       // Convert the blob to a data URL
-  //       const reader = new FileReader();
-  //       reader.readAsDataURL(blob);
-  //       reader.onloadend = () => {
-  //         const dataUrl = reader.result;
-  //         // Set the image data in state
-  //         setImageData(dataUrl);
-  //       };
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching image:", error);
-  //     });
-  // };
-
-  // const downloadImage = () => {
-  //   const apiUrl = "http://10.120.141.94:5000/get_room_image";
-
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.blob();
-  //     })
-  //     .then((blob) => {
-  //       // Create a temporary URL for the blob
-  //       const url = window.URL.createObjectURL(blob);
-
-  //       // Create a temporary link element
-  //       const link = document.createElement("a");
-  //       link.href = url;
-  //       link.download = "camera_image.jpg"; // Set the download attribute
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-
-  //       // Revoke the temporary URL
-  //       window.URL.revokeObjectURL(url);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching image:", error);
-  //     });
-  // };
-
-  // const fetchImage = async () => {
-  //   try {
-  //     const response = await Axios.get("http://10.120.141.94/getImage", {
-  //       responseType: "blob", // Set response type to blob
-  //     });
-  //     const imageUrl = URL.createObjectURL(response.data); // Create object URL for blob data
-  //     setPicture(imageUrl); // Set image state with URL
-  //     console.log("Image fetched successfully");
-  //   } catch (error) {
-  //     console.error("Failed to fetch image:", error);
-  //   }
-  // };
-
   const fetchData = async () => {
     try {
       const response = await Axios.get(
-        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+        `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       );
       setData(response.data);
-      // const extractedData = data.map((rectangle) => ({
-      //   // id: rectangle.id,
-      //   x1: rectangle.x1,
-      //   y1: rectangle.y1,
-      //   x2: rectangle.x2,
-      //   y2: rectangle.y2,
-      // }));
-
-      // Store the extracted data in the new state
-      // setBoundedRectanglesData(extractedData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
@@ -295,7 +187,7 @@ function ImageAnnotator({
   const callEditedRectangle = () => {
     if (selectedRectangleId) {
       Axios.get(
-        `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+        `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
       )
         .then((response) => {
           const selectedRectData = response.data.find(
@@ -325,7 +217,7 @@ function ImageAnnotator({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = imageData;
+    img.src = `${image}?${cacheBuster}`;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -360,16 +252,13 @@ function ImageAnnotator({
         if (selectedRectangle) {
           const { id, x, y, width, height } = selectedRectanlge;
 
-          await Axios.put(
-            `http://localhost:3001/updateBoundedRectangle/${id}`,
-            {
-              x1: x,
-              y1: y,
-              x2: x + width,
-              y2: y + height,
-              status: 0,
-            }
-          );
+          await Axios.put(`${HOST_ADDRESS}/updateBoundedRectangle/${id}`, {
+            x1: x,
+            y1: y,
+            x2: x + width,
+            y2: y + height,
+            status: 0,
+          });
           console.log("Updated rectangle");
           setAnnotations([]);
         }
@@ -379,23 +268,10 @@ function ImageAnnotator({
     }
   };
 
-  // useEffect(() => {
-  //   console.log("data", data);
-  //   // Extract xi, y1, x2, y2, and id from each bounded rectangle in data
-  //   const extractedData = data.map((rectangle) => ({
-  //     // id: rectangle.id,
-  //     x1: rectangle.x1,
-  //     y1: rectangle.y1,
-  //     x2: rectangle.x2,
-  //     y2: rectangle.y2,
-  //   }));
-
-  //   // Store the extracted data in the new state
-  //   setBoundedRectanglesData(extractedData);
-  // }, []);
-
   const handleSaveButtonClick = async () => {
     try {
+      // change rectangleId to null after deleting the rectangle
+      console.log("Selected Rectangle ID:", selectedRectangleId);
       if (selectedRectangleId) {
         handleSaveChanges();
       } else {
@@ -407,7 +283,7 @@ function ImageAnnotator({
               annotation.height >= MINIMUM_SHAPE_SIZE
             ) {
               await Axios.post(
-                `http://localhost:3001/readCamera/${selectedCamera}/addBoundedRectangle`,
+                `${HOST_ADDRESS}/readCamera/${selectedCamera}/addBoundedRectangle`,
                 {
                   x1: annotation.x,
                   y1: annotation.y,
@@ -425,13 +301,13 @@ function ImageAnnotator({
           try {
             // Fetch all data from the database
             const response = await Axios.get(
-              `http://localhost:3001/readCamera/${selectedCamera}/readBoundedRectangles`
+              `${HOST_ADDRESS}/readCamera/${selectedCamera}/readBoundedRectangles`
             );
             const fetchedData = response.data;
 
             // Send fetched data to another PC
             const sendCoordinatesResponse = await Axios.post(
-              "http://10.120.143.187:5000/send_coordinates",
+              `http://${RASPBERRY_IP}:${RASPBERRY_PORT}/send_coordinates`,
               { coordinates: fetchedData }
             );
 
@@ -461,7 +337,7 @@ function ImageAnnotator({
     const ctx = canvas.getContext("2d");
 
     const img = new Image();
-    img.src = imageData;
+    img.src = `${image}?${cacheBuster}`;
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
@@ -510,7 +386,7 @@ function ImageAnnotator({
     data,
     selectedRectangle,
     selectedRectangleId,
-    imageData,
+    cacheBuster,
   ]);
 
   return (
@@ -523,7 +399,7 @@ function ImageAnnotator({
         style={{
           border: "1px solid #ccc",
           display: "block",
-          background: `url(${imageData})`,
+          background: `url(${image}?${cacheBuster})`,
           backgroundSize: "100% 100%",
         }}
         onMouseDown={handleMouseDown}

@@ -4,6 +4,9 @@ import sidebarItems from "./SidebarItemsData";
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLast, ChevronFirst } from "lucide-react";
+
+const HOST_ADDRESS = import.meta.env.VITE_HOST_ADDRESS;
+
 export default function SideBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState({ name: "", email: "" });
@@ -21,7 +24,7 @@ export default function SideBar() {
       }
 
       const response = await fetch(
-        `http://localhost:3001/admin-details?email=${email}`,
+        `${HOST_ADDRESS}/admin-details?email=${email}`,
         {
           headers: {
             "Content-Type": "application/json",
