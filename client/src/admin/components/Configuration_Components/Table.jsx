@@ -68,7 +68,11 @@ export default function Table({
   useEffect(() => {
     const newMap = new Map();
     data.forEach((row) => {
-      newMap.set(row.RectangleID, !!row.Manual_Status);
+      newMap.set(row.RectangleID, {
+        Mode1: !!row.Mode1,
+        Mode2: !!row.Mode2,
+        Mode3: !!row.Mode3,
+      });
     });
     console.log("Manual Status Map:", newMap); // Debugging
     setManualStatusMap(newMap);
@@ -84,20 +88,28 @@ export default function Table({
     );
   };
 
-  const updateManualStatus = (rectangleId, newManualStatus) => {
-    Axios.put(`${HOST_ADDRESS}/updateManualStatus/${rectangleId}`, {
-      Manual_Status: newManualStatus ? 1 : 0,
-    })
-      .then((response) => {
-        console.log(response.data);
-        const newMap = new Map(manualStatusMap);
-        newMap.set(rectangleId, newManualStatus);
-        setManualStatusMap(newMap);
-      })
-      .catch((error) => {
-        console.error("Failed to update manual status:", error);
-      });
-  };
+  // const updateManualStatus = async (rectangleId, modeKey, newManualStatus) => {
+  //   try {
+  //     await Axios.put(
+  //       `${HOST_ADDRESS}/updateStatus/${rectangleId}/${modeKey}`,
+  //       {
+  //         status: newManualStatus,
+  //       }
+  //     );
+  //     const newMap = new Map(manualStatusMap);
+  //     newMap.set(rectangleId, {
+  //       ...newMap.get(rectangleId),
+  //       [modeKey]: newManualStatus,
+  //     });
+  //     setManualStatusMap(newMap);
+  //   } catch (error) {
+  //     console.error("Failed to update manual status:", error);
+  //   }
+  // };
+
+  // const handleManualStatusUpdate = (rectangleId, modeKey, currentStatus) => {
+  //   updateManualStatus(rectangleId, modeKey, !currentStatus);
+  // };
 
   const handleDeleteSelectedRow = () => {
     if (selectedRowId) {
@@ -124,6 +136,12 @@ export default function Table({
       const newData = [...editableData];
       newData[rowIdx][key] = parseFloat(e.target.value);
       setEditableData(newData);
+
+      // const rectangleId = newData[rowIdx].RectangleID;
+      // const modeKey =
+      //   key === "Mode1" ? "Mode1" : key === "Mode2" ? "Mode2" : "Mode3";
+      // const newManualStatus = e.target.value !== "0"; // Convert 0 to false, other values to true
+      // updateManualStatus(rectangleId, modeKey, newManualStatus);
     }
   };
 
@@ -230,39 +248,46 @@ export default function Table({
         );
       },
     },
-    {
-      header: "Automation Type",
-      accessorKey: "Manual_Status",
-      cell: ({ row }) => (
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className={`${
-              manualStatusMap.get(row.original.RectangleID)
-                ? "bg-green-500"
-                : "bg-gray-300"
-            } w-12 h-6 rounded-full focus:outline-none`}
-            onClick={() =>
-              updateManualStatus(
-                row.original.RectangleID,
-                !manualStatusMap.get(row.original.RectangleID)
-              )
-            }
-          >
-            <span
-              className={`${
-                manualStatusMap.get(row.original.RectangleID)
-                  ? "translate-x-3"
-                  : "-translate-x-3"
-              } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
-            />
-          </button>
-          {manualStatusMap.get(row.original.RectangleID)
-            ? "Manual"
-            : "Automatic"}
-        </div>
-      ),
-    },
+    // {
+    //   header: "Automation Type",
+    //   accessorKey: "Manual_Status",
+    //   cell: ({ row }) => (
+    //     <div className="flex gap-2">
+    //       {["Mode1", "Mode2", "Mode3"].map((modeKey) => (
+    //         <div key={modeKey} className="flex gap-2 items-center">
+    //           {modeKey === "Mode1"
+    //             ? "Socket 1"
+    //             : modeKey === "Mode2"
+    //             ? "Socket 2"
+    //             : "Socket 3"}
+    //           <button
+    //             type="button"
+    //             className={`${
+    //               manualStatusMap.get(row.original.RectangleID)?.[modeKey]
+    //                 ? "bg-green-500"
+    //                 : "bg-gray-300"
+    //             } w-12 h-6 rounded-full focus:outline-none`}
+    //             onClick={() =>
+    //               handleManualStatusUpdate(
+    //                 row.original.RectangleID,
+    //                 modeKey,
+    //                 manualStatusMap.get(row.original.RectangleID)?.[modeKey]
+    //               )
+    //             }
+    //           >
+    //             <span
+    //               className={`${
+    //                 manualStatusMap.get(row.original.RectangleID)?.[modeKey]
+    //                   ? "translate-x-3"
+    //                   : "-translate-x-3"
+    //               } m-1 inline-block w-4 h-4 bg-white rounded-full shadow-md transform transition-transform`}
+    //             />
+    //           </button>
+    //         </div>
+    //       ))}
+    //     </div>
+    //   ),
+    // },
   ];
 
   const table = useReactTable({

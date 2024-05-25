@@ -43,15 +43,15 @@ export default function DashboardStatsGrid() {
 
   return (
     <div className="bg-primary">
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-        <DashboardBox
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        {/* <DashboardBox
           icon={<IoPeople className="text-6xl p-0 m-0 text-icon" />}
           title="Users"
           value={users}
           link="/admin/users"
           color="bg-background"
           description="Manage user accounts and permissions."
-        />
+        /> */}
         <DashboardBox
           icon={
             <MajesticonsMapMarkerArea
@@ -142,22 +142,28 @@ function AnalyticsGraph() {
     const fetchData = () => {
       Axios.get(`${HOST_ADDRESS}/recvStats`)
         .then((res) => {
-          const dataPoint = res.data[0]; // Assuming the API returns an array of data points
-          const { ElectricCurrent, Voltage, Power } = dataPoint;
+          const dataPoints = res.data;
 
           const chart = chartRef.current;
           if (chart) {
-            const now = new Date().toLocaleTimeString();
-            if (chart.data.labels.length >= DATA_LIMIT) {
-              chart.data.labels.shift(); // Remove oldest label
-              chart.data.datasets[0].data.shift(); // Remove oldest data point for Electric Current
-              chart.data.datasets[1].data.shift(); // Remove oldest data point for Voltage
-              chart.data.datasets[2].data.shift(); // Remove oldest data point for Power
-            }
-            chart.data.labels.push(now);
-            chart.data.datasets[0].data.push(ElectricCurrent);
-            chart.data.datasets[1].data.push(Voltage);
-            chart.data.datasets[2].data.push(Power);
+            dataPoints.forEach((point) => {
+              const timestamp = point.TimeStamp
+                ? new Date(point.TimeStamp).toLocaleTimeString()
+                : new Date().toLocaleTimeString();
+
+              if (chart.data.labels.length >= DATA_LIMIT) {
+                chart.data.labels.shift(); // Remove oldest label
+                chart.data.datasets[0].data.shift(); // Remove oldest data point for Amp
+                chart.data.datasets[1].data.shift(); // Remove oldest data point for Vol
+                chart.data.datasets[2].data.shift(); // Remove oldest data point for Power
+              }
+
+              chart.data.labels.push(timestamp);
+              chart.data.datasets[0].data.push(point.Amp);
+              chart.data.datasets[1].data.push(point.Vol);
+              chart.data.datasets[2].data.push(point.Power);
+            });
+
             chart.update();
           }
         })
